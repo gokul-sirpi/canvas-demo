@@ -1,0 +1,22 @@
+@import '../node_modules/ol/ol.css';
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: Epilogue, sans-serif;
+}
+dialog {
+  margin: auto;
+}
+body {
+  --color-primary: #058d05;
+  --color-secondary: #f86925;
+  --color-accent: #8a8a8a;
+  --radius-sm: 0.3rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --font-sm: 0.8rem;
+  --font-md: 1.2rem;
+  --font-lg: 1.6rem;
+}

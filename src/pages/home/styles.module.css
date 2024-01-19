@@ -1,0 +1,28 @@
+.container {
+  height: 100vh;
+  padding: 0rem 3rem 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo_img {
+  width: 15rem;
+  padding-bottom: 1rem;
+}
+.description {
+  width: min(40rem, 100%);
+  padding-block: 1rem;
+  text-align: center;
+}
+
+.login_button {
+  background-color: var(--color-primary);
+  border: solid transparent;
+  color: white;
+  padding: 0.7rem 5rem;
+  border-radius: 0.3rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+}

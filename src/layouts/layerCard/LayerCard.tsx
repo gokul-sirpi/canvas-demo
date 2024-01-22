@@ -7,7 +7,7 @@ function LayerCard() {
     dialogref.current?.showModal();
   }
   function handleCloseDialog() {
-    dialogref.current?.close();
+    dialogref.current?.showModal();
   }
   return (
     <section className={styles.container}>

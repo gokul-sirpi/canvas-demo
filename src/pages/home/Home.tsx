@@ -1,8 +1,9 @@
-import Keycloak from 'keycloak-js';
-import ugixLogo from '../../assets/images/UGIX-logo.svg';
-import styles from './styles.module.css';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+//
+import styles from './styles.module.css';
+import newKeycloak from '../../lib/keycloak';
+import ugixLogo from '../../assets/images/UGIX-logo.svg';
 
 function Home() {
   const isRun = useRef(false);
@@ -12,13 +13,11 @@ function Home() {
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
-    console.log('page reloaded');
-    const keycloak = new Keycloak({
-      url: 'https://keycloak-update.iudx.io/auth/',
-      realm: 'demo',
-      clientId: 'angular-iudx-client',
-    });
-    keycloak
+    initialiseKeycloak();
+  }, []);
+
+  function initialiseKeycloak() {
+    newKeycloak()
       .init({
         onLoad: 'check-sso',
       })
@@ -33,25 +32,18 @@ function Home() {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }
 
   function handleLogin() {
     windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
-
     setInterval(() => {
       checkLoginStatus();
     }, 1000);
   }
 
   function checkLoginStatus() {
-    const keycloak = new Keycloak({
-      url: 'https://keycloak-update.iudx.io/auth/',
-      realm: 'demo',
-      clientId: 'angular-iudx-client',
-    });
-    keycloak.init({
-      onLoad: 'check-sso',
-    });
+    const newAuth = newKeycloak();
+    newAuth.init({ onLoad: 'check-sso' });
   }
   return (
     <section className={styles.container}>

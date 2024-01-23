@@ -1,21 +1,58 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
-import ol_map from '../../lib/openLayers.ts';
+import openLMap from '../../lib/openLayers.ts';
 import Header from '../../layouts/header/Header';
 import LayerCard from '../../layouts/layerCard/LayerCard';
+import { UserLayer } from '../../types/UserLayer.ts';
+import { Type as geometryType } from 'ol/geom/Geometry';
 
 function Canvas() {
   const singleRender = useRef(false);
+  const [userLayer, setUserLayer] = useState<UserLayer[]>([]);
   useEffect(() => {
     if (singleRender.current) return;
-    ol_map.map.setTarget('ol-map');
+    openLMap.map.setTarget('ol-map');
   }, []);
+
+  function addUserLayer(layer: UserLayer) {
+    userLayer.push(layer);
+    setUserLayer([...userLayer]);
+  }
+
+  // function addNewUserlayer(layerName: string) {
+  //   const newLayer = openLMap.createNewLayer(layerName);
+  //   setUserLayer((prev) => {
+  //     prev.push(newLayer);
+  //     return [...prev];
+  //   });
+  // }
+
+  function addNewUserFeature(type: geometryType) {
+    if (userLayer.length > 0) {
+      let currentLayer;
+      for (const layer of userLayer) {
+        if (layer.selected) {
+          currentLayer = layer;
+          break;
+        }
+      }
+      if (currentLayer) {
+        openLMap.drawFeature(type, currentLayer?.source, () => {});
+      }
+    } else {
+      const newLayer = openLMap.createNewLayer(`layer${userLayer.length}`);
+      openLMap.drawFeature(type, newLayer.source, () => {
+        addUserLayer(newLayer);
+      });
+    }
+  }
+
   return (
     <section className={styles.container}>
       <div id="ol-map" className={styles.ol_map}></div>
       <>
-        <Header map={ol_map} />
-        <LayerCard />
+        <Header addFeature={addNewUserFeature} />
+        <LayerCard userLayer={userLayer} />
       </>
     </section>
   );

@@ -1,26 +1,16 @@
-import { useRef } from 'react';
 import styles from './styles.module.css';
+import { UserLayer } from '../../types/UserLayer';
 //
-function LayerCard() {
-  const dialogref = useRef<HTMLDialogElement>(null);
-  function handleOpenDialog() {
-    dialogref.current?.showModal();
-  }
-  function handleCloseDialog() {
-    dialogref.current?.showModal();
-  }
+function LayerCard({ userLayer }: { userLayer: UserLayer[] }) {
   return (
     <section className={styles.container}>
       <div>
-        <button onClick={handleOpenDialog} className={styles.browse_btn}>
-          Browse Data
-        </button>
-        <dialog ref={dialogref}>
-          <div>Explore features</div>
-          <div>
-            <button onClick={handleCloseDialog}>Close</button>
-          </div>
-        </dialog>
+        <h4>User Layers</h4>
+        <div>
+          {userLayer.map((layer) => {
+            return <div key={layer.layerId}>{layer.layerName}</div>;
+          })}
+        </div>
       </div>
     </section>
   );

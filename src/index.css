@@ -12,11 +12,21 @@ dialog {
 body {
   --color-primary: #058d05;
   --color-secondary: #f86925;
-  --color-accent: #8a8a8a;
+  --color-accent: #d6d6d6;
   --radius-sm: 0.3rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --font-sm: 0.8rem;
   --font-md: 1.2rem;
   --font-lg: 1.6rem;
+}
+
+button {
+  background-color: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--color-accent);
 }

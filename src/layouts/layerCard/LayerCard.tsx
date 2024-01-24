@@ -1,14 +1,15 @@
 import styles from './styles.module.css';
 import { UserLayer } from '../../types/UserLayer';
+import LayerTile from '../../components/layerTile/LayerTile';
 //
 function LayerCard({ userLayer }: { userLayer: UserLayer[] }) {
   return (
     <section className={styles.container}>
-      <div>
-        <h4>User Layers</h4>
-        <div>
+      <div className={styles.user_layer_container}>
+        <h2>User layers</h2>
+        <div className={styles.layer_container}>
           {userLayer.map((layer) => {
-            return <div key={layer.layerId}>{layer.layerName}</div>;
+            return <LayerTile key={layer.layerId} layer={layer} />;
           })}
         </div>
       </div>

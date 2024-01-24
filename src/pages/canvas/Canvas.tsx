@@ -4,7 +4,6 @@ import openLMap from '../../lib/openLayers.ts';
 import Header from '../../layouts/header/Header';
 import LayerCard from '../../layouts/layerCard/LayerCard';
 import { UserLayer } from '../../types/UserLayer.ts';
-import { Type as geometryType } from 'ol/geom/Geometry';
 
 function Canvas() {
   const singleRender = useRef(false);
@@ -27,24 +26,30 @@ function Canvas() {
   //   });
   // }
 
-  function addNewUserFeature(type: geometryType) {
-    if (userLayer.length > 0) {
-      let currentLayer;
-      for (const layer of userLayer) {
-        if (layer.selected) {
-          currentLayer = layer;
-          break;
-        }
-      }
-      if (currentLayer) {
-        openLMap.drawFeature(type, currentLayer?.source, () => {});
-      }
-    } else {
-      const newLayer = openLMap.createNewLayer(`layer${userLayer.length}`);
-      openLMap.drawFeature(type, newLayer.source, () => {
+  function addNewUserFeature(type: 'Circle' | 'Box' | 'Point') {
+    // if (userLayer.length > 0) {
+    //   let currentLayer;
+    //   for (const layer of userLayer) {
+    //     if (layer.selected) {
+    //       currentLayer = layer;
+    //       break;
+    //     }
+    //   }
+    //   if (currentLayer) {
+    //     openLMap.drawFeature(type, currentLayer?.source, () => {});
+    //   }
+    // } else {
+    // }
+    const newLayer = openLMap.createNewLayer(`layer${userLayer.length}`);
+    if (type === 'Point') {
+      openLMap.addMarkerFeature(newLayer.source, () => {
         addUserLayer(newLayer);
       });
+      return;
     }
+    openLMap.drawFeature(type, newLayer.source, () => {
+      addUserLayer(newLayer);
+    });
   }
 
   return (

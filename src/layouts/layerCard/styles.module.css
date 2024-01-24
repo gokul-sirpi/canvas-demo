@@ -2,16 +2,21 @@
   position: absolute;
   /* z-index: 10; */
   padding: 1rem;
-  top: 10rem;
-  left: 2rem;
+  top: 8rem;
+  left: 1rem;
   background-color: white;
+  border-radius: var(--radius-md);
+  min-width: 18rem;
 }
 
-.browse_btn {
-  background-color: var(--color-primary);
-  padding: 1rem 2rem;
-  border: transparent;
-  border-radius: var(--radius-sm);
-  color: white;
-  font-size: var(--font-md);
+.layer_container {
+  padding: 0.3rem 0rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.user_layer_container > h2 {
+  font-size: small;
+  font-weight: 400;
 }

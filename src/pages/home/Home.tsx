@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 //
-import Keycloak from 'keycloak-js';
 import styles from './styles.module.css';
-import newKeycloak from '../../lib/keycloak';
-import ugixLogo from '../../assets/images/UGIX-logo.svg';
+import keycloak from '../../lib/keycloak';
+import ugixLogo from '../../assets/images/gsix-logo.svg';
 
 function Home() {
   const isRun = useRef(false);
   const windowref = useRef<Window | null>(null);
-  const keyRef = useRef<Keycloak>();
+  const intervalId = useRef<number>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,15 +18,13 @@ function Home() {
   }, []);
 
   function initialiseKeycloak() {
-    keyRef.current = newKeycloak();
-    keyRef.current
+    keycloak
       .init({
         onLoad: 'check-sso',
       })
       .then((authenticated) => {
         console.log(authenticated);
         if (authenticated) {
-          console.log();
           navigate('/canvas');
         } else {
           handleLogin();
@@ -40,15 +37,20 @@ function Home() {
 
   function handleLogin() {
     windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
-    // key.login();
-    // setInterval(() => {
-    //   // checkLoginStatus();
-    // }, 1000);
+    intervalId.current = setInterval(() => {
+      checkLoginStatus();
+    }, 1000);
   }
 
-  // function checkLoginStatus() {
-  //   const newAuth = newKeycloak();
-  //   newAuth.init({ onLoad: 'check-sso' });
+  function checkLoginStatus() {
+    console.log('interval');
+
+    clearInterval(intervalId.current);
+  }
+  // function closeTab() {
+  //   if (windowref.current) {
+  //     windowref.current.close();
+  //   }
   // }
   return (
     <section className={styles.container}>

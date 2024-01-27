@@ -1,18 +1,12 @@
+import { LiaFileDownloadSolid } from 'react-icons/lia';
+import { IoLayersOutline } from 'react-icons/io5';
 import { TbWorldSearch } from 'react-icons/tb';
+//
+import DrawingTool from '../../components/drawingTool/DrawingTool';
 import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
-//
-import { IoLayersOutline, IoSquareOutline } from 'react-icons/io5';
-import { SlLocationPin } from 'react-icons/sl';
-import { GoCircle } from 'react-icons/go';
-import { LiaFileDownloadSolid } from 'react-icons/lia';
 
-type drawType = 'Circle' | 'Box' | 'Point';
-function Header({ addFeature }: { addFeature: (type: drawType) => void }) {
-  function drawBbox(type: drawType) {
-    addFeature(type);
-  }
-
+function Header() {
   return (
     <header className={styles.container}>
       <img src={ugix_logo} className={styles.logo_img} alt="" />
@@ -22,25 +16,9 @@ function Header({ addFeature }: { addFeature: (type: drawType) => void }) {
             <TbWorldSearch size={25} />
           </div>
         </button>
-        {/* <hr /> */}
-        <button onClick={() => drawBbox('Circle')}>
-          <div className={styles.btn_icon_container}>
-            <GoCircle size={25} />
-          </div>
-        </button>
-        {/* <hr /> */}
-        <button onClick={() => drawBbox('Box')}>
-          <div className={styles.btn_icon_container}>
-            <IoSquareOutline size={25} />
-          </div>
-        </button>
-        {/* <hr /> */}
-        <button onClick={() => drawBbox('Point')}>
-          <div className={styles.btn_icon_container}>
-            <SlLocationPin size={25} />
-          </div>
-        </button>
-        {/* <hr /> */}
+        <DrawingTool toolType="Circle" />
+        <DrawingTool toolType="Box" />
+        <DrawingTool toolType="Point" />
         <button>
           <div className={styles.btn_icon_container}>
             <IoLayersOutline size={25} />

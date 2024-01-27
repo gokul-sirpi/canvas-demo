@@ -1,0 +1,29 @@
+import { createSlice } from '@reduxjs/toolkit';
+import { UserLayer } from '../../types/UserLayer';
+type UserLayerState = {
+  layers: UserLayer[];
+};
+
+const initialState: UserLayerState = {
+  layers: [],
+};
+
+export const userLayerSlice = createSlice({
+  name: 'userLayer',
+  initialState,
+  reducers: {
+    addUserLayer(state, action) {
+      state.layers.push(action.payload);
+    },
+    updateUserLayer(state, action) {
+      state.layers[action.payload.index] = action.payload.modifiedLayer;
+    },
+    deleteUserLayer(state, { payload }) {
+      state.layers.splice(payload.index, 1);
+    },
+  },
+});
+
+export const { addUserLayer, updateUserLayer, deleteUserLayer } =
+  userLayerSlice.actions;
+export default userLayerSlice.reducer;

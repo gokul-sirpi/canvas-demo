@@ -28,7 +28,7 @@ const markerStyle = new Style({
   }),
 });
 
-const ol_map = {
+const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
   map: new Map({
@@ -39,7 +39,9 @@ const ol_map = {
     }),
     controls: [scaleControl, attribution],
     layers: [standardLayer],
+    // target: 'ol-map',
   }),
+
   removeDrawInteraction() {
     if (this.drawing) {
       this.map.removeInteraction(this.draw);
@@ -47,48 +49,69 @@ const ol_map = {
     }
   },
 
-  createNewLayer(layerName: string): UserLayer {
-    const source = new VectorSource({ wrapX: false });
+  addLayer(layer: VectorLayer<VectorSource>) {
+    this.map.addLayer(layer);
+  },
+
+  removeLayer(layerId: string) {
+    const layer = this.getLayer(layerId);
+    if (layer) {
+      this.map.removeLayer(layer);
+    }
+  },
+
+  getLayer(layerId: string): VectorLayer<VectorSource> | undefined {
+    let reqLayer;
+    this.map.getLayers().forEach((layer) => {
+      if (layer.get('layer-id') === layerId) {
+        reqLayer = layer;
+      }
+    });
+    return reqLayer;
+  },
+
+  createNewLayer(layerName: string): UserLayer & { source: VectorSource } {
+    const source = new VectorSource({});
     const layer = new VectorLayer({ source: source });
+    const layerId = createUniqueId();
+    layer.set('layer-id', layerId);
     const newLayer = {
       layerName: layerName,
-      layerId: createUniqueId(),
-      layer: layer,
-      source: source,
+      layerId,
+      source,
       selected: true,
       visible: true,
+      isCompleted: false,
     };
     this.map.addLayer(layer);
     return newLayer;
   },
 
-  drawFeature(
+  addDrawFeature(
     type: 'Circle' | 'Box',
     source: VectorSource,
     callback?: () => void
   ) {
     this.removeDrawInteraction();
-    let geomatryFunction;
+    let geometryFunction;
     if (type === 'Box') {
-      geomatryFunction = createBox();
+      geometryFunction = createBox();
     }
     this.draw = new Draw({
       type: 'Circle',
       source: source,
-      geometryFunction: geomatryFunction,
+      geometryFunction,
     });
     this.map.addInteraction(this.draw);
     this.drawing = true;
     this.draw.on('drawend', () => {
-      this.map.removeInteraction(this.draw);
-      this.drawing = false;
       if (callback) {
         callback();
       }
     });
   },
 
-  addMarkerFeature(source: VectorSource, callback: () => void) {
+  addMarkerFeature(source: VectorSource, callback?: () => void) {
     this.removeDrawInteraction();
     this.draw = new Draw({
       type: 'Point',
@@ -96,22 +119,27 @@ const ol_map = {
     this.map.addInteraction(this.draw);
     this.drawing = true;
     this.draw.on('drawend', (drawEvent) => {
-      console.log(drawEvent.target.sketchCoords_);
       const marker = new Feature({
         geometry: new Point(drawEvent.target.sketchCoords_),
         name: 'marker',
       });
       marker.setStyle(markerStyle);
       source.addFeature(marker);
-      this.map.removeInteraction(this.draw);
-      this.drawing = false;
       if (callback) {
         callback();
       }
     });
   },
 
-  addLayer() {},
+  toggleLayerVisibility(layerId: string, visible: boolean) {
+    const layer = this.getLayer(layerId);
+    if (layer) {
+      layer.setVisible(visible);
+    }
+  },
+  getLayerVisibility(layerId: string): boolean | undefined {
+    return this.getLayer(layerId)?.isVisible();
+  },
 };
 // basic map interactions
 // ol_map.map.on('pointermove', (e) => {
@@ -128,4 +156,4 @@ function createUniqueId() {
   return time + random + id++;
 }
 
-export default ol_map;
+export default openLayerMap;

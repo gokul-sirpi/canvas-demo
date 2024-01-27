@@ -47,3 +47,7 @@
   padding: 0.5rem 0.2rem;
   color: var(--color-primary);
 }
+
+.tools_container button:hover {
+  background-color: var(--color-accent);
+}

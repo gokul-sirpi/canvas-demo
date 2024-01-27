@@ -1,44 +1,102 @@
-//
+import { useRef, useState } from 'react';
 import { PiDotsThreeOutlineFill } from 'react-icons/pi';
-import { UserLayer } from '../../types/UserLayer';
-import styles from './styles.module.css';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { useState } from 'react';
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
+import { UserLayer } from '../../types/UserLayer';
+//
+import styles from './styles.module.css';
+import openLayerMap from '../../lib/openLayers';
+import { useDispatch } from 'react-redux';
+import {
+  deleteUserLayer,
+  updateUserLayer,
+} from '../../context/userLayers/userLayerSlice';
 
-function LayerTile({ layer }: { layer: UserLayer }) {
-  const [visible, setVisible] = useState<boolean>(layer.layer.isVisible());
+function LayerTile({ layer, index }: { layer: UserLayer; index: number }) {
+  const layerNameRef = useRef<HTMLInputElement>(null);
+  const [visible, setVisible] = useState<boolean | undefined>(
+    openLayerMap.getLayerVisibility(layer.layerId)
+  );
+  const dispatch = useDispatch();
   function toggleLayerVisibility() {
-    if (layer.layer.isVisible()) {
-      layer.layer.setVisible(false);
+    if (visible) {
+      openLayerMap.toggleLayerVisibility(layer.layerId, false);
       setVisible(false);
     } else {
-      layer.layer.setVisible(true);
+      openLayerMap.toggleLayerVisibility(layer.layerId, true);
       setVisible(true);
     }
   }
+
+  function completeLayerCreation() {
+    openLayerMap.removeDrawInteraction();
+    let layerName = layerNameRef.current?.value;
+    if (!layerName) {
+      layerName = `Layer${index + 1}`;
+    }
+    const modifiedLayer = { ...layer };
+    modifiedLayer.layerName = layerName;
+    modifiedLayer.isCompleted = true;
+    dispatch(updateUserLayer({ index, modifiedLayer }));
+  }
+
+  function cancelLayerCreation() {
+    openLayerMap.removeLayer(layer.layerId);
+    openLayerMap.removeDrawInteraction();
+    dispatch(deleteUserLayer(index));
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.input_container}>
-        <input
-          type="checkbox"
-          checked={visible}
-          name=""
-          id={layer.layerId}
-          onChange={toggleLayerVisibility}
-        />
-        <label htmlFor={layer.layerId}>{layer.layerName}</label>
+        <button onClick={toggleLayerVisibility}>
+          <div className={styles.btn_icon_container}>
+            {visible ? <FaRegEye size={15} /> : <FaRegEyeSlash size={15} />}
+          </div>
+        </button>
+        {layer.isCompleted ? (
+          <p>{layer.layerName}</p>
+        ) : (
+          <input
+            placeholder={`default name - Layer${index + 1}`}
+            ref={layerNameRef}
+            autoFocus
+            type="text"
+          />
+        )}
       </div>
       <div className={styles.btn_container}>
-        <button>
-          <div className={styles.btn_icon_container}>
-            <PiDotsThreeOutlineFill size={20} />
-          </div>
-        </button>
-        <button>
-          <div className={styles.btn_icon_container}>
-            <IoSettingsOutline size={20} />
-          </div>
-        </button>
+        {layer.isCompleted ? (
+          <>
+            <button>
+              <div className={styles.btn_icon_container}>
+                <PiDotsThreeOutlineFill size={20} />
+              </div>
+            </button>
+            <button>
+              <div className={styles.btn_icon_container}>
+                <IoSettingsOutline size={20} />
+              </div>
+            </button>
+          </>
+        ) : (
+          <>
+            <button>
+              <div
+                onClick={cancelLayerCreation}
+                className={styles.btn_icon_container}
+              >
+                <IoIosCloseCircle size={25} />
+              </div>
+            </button>
+            <button onClick={completeLayerCreation}>
+              <div className={styles.btn_icon_container}>
+                <IoIosCheckmarkCircle size={25} />
+              </div>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

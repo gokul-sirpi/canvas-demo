@@ -26,7 +26,3 @@ button {
   border: 1px solid transparent;
   cursor: pointer;
 }
-
-button:hover {
-  background-color: var(--color-accent);
-}

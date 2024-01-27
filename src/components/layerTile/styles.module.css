@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 3rem;
+  gap: 1rem;
   padding: 0.2rem 0.5rem;
   background-color: #f6f6f6;
   border-radius: var(--radius-sm);
@@ -22,10 +22,8 @@
   flex-grow: 1;
 }
 .input_container > input {
-  height: 0.9rem;
-  width: 0.9rem;
-  color: var(--color-accent);
-  accent-color: var(--color-primary);
+  padding: 0.3rem 0.5rem;
+  max-width: 10rem;
 }
 .input_container > input,
 .input_container > label {

@@ -41,17 +41,36 @@ function Home() {
       checkLoginStatus();
     }, 1000);
   }
-
+  function getCookieValue(cname: string) {
+    const cookies = document.cookie.split(';');
+    let returnVal;
+    console.log(cookies);
+    for (const cookie of cookies) {
+      if (!cookie) continue;
+      const cookieKey = cookie.split('=')[0].trim();
+      const cookieValue = cookie.split('=')[1].trim();
+      if (cookieKey === cname) {
+        returnVal = cookieValue;
+      }
+    }
+    return returnVal;
+  }
   function checkLoginStatus() {
     console.log('interval');
-
-    clearInterval(intervalId.current);
+    const cookieResponse = getCookieValue('iudx-ui-sso');
+    console.log(cookieResponse);
+    if (cookieResponse === 'logged-in') {
+      clearInterval(intervalId.current);
+      closeAuthTab();
+      // keycloak.login({ redirectUri: window.location.href });
+      window.location.reload();
+    }
   }
-  // function closeTab() {
-  //   if (windowref.current) {
-  //     windowref.current.close();
-  //   }
-  // }
+  function closeAuthTab() {
+    if (windowref.current) {
+      windowref.current.close();
+    }
+  }
   return (
     <section className={styles.container}>
       <div>

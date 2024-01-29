@@ -41,7 +41,9 @@ const openLayerMap = {
     layers: [standardLayer],
     // target: 'ol-map',
   }),
-
+  setOlTarget(target: string) {
+    this.map.setTarget(target);
+  },
   removeDrawInteraction() {
     if (this.drawing) {
       this.map.removeInteraction(this.draw);
@@ -137,6 +139,7 @@ const openLayerMap = {
       layer.setVisible(visible);
     }
   },
+
   getLayerVisibility(layerId: string): boolean | undefined {
     return this.getLayer(layerId)?.isVisible();
   },

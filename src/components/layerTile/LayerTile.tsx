@@ -44,7 +44,7 @@ function LayerTile({ layer, index }: { layer: UserLayer; index: number }) {
   function cancelLayerCreation() {
     openLayerMap.removeLayer(layer.layerId);
     openLayerMap.removeDrawInteraction();
-    dispatch(deleteUserLayer(index));
+    dispatch(deleteUserLayer(layer.layerId));
   }
 
   return (

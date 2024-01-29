@@ -19,7 +19,9 @@ export const userLayerSlice = createSlice({
       state.layers[action.payload.index] = action.payload.modifiedLayer;
     },
     deleteUserLayer(state, { payload }) {
-      state.layers.splice(payload.index, 1);
+      state.layers = state.layers.filter((layer) => {
+        return layer.layerId !== payload;
+      });
     },
   },
 });

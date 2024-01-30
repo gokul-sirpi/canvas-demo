@@ -36,7 +36,8 @@ function Home() {
   }
 
   function handleLogin() {
-    windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
+    // windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
+    windowref.current = window.open('https://authsso.gsx.iudx.io/', '_blank');
     intervalId.current = setInterval(() => {
       checkLoginStatus();
     }, 1000);
@@ -57,7 +58,7 @@ function Home() {
   }
   function checkLoginStatus() {
     console.log('interval');
-    const cookieResponse = getCookieValue('iudx-ui-sso');
+    const cookieResponse = getCookieValue('gsx-ui-sso');
     console.log(cookieResponse);
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);

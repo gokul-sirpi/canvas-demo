@@ -158,8 +158,7 @@ const openLayerMap = {
     const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       //@ts-expect-error vector source expects Feature<Geometry>
-      //but Geojson().readFeature() returns FeatureLike
-      //so ignore
+      //but Geojson().readFeature() returns FeatureLike known issue in openlayers
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });

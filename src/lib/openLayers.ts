@@ -8,7 +8,11 @@ import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
 import { Point } from 'ol/geom';
+import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
+import { GeoJsonObj } from '../types/GeojsonType';
+import styleFunction from './layerStyle';
+
 const standardLayer = new TileLayer({
   source: new OSM({}),
 });
@@ -74,7 +78,11 @@ const openLayerMap = {
 
   createNewLayer(layerName: string): UserLayer & { source: VectorSource } {
     const source = new VectorSource({});
-    const layer = new VectorLayer({ source: source });
+    const featureColor = getRandomColor();
+    const layer = new VectorLayer({
+      source: source,
+      style: (feature) => styleFunction(feature, featureColor),
+    });
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
     const newLayer = {
@@ -133,6 +141,39 @@ const openLayerMap = {
     });
   },
 
+  addGeoJsonFeature(geojsonData: GeoJsonObj, layerName: string) {
+    geojsonData.crs = {
+      type: 'name',
+      properties: {
+        name: 'EPSG:4326',
+      },
+    };
+    for (const feature of geojsonData.features) {
+      feature.type = 'Feature';
+    }
+    const vectorSource = new VectorSource({
+      features: new GeoJson().readFeatures(geojsonData),
+    });
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+    const vectorLayer = new VectorLayer({
+      //@ts-expect-error vector source expects Feature<Geometry>
+      //but Geojson().readFeature() returns FeatureLike
+      //so ignore
+      source: vectorSource,
+      style: (feature) => styleFunction(feature, layerColor),
+    });
+    vectorLayer.set('layer-id', layerId);
+    this.addLayer(vectorLayer);
+    const newLayer = {
+      layerName: layerName,
+      layerId,
+      selected: true,
+      visible: true,
+    };
+    return newLayer;
+  },
+
   toggleLayerVisibility(layerId: string, visible: boolean) {
     const layer = this.getLayer(layerId);
     if (layer) {
@@ -152,11 +193,21 @@ const openLayerMap = {
 //   });
 // });
 
+//creates unique id for layers
 let id = 0;
 function createUniqueId() {
   const time = Date.now().toString();
   const random = Math.random().toString(16).slice(2, 10);
   return time + random + id++;
+}
+
+//creates random hex color
+function getRandomColor(): string {
+  let num = '';
+  for (let i = 0; i < 6; i++) {
+    num += Math.floor(Math.random() * 16).toString(16);
+  }
+  return '#' + num;
 }
 
 export default openLayerMap;

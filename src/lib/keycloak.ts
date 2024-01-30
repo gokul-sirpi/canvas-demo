@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js';
 
 const keycloak = new Keycloak({
-  url: 'https://keycloak-update.iudx.io/auth/',
+  url: 'https://keycloak-docker.iudx.io/auth',
   realm: 'demo',
   clientId: 'angular-iudx-client',
 });

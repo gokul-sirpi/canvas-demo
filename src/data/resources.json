@@ -1,0 +1,1333 @@
+[
+  {
+    "_id": "65ae3cafd7c0d61c11164454",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_communication_points",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.436Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Communication points",
+      "description": "Data Descriptor for Communications points",
+      "geometry": {
+        "description": "Geojson Points corresponding to the communications points surveyed",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Point"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for reference",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Bridge on road 1st importance (C)', 'Bridge on railway B/G double-line (C)', 'Bridge on road 2nd importance (C)', 'Bridge on railway B/G single-line (C)', 'Aerodrome', 'Bridge on railway O/G single-line (C)', 'Railway B/G single-line distance stone tick', 'Bridge on road others (C)', 'Toll', 'BRIDGE ON EX_HIGHWAY', 'Road 2nd importance distance stone tick', 'Road others distance stone tick', 'Railway station hut', 'Railway B/G double-line distance stone tick', 'Helipad', 'Pass', 'Bridge on track/foot path (C)', 'Road 1st importance distance stone tick', 'Railway station enclosure (C)', 'Railway O/G single-line distance stone tick', 'BRIDGE ON SH 2_IMP D_C_WAY']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "f_name": "Pass"
+      },
+      "id": 1,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.23473858983735, 13.151465107118401]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of surveyed communication points related to transit",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-03-15T05:38:31.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Surveyed Communication Points",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_communication_points",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.697Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c11164456",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_prominent_buildings",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.447Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Building points",
+      "description": "Data Descriptor for Building points",
+      "geometry": {
+        "description": "Geojson Points corresponding to the areas surveyed",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Point"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for reference",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Temple', 'Gopuram', 'Watch-tower', 'Hut oblong permanent', 'Police Station', 'Church', 'Chimney', 'Hospital', 'Vetnary Dispensary', 'Deserted site', 'Hut permanent', 'Fort conventional', 'Hut oblong temporary', 'Mosque', 'Rest House', 'Dispensary', 'Christian memorial', 'CIRCUIT HOUSE', 'Post Office', 'Monument', 'Idgah', 'Chhatri', 'Pagoda', 'Tomb', 'Hut temporary']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "f_name": "Fort conventional"
+      },
+      "id": 2,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.23925057449685, 13.1274876065328]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of surveyed buildings",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-03-15T05:40:08.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Surveyed Buildings",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_prominent_buildings",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.703Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c11164458",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_dominant_vegetation",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.451Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Vegetation points",
+      "description": "Data Descriptor for Vegetation points",
+      "geometry": {
+        "description": "Geojson Points corresponding to the areas surveyed",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Point"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for reference",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Grass', 'Other tree small', 'Palm inclined', 'Cactus or aloes', 'Palm upright', 'Plantain', 'Bamboo', 'Betelnut', 'Other tree big', 'Surveyed tree', 'Conifer (pine, fir etc.)', 'Palmyra']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "f_name": "Palmyra"
+      },
+      "id": 1,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.22557093696196, 13.117005806924018]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of dominant vegetation points surveyed",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-03-15T05:41:08.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Surveyed Dominant Vegetation Points",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_dominant_vegetation",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.708Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116445a",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_hydrographical_lines",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.463Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Hydrographical Lines",
+      "description": "Data Descriptor for Hydrographical Lines",
+      "geometry": {
+        "description": "Geojson LineString corresponding to path of the flowing water body",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:LineString"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for reference",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_length": {
+        "type": ["ValueDescriptor"],
+        "description": "Length of the feature",
+        "unitCode": "KMT",
+        "unitText": "kilometre",
+        "dataSchema": "iudx:Number"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Other distributary/minor dry', 'Broken ground/ravines less than 6 m', 'Stream single-line dry 1st graduation', 'Drain single-line non-perennial', 'Canal navigation lock (S)', 'Canal banks, for double-line perennial canal over 20 m wide', 'Dam (Masonry or rock filled)', 'Stream single-line perennial 2nd graduation', 'Tank embankment 2-3 m', 'Siphon on double-line non-perennial canal', 'Canal single line non-perennial < 20 m or branch/important distributary', 'Protective embankment > = 3 m', 'Stream single-line dry 2nd graduation', 'Weir', 'Tank embankment > = 3 m', 'Stream single-line dry 4th & above graduation.', 'Canal/Drain double-line disused/under construction', 'Tank embankment steep', 'Stream single-line perennial 3rd graduation', 'Protective embankment 2-3 m', 'Water channel in dry river-bed', 'Canal/Drain single-line disused/under construction', 'Weir and/or lock on perennial canal (S)', 'Waterfall on double-line non-perennial stream', 'Canal tunnel', 'River bank unbroken < 3 m', 'Drain banks for double-line non-perennial drain', 'Stream single-line perennial 1st graduation', 'Stream dry undefined/unreliable', 'Other distributary/minor perennial', 'Canal single-line perennial < 20 m or branch /  important distributary', 'Field bund across stream', 'Stream single-line dry 3rd graduation']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "f_name": "Stream single-line dry 1st graduation",
+        "shape_length": 158.734858782791
+      },
+      "id": 1,
+      "geometry": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [77.22524870442295, 13.149009978382379],
+            [77.22553465944972, 13.149154976027909],
+            [77.22582527545609, 13.149295324321752],
+            [77.22618509182199, 13.149399649609151],
+            [77.22650349616613, 13.149513008300074],
+            [77.22655867533622, 13.149599008836047]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of Hydrographical bodies such as rivers, streams and canals",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-18T19:57:58.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Hydrographical Line Featuers in Bangalore",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_hydrographical_lines",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.712Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116445c",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_communication_lines",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.472Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Communication Lines",
+      "description": "Data Descriptor for Communication Lines",
+      "geometry": {
+        "description": "Geojson LineString corresponding to path of the communication lines",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:LineString"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for reference",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_length": {
+        "type": ["ValueDescriptor"],
+        "description": "Length of the feature",
+        "unitCode": "MTR",
+        "unitText": "metre"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Cutting > 3 m one side', 'Track follows stream-bed/boundary etc.', 'Ford', 'Road metalled 1st importance', 'Embankment 2-3 m both sides', 'Embankment 2-3 m one side', 'Cutting 2-3 m one side', 'Railway other gauge single-line', 'Bridge on railway B/G double-line (S)', 'Bridge on road others (S)', 'Cutting > 3 m both sides', 'Embankment > 3 m one side', 'Railway B/G single-line U/C', 'Road metalled others', 'Foot-path plains', 'Bridge on road others (P)', 'Cutting 2-3 m both sides', 'Embankment > 3 m both sides', 'Cart-track plains', 'Bridge on railway O/G double-line (S)', 'Bridge on railway B/G single-line (S)', 'Foot-path hills', 'Railway broad gauge double-line', 'Road U/M under construction', 'Road metalled 2nd importance', 'Road U/M others', 'Railway B/G single-line', 'Box for road Name/No.']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "shape_length": 336.811702439678,
+        "f_name": "Box for road Name/No."
+      },
+      "id": 1,
+      "geometry": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [77.22502730609568, 13.153803387821247],
+            [77.22813285228914, 13.153824353041367]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of communication (transportation) lines such as roads and railways",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-18T19:58:02.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Communication Line Features in Bangalore",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_communication_lines",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.720Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116445e",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_hydrographical_areas",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.478Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Hydrographical Areas",
+      "description": "Data Descriptor for Hydrographical Areas",
+      "geometry": {
+        "description": "Geojson polygon corresponding to the closed shape area representing the water body",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Polygon"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "An incrementing index for referenece",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_length": {
+        "type": ["ValueDescriptor"],
+        "description": "Perimeter of the area",
+        "unitCode": "MTR",
+        "unitText": "metre",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_area": {
+        "type": ["ValueDescriptor"],
+        "description": "Area of this feature",
+        "unitCode": "MTK",
+        "unitText": "square metre",
+        "dataSchema": "iudx:Number"
+      },
+      "f_name": {
+        "type": ["ValueDescriptor"],
+        "description": "Name/Type of this feature. ENUM: ['Flat sand limit in lakes/tanks', 'Flat sand limit in sandy river-bed', 'Limit of water in lakes/Tanks (Blue wash)', 'Reeds in perennial water', 'River island', 'River water channel area', 'Submerged rock with danger line', 'Tank/Lake perennial as surveyed', 'Tank non-perennial as surveyed', 'Tank perennial excavated']",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "shape_length": 260.042793167624,
+        "shape_area": 4364.85300000037,
+        "f_name": "Tank/Lake perennial as surveyed"
+      },
+      "id": 1,
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [77.23120413820288, 13.146265734719604],
+              [77.23131024998443, 13.146243306493723],
+              [77.23139801266551, 13.14618010258035],
+              [77.23148568338092, 13.146076145162711],
+              [77.23148591111982, 13.145958579286889],
+              [77.23142130639481, 13.145849980358678],
+              [77.23126915506921, 13.145777474126321],
+              [77.23105225150637, 13.145804388591403],
+              [77.2308445067682, 13.145844868365575],
+              [77.230659957841, 13.14588089947508],
+              [77.23057687697406, 13.145962225729305],
+              [77.2305121138436, 13.146070682961582],
+              [77.23060888790535, 13.146188310402007],
+              [77.230844211688, 13.146260998492213],
+              [77.2310288110238, 13.146261112486496],
+              [77.23120413820288, 13.146265734719604]
+            ]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164450",
+    "description": "Feature layer of Hydrographical bodies such as lakes, ponds, tanks and wells",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-18T19:58:05.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Hydrographical Area Features in Bangalore",
+    "location": {
+      "type": "Place",
+      "address": "Bangalore",
+      "geometry": {
+        "coordinates": [
+          [
+            [77.28284231710057, 13.28596860930142],
+            [77.28284231710057, 12.66293067694862],
+            [77.90667901628791, 12.66293067694862],
+            [77.90667901628791, 13.28596860930142],
+            [77.28284231710057, 13.28596860930142]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "bangalore_hydrographical_areas",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.726Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116447a",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/district_hq",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.610Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:Headquarters"],
+      "dataDescriptorLabel": "Data Descriptor for District Headquarters in India",
+      "description": "Data attribute details of district headquarters in India.",
+      "geometry": {
+        "description": "The physical coordinates of Indian district headquarters corresponding to this observation.",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Point"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "The fid of Indian district headquarters corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "objectid": {
+        "type": ["ValueDescriptor"],
+        "description": "The objectid of the Indian district headquarters corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "perimeter": {
+        "type": ["ValueDescriptor"],
+        "description": "The total length of the headquarters boundary corresponding to this observation.",
+        "unitCode": "KMT",
+        "unitText": "kilometre",
+        "dataSchema": "iudx:Number"
+      },
+      "area": {
+        "type": ["ValueDescriptor"],
+        "description": "The total area enclosed within the boundary of the district headquarters corresponding to this observation.",
+        "unitCode": "KMK",
+        "unitText": "square kilometre",
+        "dataSchema": "iudx:Number"
+      },
+      "indiadpt": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian department corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "indiadpt_i": {
+        "type": ["ValueDescriptor"],
+        "description": "The Indian department_I corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "hq": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian district headquarters corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "town": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian town corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "state": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian state corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "taluk": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the taluk corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "district": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian district corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "area": 0,
+        "objectid": 302,
+        "indiadpt_": 277,
+        "state": "TRIPURA",
+        "district": "WEST TRIPURA",
+        "perimeter": 0,
+        "fid": 931,
+        "indiadpt_i": 39,
+        "town": "AGARTALA",
+        "taluk": "SADAR"
+      },
+      "id": "AGARTALA",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [91.27129661478112, 23.828385729333068]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164476",
+    "description": "Geographic information of district headquarters in India.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-19T07:22:32.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Indian District Headquarters",
+    "location": {
+      "type": "Place",
+      "address": "India",
+      "geometry": {
+        "coordinates": [
+          [
+            [68.14586639110846, 37.36314280576454],
+            [68.14586639110846, 6.048181629461695],
+            [98.2425724278707, 6.048181629461695],
+            [98.2425724278707, 37.36314280576454],
+            [68.14586639110846, 37.36314280576454]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "district_hq",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.823Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116447c",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/district_boundaries",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.619Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:District"],
+      "dataDescriptorLabel": "Data descriptor for district boundaries in India",
+      "description": "Data attribute details of district boundaries in India.",
+      "geometry": {
+        "description": "Coordinates of the multi polygon of the district boundary corresponding to this observation.",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:MultiPolygon"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "The fid of the Indian district corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "Dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "district": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian district corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "state": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian state in which the district corresponding to this observation is located.",
+        "dataSchema": "iudx:Text"
+      },
+      "remarks": {
+        "type": ["ValueDescriptor"],
+        "description": "Remarks corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "state_lgd": {
+        "type": ["ValueDescriptor"],
+        "description": "The local government directory code representing the Indian state corresponding to this observation.",
+        "dataSchema": "iudx:Number",
+        "unitCode": "C62",
+        "unitText": "Dimensionless"
+      },
+      "district_I": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of Indian district I corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "shape_leng": {
+        "type": ["ValueDescriptor"],
+        "description": "The total length of the Indian district boundary corresponding to this observation.",
+        "unitCode": "MTR",
+        "unitText": "metre",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_area": {
+        "type": ["ValueDescriptor"],
+        "description": "The total area enclosed within the boundary of the Indian district corresponding to this observation.",
+        "unitCode": "MTK",
+        "unitText": "square metre",
+        "dataSchema": "iudx:Number"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "state": "TELANGANA",
+        "state_lgd": 36,
+        "shape_leng": 379140.278537,
+        "remarks": null,
+        "fid": 441,
+        "district_l": "501",
+        "shape_area": 3865768521.56
+      },
+      "id": "ADILABAD",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ],
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ],
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164476",
+    "description": "Geographic boundary information of the districts in India.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-19T06:51:35.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Indian District Boundaries",
+    "location": {
+      "type": "Place",
+      "address": "India",
+      "geometry": {
+        "coordinates": [
+          [
+            [68.14586639110846, 37.36314280576454],
+            [68.14586639110846, 6.048181629461695],
+            [98.2425724278707, 6.048181629461695],
+            [98.2425724278707, 37.36314280576454],
+            [68.14586639110846, 37.36314280576454]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "district_boundaries",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.829Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116447e",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/subdistrict_boundaries",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.626Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:District"],
+      "dataDescriptorLabel": "Data descriptor for Subdistrict Boundaries in India",
+      "description": "Data attribute details of subdistrict  boundaries in India.",
+      "geometry": {
+        "description": "Coordinates of the multi polygon of the subdistrict boundary corresponding to this observation.",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:MultiPolygon"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "The fid of the Indian subdistrict boundary corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "district": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian district corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "state": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian state in which the subdistrict corresponding to this observation is located.",
+        "dataSchema": "iudx:Text"
+      },
+      "tehsil": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the tehsil corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "shape_leng": {
+        "type": ["ValueDescriptor"],
+        "description": "The total length of the subdistrict boundary corresponding to this observation.",
+        "unitCode": "MTR",
+        "unitText": "metre",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_area": {
+        "type": ["ValueDescriptor"],
+        "description": "The total area enclosed within the boundary of the Indian subdistrict corresponding to this observation.",
+        "unitCode": "MTK",
+        "unitText": "square metre",
+        "dataSchema": "iudx:Number"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "fid": 3627,
+        "shape_area": 598908155.12,
+        "district": "DANGS",
+        "state": "GUJARAT",
+        "shape_leng": 232827.902342
+      },
+      "id": "Aahva",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ],
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ],
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164476",
+    "description": "Geographic boundary information of the subdistricts in India.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-19T06:51:40.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Indian Subdistrict Boundaries",
+    "location": {
+      "type": "Place",
+      "address": "India",
+      "geometry": {
+        "coordinates": [
+          [
+            [68.14586639110846, 37.36314280576454],
+            [68.14586639110846, 6.048181629461695],
+            [98.2425724278707, 6.048181629461695],
+            [98.2425724278707, 37.36314280576454],
+            [68.14586639110846, 37.36314280576454]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "subdistrict_boundaries",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.835Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c11164480",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/state_boundaries",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.632Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:States"],
+      "dataDescriptorLabel": "Data descriptor for state boundaries in India",
+      "description": "Data attribute details of state boundaries in India.",
+      "geometry": {
+        "description": "Coordinates of the multi polygon of the state corresponding to this observation.",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:MultiPolygon"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "The fid of the Indian state corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "state": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian state corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "state_lgd": {
+        "type": ["ValueDescriptor"],
+        "description": "The state local government directory corresponding to this observation.",
+        "dataSchema": "iudx:Number",
+        "unitCode": "C62",
+        "unitText": "Dimensionless"
+      },
+      "shape_leng": {
+        "type": ["ValueDescriptor"],
+        "description": "The total length of the state boundary corresponding to this observation.",
+        "unitCode": "MTR",
+        "unitText": "metre",
+        "dataSchema": "iudx:Number"
+      },
+      "shape_area": {
+        "type": ["ValueDescriptor"],
+        "description": "The total area enclosed within the boundary of the Indian state corresponding to this observation.",
+        "unitCode": "MTK",
+        "unitText": "square metre",
+        "dataSchema": "iudx:Number"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "state_lgd": 35,
+        "shape_area": 7837275699.51,
+        "fid": 1,
+        "shape_leng": 5824763.34306
+      },
+      "id": "ANDAMAN & NICOBAR",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ],
+          [
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ],
+            [
+              [78.33565185875004, 19.883577857703568],
+              [78.3368794223706, 19.88300347832349],
+              [78.3391295145052, 19.88311184436659],
+              [78.34240512275156, 19.88280607801742],
+              [78.34415205764743, 19.88269711537531],
+              [78.34673166948446, 19.882526433563847],
+              [78.33565185875004, 19.883577857703568]
+            ]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164476",
+    "description": "Geographic boundary information of the states in India.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-18T19:32:24.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Indian State Boundaries",
+    "location": {
+      "type": "Place",
+      "address": "India",
+      "geometry": {
+        "coordinates": [
+          [
+            [68.14586639110846, 37.36314280576454],
+            [68.14586639110846, 6.048181629461695],
+            [98.2425724278707, 6.048181629461695],
+            [98.2425724278707, 37.36314280576454],
+            [68.14586639110846, 37.36314280576454]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "state_boundaries",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.841Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c11164482",
+    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/major_towns",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.644Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:MajorTowns"],
+      "dataDescriptorLabel": "Data descriptor for Major Towns in India",
+      "description": "Data attribute details of major towns in India.",
+      "geometry": {
+        "description": "Physical Coordinates of the major towns in India corresponding to this observation.",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:Point"
+      },
+      "fid": {
+        "type": ["ValueDescriptor"],
+        "description": "The fid of the major town in India corresponding to this observation.",
+        "unitCode": "C62",
+        "unitText": "dimensionless",
+        "dataSchema": "iudx:Number"
+      },
+      "rotation": {
+        "type": ["ValueDescriptor"],
+        "description": "The rotation of the physical coordinates of the major town in India corresponding to this observation.",
+        "dataSchema": "iudx:Number"
+      },
+      "scale": {
+        "type": ["ValueDescriptor"],
+        "description": "The scale of the major town in India corresponding to this observation.",
+        "dataSchema": "iudx:Number"
+      },
+      "name_of_town": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian major town corresponding to this observation.",
+        "dataSchema": "iudx:Text"
+      },
+      "district": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian district in which the major town corresponding to this observation is located.",
+        "dataSchema": "iudx:Text"
+      },
+      "state": {
+        "type": ["ValueDescriptor"],
+        "description": "The name of the Indian state in which the major town corresponding to this observation is located.",
+        "dataSchema": "iudx:Text"
+      },
+      "elevation": {
+        "type": ["ValueDescriptor"],
+        "description": "The elevation of the major town in India corresponding to this observation.",
+        "dataSchema": "iudx:Number"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "rotation": 0,
+        "scale": 0,
+        "district": "JODHPUR",
+        "elevation": 0,
+        "fid": 11340,
+        "state": "RAJASTHAN"
+      },
+      "id": "AAOP",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [73.57864110776198, 26.7929069301637]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164476",
+    "description": "Geographic information of the major towns in India.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-04-19T06:51:47.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Major Towns in India",
+    "location": {
+      "type": "Place",
+      "address": "India",
+      "geometry": {
+        "coordinates": [
+          [
+            [68.14586639110846, 37.36314280576454],
+            [68.14586639110846, 6.048181629461695],
+            [98.2425724278707, 6.048181629461695],
+            [98.2425724278707, 37.36314280576454],
+            [68.14586639110846, 37.36314280576454]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "major_towns",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def9",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.847Z"
+  },
+  {
+    "_id": "65ae3cafd7c0d61c1116448d",
+    "id": "datakaveri.org/c13ea5d5cd8707cd8ca261ca46f98983df2607e0/gsx.iudx.io/varanasi_geophysical/varanasi_fires",
+    "__v": 0,
+    "createdAt": "2024-01-22T10:00:15.710Z",
+    "dataDescriptor": {
+      "@context": "https://voc.iudx.org.in/",
+      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
+      "dataDescriptorLabel": "Data Descriptor for Fire regions",
+      "description": "Data Descriptor for Fire regions",
+      "geometry": {
+        "description": "Geojson polygon corresponding to the closed shape area representing the region effected by the fire",
+        "type": ["ValueDescriptor"],
+        "dataSchema": "iudx:MultiPolygon"
+      },
+      "t21": {
+        "type": ["ValueDescriptor"],
+        "description": "The T21 band of the FIRMS dataset indicating the brightness temperature of a fire pixel using MODIS channels 21/22.",
+        "unitCode": "K",
+        "unitText": "Kelvin",
+        "minValue": 300,
+        "maxValue": 502,
+        "dataSchema": "iudx:Number"
+      },
+      "date": {
+        "type": ["ValueDescriptor"],
+        "description": "Last reported date of observation.",
+        "dataSchema": "iudx:DateTime"
+      }
+    },
+    "dataSample": {
+      "type": "Feature",
+      "properties": {
+        "t21": 321.299987792969,
+        "date": "2016-01-09T00:00:00+00:00"
+      },
+      "id": 1,
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [82.75010902723797, 25.81578463502681],
+              [82.75055818488002, 25.81578463502681],
+              [82.75055818488002, 25.81668295031093],
+              [82.75100734252209, 25.81668295031093],
+              [82.75100734252209, 25.81713210795299],
+              [82.75145650016414, 25.81713210795299],
+              [82.75145650016414, 25.818030423237108],
+              [82.7519056578062, 25.818030423237108],
+              [82.7519056578062, 25.818479580879167],
+              [82.75235481544827, 25.818479580879167],
+              [82.75235481544827, 25.81892873852123],
+              [82.75280397309032, 25.81892873852123],
+              [82.75280397309032, 25.819827053805348],
+              [82.75325313073239, 25.819827053805348],
+              [82.75325313073239, 25.820276211447407],
+              [82.75370228837444, 25.820276211447407],
+              [82.75370228837444, 25.82117452673153],
+              [82.75415144601651, 25.82117452673153],
+              [82.75415144601651, 25.821623684373588],
+              [82.75460060365856, 25.821623684373588],
+              [82.75460060365856, 25.822521999657706],
+              [82.75504976130063, 25.822521999657706],
+              [82.75504976130063, 25.822971157299765],
+              [82.75549891894268, 25.822971157299765],
+              [82.75549891894268, 25.823420314941824],
+              [82.75594807658474, 25.823420314941824],
+              [82.75594807658474, 25.824318630225946],
+              [82.7563972342268, 25.824318630225946],
+              [82.7563972342268, 25.824767787868005],
+              [82.75684639186886, 25.824767787868005],
+              [82.75684639186886, 25.825666103152123],
+              [82.75729554951093, 25.825666103152123],
+              [82.75729554951093, 25.826115260794186],
+              [82.75774470715298, 25.826115260794186],
+              [82.75774470715298, 25.827013576078304],
+              [82.75819386479505, 25.827013576078304],
+              [82.75819386479505, 25.827462733720363],
+              [82.7586430224371, 25.827462733720363],
+              [82.7586430224371, 25.827911891362422],
+              [82.75909218007916, 25.827911891362422],
+              [82.75909218007916, 25.828810206646544],
+              [82.75954133772122, 25.828810206646544],
+              [82.75954133772122, 25.829259364288603],
+              [82.75999049536328, 25.829259364288603],
+              [82.75999049536328, 25.83015767957272],
+              [82.76043965300534, 25.83015767957272],
+              [82.76043965300534, 25.83060683721478],
+              [82.7608888106474, 25.83060683721478],
+              [82.7608888106474, 25.831505152498902],
+              [82.76133796828945, 25.831505152498902],
+              [82.76133796828945, 25.83195431014096],
+              [82.76178712593152, 25.83195431014096],
+              [82.76178712593152, 25.83285262542508],
+              [82.76223628357359, 25.83285262542508],
+              [82.76223628357359, 25.833301783067142],
+              [82.78065174689803, 25.833301783067142],
+              [82.78065174689803, 25.83240346778302],
+              [82.78020258925596, 25.83240346778302],
+              [82.78020258925596, 25.83195431014096],
+              [82.77975343161391, 25.83195431014096],
+              [82.77975343161391, 25.831055994856843],
+              [82.77930427397185, 25.831055994856843],
+              [82.77930427397185, 25.83060683721478],
+              [82.7788551163298, 25.83060683721478],
+              [82.7788551163298, 25.829708521930662],
+              [82.77840595868773, 25.829708521930662],
+              [82.77840595868773, 25.829259364288603],
+              [82.77795680104568, 25.829259364288603],
+              [82.77795680104568, 25.828810206646544],
+              [82.77750764340361, 25.828810206646544],
+              [82.77750764340361, 25.827911891362422],
+              [82.77705848576156, 25.827911891362422],
+              [82.77705848576156, 25.827462733720363],
+              [82.77660932811949, 25.827462733720363],
+              [82.77660932811949, 25.826564418436245],
+              [82.77616017047743, 25.826564418436245],
+              [82.77616017047743, 25.826115260794186],
+              [82.77571101283537, 25.826115260794186],
+              [82.77571101283537, 25.825216945510064],
+              [82.7752618551933, 25.825216945510064],
+              [82.7752618551933, 25.824767787868005],
+              [82.77481269755125, 25.824767787868005],
+              [82.77481269755125, 25.824318630225946],
+              [82.77436353990919, 25.824318630225946],
+              [82.77436353990919, 25.823420314941824],
+              [82.77391438226714, 25.823420314941824],
+              [82.77391438226714, 25.822971157299765],
+              [82.77346522462507, 25.822971157299765],
+              [82.77346522462507, 25.822072842015647],
+              [82.77301606698302, 25.822072842015647],
+              [82.77301606698302, 25.821623684373588],
+              [82.77256690934095, 25.821623684373588],
+              [82.77256690934095, 25.820725369089466],
+              [82.7721177516989, 25.820725369089466],
+              [82.7721177516989, 25.820276211447407],
+              [82.77166859405683, 25.820276211447407],
+              [82.77166859405683, 25.819827053805348],
+              [82.77121943641477, 25.819827053805348],
+              [82.77121943641477, 25.81892873852123],
+              [82.77077027877272, 25.81892873852123],
+              [82.77077027877272, 25.818479580879167],
+              [82.77032112113065, 25.818479580879167],
+              [82.77032112113065, 25.81758126559505],
+              [82.7698719634886, 25.81758126559505],
+              [82.7698719634886, 25.81713210795299],
+              [82.76942280584653, 25.81713210795299],
+              [82.76942280584653, 25.81623379266887],
+              [82.76897364820448, 25.81623379266887],
+              [82.76897364820448, 25.81578463502681],
+              [82.76852449056241, 25.81578463502681],
+              [82.76852449056241, 25.81533547738475],
+              [82.76807533292036, 25.81533547738475],
+              [82.76807533292036, 25.81443716210063],
+              [82.7676261752783, 25.81443716210063],
+              [82.7676261752783, 25.813988004458572],
+              [82.76717701763624, 25.813988004458572],
+              [82.76717701763624, 25.81308968917445],
+              [82.76672785999418, 25.81308968917445],
+              [82.76672785999418, 25.81264053153239],
+              [82.76627870235211, 25.81264053153239],
+              [82.76627870235211, 25.811742216248273],
+              [82.76582954471006, 25.811742216248273],
+              [82.76582954471006, 25.81129305860621],
+              [82.76538038706799, 25.81129305860621],
+              [82.76538038706799, 25.81084390096415],
+              [82.76493122942594, 25.81084390096415],
+              [82.76493122942594, 25.809945585680033],
+              [82.76448207178387, 25.809945585680033],
+              [82.76448207178387, 25.809496428037974],
+              [82.76403291414182, 25.809496428037974],
+              [82.76403291414182, 25.808598112753852],
+              [82.76358375649976, 25.808598112753852],
+              [82.76358375649976, 25.808148955111793],
+              [82.74516829317531, 25.808148955111793],
+              [82.74516829317531, 25.809047270395915],
+              [82.74561745081736, 25.809047270395915],
+              [82.74561745081736, 25.809496428037974],
+              [82.74606660845943, 25.809496428037974],
+              [82.74606660845943, 25.809945585680033],
+              [82.74651576610148, 25.809945585680033],
+              [82.74651576610148, 25.81084390096415],
+              [82.74696492374355, 25.81084390096415],
+              [82.74696492374355, 25.81129305860621],
+              [82.74741408138561, 25.81129305860621],
+              [82.74741408138561, 25.812191373890332],
+              [82.74786323902767, 25.812191373890332],
+              [82.74786323902767, 25.81264053153239],
+              [82.74831239666973, 25.81264053153239],
+              [82.74831239666973, 25.81353884681651],
+              [82.74876155431178, 25.81353884681651],
+              [82.74876155431178, 25.813988004458572],
+              [82.74921071195385, 25.813988004458572],
+              [82.74921071195385, 25.81443716210063],
+              [82.7496598695959, 25.81443716210063],
+              [82.7496598695959, 25.81533547738475],
+              [82.75010902723797, 25.81533547738475],
+              [82.75010902723797, 25.81578463502681]
+            ]
+          ]
+        ]
+      }
+    },
+    "dataset": "65ae3cafd7c0d61c11164489",
+    "description": "Fires detected in a 100sqkm radius around Varanasi over the years 2016 to 2023. The dataset is obtained from Google Earth Engine sourced from MODIS Collection 6 NRT Hotspot / Active Fire Detections MCD14DL.",
+    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
+    "instance": "surveyofindia",
+    "itemCreatedAt": "2023-03-20T06:51:15.000Z",
+    "itemStatus": "ACTIVE",
+    "label": "Fires detected in and around Varanasi City",
+    "location": {
+      "type": "Place",
+      "address": "Varanasi",
+      "geometry": {
+        "coordinates": [
+          [
+            [82.87186862796221, 25.418851996495476],
+            [82.87186862796221, 25.2088418555399],
+            [83.10833478267705, 25.2088418555399],
+            [83.10833478267705, 25.418851996495476],
+            [82.87186862796221, 25.418851996495476]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    "name": "varanasi_fires",
+    "ogc": "feature",
+    "provider": "64ccf364d7c0d61c11e8def7",
+    "resourceType": "OGC",
+    "updatedAt": "2024-01-31T04:00:11.883Z"
+  }
+]

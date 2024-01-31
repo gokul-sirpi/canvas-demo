@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import keycloak from '../../lib/keycloak';
 import ugixLogo from '../../assets/images/gsix-logo.svg';
+import axios from 'axios';
 
 function Home() {
   const isRun = useRef(false);
@@ -22,15 +23,16 @@ function Home() {
       .init({
         onLoad: 'check-sso',
       })
-      .then((authenticated) => {
+      .then((authenticated: boolean) => {
         console.log(authenticated);
         if (authenticated) {
-          navigate('/canvas');
+          // navigate('/canvas');
+          checkUserProfile();
         } else {
           handleLogin();
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         console.log(err);
       });
   }
@@ -40,12 +42,11 @@ function Home() {
     windowref.current = window.open('https://authsso.gsx.iudx.io/', '_blank');
     intervalId.current = setInterval(() => {
       checkLoginStatus();
-    }, 1000);
+    }, 500);
   }
   function getCookieValue(cname: string) {
     const cookies = document.cookie.split(';');
     let returnVal;
-    console.log(cookies);
     for (const cookie of cookies) {
       if (!cookie) continue;
       const cookieKey = cookie.split('=')[0].trim();
@@ -57,19 +58,33 @@ function Home() {
     return returnVal;
   }
   function checkLoginStatus() {
-    console.log('interval');
     const cookieResponse = getCookieValue('gsx-ui-sso');
-    console.log(cookieResponse);
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);
       closeAuthTab();
-      // keycloak.login({ redirectUri: window.location.href });
       window.location.reload();
     }
   }
   function closeAuthTab() {
     if (windowref.current) {
       windowref.current.close();
+    }
+  }
+
+  async function checkUserProfile() {
+    try {
+      const response = await axios.get(
+        'https://gsx-auth.iudx.io/auth/v1/user/profile',
+        { headers: { Authorization: `Bearer ${keycloak.token}` } }
+      );
+      console.log(response);
+      if (response.status === 200 && response.data.results) {
+        if (response.data.results.roles.length > 0) {
+          navigate('/canvas');
+        }
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
   return (

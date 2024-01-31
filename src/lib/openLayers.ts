@@ -158,7 +158,7 @@ const openLayerMap = {
     const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       //@ts-expect-error vector source expects Feature<Geometry>
-      //but Geojson().readFeature() returns FeatureLike known issue in openlayers
+      //but Geojson().readFeature() returns FeatureLike, known issue in openlayers
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
@@ -185,12 +185,6 @@ const openLayerMap = {
   },
 };
 // basic map interactions
-// ol_map.map.on('pointermove', (e) => {
-//   const feature = ol_map.map.forEachFeatureAtPixel(e.pixel, (feature) => {
-//     console.log(feature);
-//     return feature;
-//   });
-// });
 
 //creates unique id for layers
 let id = 0;

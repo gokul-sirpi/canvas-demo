@@ -4,6 +4,7 @@ import styles from './styles.module.css';
 import { BsArrowRight } from 'react-icons/bs';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
+import GsixFeatureTile from '../../components/gsixFeatureTile/GsixFeatureTile';
 
 function BrowseDataDialog({
   isDialogOpen,
@@ -38,8 +39,8 @@ function BrowseDataDialog({
             </button>
           </Dialog.Description>
           <div className={styles.feature_tile_container}>
-            {/* For Feature tile */}
-   
+          <GsixFeatureTile />
+          <GsixFeatureTile />
           </div>
         </Dialog.Content>
       </Dialog.Portal>

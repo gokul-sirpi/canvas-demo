@@ -15,6 +15,7 @@
     ]
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.5",
     "@react-keycloak/web": "^3.4.0",
     "@reduxjs/toolkit": "^2.1.0",
     "axios": "^1.6.7",

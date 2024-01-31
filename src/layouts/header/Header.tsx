@@ -5,14 +5,19 @@ import { TbWorldSearch } from 'react-icons/tb';
 import DrawingTool from '../../components/drawingTool/DrawingTool';
 import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
+import { useState } from 'react';
+import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 
 function Header() {
+  const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
+  useState<boolean>(false);
   return (
+    <>
     <header className={styles.container}>
       <img src={ugix_logo} className={styles.logo_img} alt="" />
       <div className={styles.tools_container}>
         <button autoFocus>
-          <div className={styles.btn_icon_container}>
+          <div className={styles.btn_icon_container}  onClick={()=>setIsBrowseCatalogDialogOpen(true)}>
             <TbWorldSearch size={25} />
           </div>
         </button>
@@ -33,6 +38,11 @@ function Header() {
       </div>
       <div>Profile</div>
     </header>
+          <BrowseDataDialog
+          isDialogOpen={isBrowseCatalogDialogOpen}
+          setIsDialogOpen={() => setIsBrowseCatalogDialogOpen(false)}
+        />
+      </>
   );
 }
 

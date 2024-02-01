@@ -12,8 +12,15 @@ import {
   deleteUserLayer,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
+import { GsixLayer } from '../../types/gsixLayers';
 
-function LayerTile({ layer, index }: { layer: UserLayer; index: number }) {
+function LayerTile({
+  layer,
+  index,
+}: {
+  layer: UserLayer | GsixLayer;
+  index: number;
+}) {
   const layerNameRef = useRef<HTMLInputElement>(null);
   const [visible, setVisible] = useState<boolean | undefined>(
     openLayerMap.getLayerVisibility(layer.layerId)
@@ -56,7 +63,9 @@ function LayerTile({ layer, index }: { layer: UserLayer; index: number }) {
           </div>
         </button>
         {layer.isCompleted ? (
-          <p>{layer.layerName}</p>
+          <div className={styles.layer_title_container}>
+            <p className={styles.layer_title}>{layer.layerName}</p>
+          </div>
         ) : (
           <input
             placeholder={`default name - Layer${index + 1}`}

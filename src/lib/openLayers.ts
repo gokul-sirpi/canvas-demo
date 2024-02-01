@@ -10,8 +10,9 @@ import { Style, Icon } from 'ol/style';
 import { Point } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
-import { GeoJsonObj } from '../types/GeojsonType';
+import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
 import styleFunction from './layerStyle';
+import { GsixLayer } from '../types/gsixLayers';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -141,7 +142,11 @@ const openLayerMap = {
     });
   },
 
-  addGeoJsonFeature(geojsonData: GeoJsonObj, layerName: string) {
+  addGeoJsonFeature(
+    geojsonData: GeoJsonObj,
+    layerName: string,
+    gsixId: string
+  ) {
     geojsonData.crs = {
       type: 'name',
       properties: {
@@ -154,21 +159,24 @@ const openLayerMap = {
     const vectorSource = new VectorSource({
       features: new GeoJson().readFeatures(geojsonData),
     });
-    const layerColor = getRandomColor();
+    // const layerColor = getRandomColor();
+    const layerColor = '#8d0505';
     const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       //@ts-expect-error vector source expects Feature<Geometry>
-      //but Geojson().readFeature() returns FeatureLike known issue in openlayers
+      //but Geojson().readFeature() returns FeatureLike, known issue in openlayers
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
-    const newLayer = {
+    const newLayer: GsixLayer = {
       layerName: layerName,
       layerId,
+      gsixLayerId: gsixId,
       selected: true,
       visible: true,
+      isCompleted: true,
     };
     return newLayer;
   },
@@ -183,14 +191,37 @@ const openLayerMap = {
   getLayerVisibility(layerId: string): boolean | undefined {
     return this.getLayer(layerId)?.isVisible();
   },
+
+  zoomToFit(feature: JsonFeature) {
+    let meanLat = 0;
+    let meanLng = 0;
+    for (let i = 0; i < 4; i++) {
+      const coord = feature.geometry.coordinates[0][i];
+      meanLat += coord[0];
+      meanLng += coord[1];
+    }
+    const position = [meanLat / 4, meanLng / 4];
+    // const origin = feature.geometry.coordinates[0][0];
+    const view = this.map.getView();
+    view.setCenter(position);
+    view.setZoom(8);
+  },
+
+  distanceBetweenPoints(point1: number[], point2: number[]) {
+    const lat1 = point1[0] / 57.295;
+    const lat2 = point2[0] / 57.295;
+    const lng1 = point1[1] / 57.295;
+    const lng2 = point2[1] / 57.295;
+    const distance =
+      6371 *
+      Math.acos(
+        Math.sin(lat1) * Math.sin(lat2) +
+          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+      );
+    return distance;
+  },
 };
 // basic map interactions
-// ol_map.map.on('pointermove', (e) => {
-//   const feature = ol_map.map.forEachFeatureAtPixel(e.pixel, (feature) => {
-//     console.log(feature);
-//     return feature;
-//   });
-// });
 
 //creates unique id for layers
 let id = 0;

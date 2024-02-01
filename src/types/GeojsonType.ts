@@ -1,6 +1,6 @@
 import { Type } from 'ol/render/Feature';
 
-type JsonFeature = {
+export type JsonFeature = {
   id: 'string';
   type: 'Feature';
   geometry: {
@@ -11,7 +11,7 @@ type JsonFeature = {
         name: string;
       };
     };
-    coordinates: number[] | number[][][];
+    coordinates: number[][][];
   };
   properties: object;
 };

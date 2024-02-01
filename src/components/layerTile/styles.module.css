@@ -15,11 +15,19 @@
   background-color: #f1f1f1;
 }
 
+.layer_title_container {
+  white-space: noWrap;
+  width: 11rem;
+}
+.layer_title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .input_container {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-grow: 1;
 }
 .input_container > input {
   padding: 0.3rem 0.5rem;

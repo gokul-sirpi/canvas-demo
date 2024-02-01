@@ -1,48 +1,75 @@
-.tileContainer {
+.tile_container {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  position: relative;
 }
-.soiImg {
+.soi_img {
   width: 1.5rem;
   height: 1.5rem;
 }
-.tileDescriptionContainer {
+.tile_description_container {
   border: 1px solid #aaa;
-  border-radius: 3px;
-  width: fit-content;
+  border-radius: var(--radius-sm);
   padding: 1rem;
-  margin: 1rem;
-  cursor: pointer;
+  display: flex;
+  flex-grow: 1;
+  gap: 0.5rem;
 }
-.tileImgContainer {
+.tile_img_container {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding-left: 0.3rem;
   width: fit-content;
 }
-.soiText {
+.soi_text {
   font-size: 12px;
   color: #6c6c6c;
 }
-.tileTitle {
-  font-weight: normal;
-  padding: 1rem 0;
+.title_container {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+.tile_title {
+  font-weight: normal;
+  font-size: var(--font-md);
+}
+
 .badge {
   background-color: #009e5e;
   color: #fff;
   padding: 5px 10px;
+  margin-left: auto;
   text-align: center;
   border-radius: 3px;
   width: fit-content;
   font-size: 12px;
 }
-.addIcon {
-  color: #038d07;
-  font-size: 3rem;
+.badge_private {
+  background-color: #c77d00;
 }
-.iconContainer {
+.add_icon {
+  color: #038d07;
+  font-size: 2.5rem;
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+}
+button:disabled > .add_icon {
+  color: var(--color-accent);
+  cursor: auto;
+}
+.icon_container {
+  display: flex;
+}
+.warn_text {
+  position: absolute;
+  bottom: -0.7rem;
+  font-size: var(--font-xsm);
+  color: red;
+}
+.warn_text > a {
+  color: inherit;
 }

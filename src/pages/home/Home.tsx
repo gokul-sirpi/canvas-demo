@@ -29,12 +29,17 @@ function Home() {
           // navigate('/canvas');
           checkUserProfile();
         } else {
+          setCookie('gsx-ui-sso', '');
           handleLogin();
         }
       })
       .catch((err: Error) => {
         console.log(err);
       });
+  }
+
+  function setCookie(key: string, val: string) {
+    document.cookie = `${key}=${val};domain=iudx.io`;
   }
 
   function handleLogin() {
@@ -44,6 +49,7 @@ function Home() {
       checkLoginStatus();
     }, 500);
   }
+
   function getCookieValue(cname: string) {
     const cookies = document.cookie.split(';');
     let returnVal;
@@ -57,6 +63,7 @@ function Home() {
     }
     return returnVal;
   }
+
   function checkLoginStatus() {
     const cookieResponse = getCookieValue('gsx-ui-sso');
     if (cookieResponse === 'logged-in') {
@@ -65,6 +72,7 @@ function Home() {
       window.location.reload();
     }
   }
+
   function closeAuthTab() {
     if (windowref.current) {
       windowref.current.close();
@@ -87,6 +95,7 @@ function Home() {
       console.log(error);
     }
   }
+
   return (
     <section className={styles.container}>
       <div>

@@ -1,209 +1,5 @@
 [
   {
-    "_id": "65ae3cafd7c0d61c11164454",
-    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_communication_points",
-    "__v": 0,
-    "createdAt": "2024-01-22T10:00:15.436Z",
-    "dataDescriptor": {
-      "@context": "https://voc.iudx.org.in/",
-      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
-      "dataDescriptorLabel": "Data Descriptor for Communication points",
-      "description": "Data Descriptor for Communications points",
-      "geometry": {
-        "description": "Geojson Points corresponding to the communications points surveyed",
-        "type": ["ValueDescriptor"],
-        "dataSchema": "iudx:Point"
-      },
-      "fid": {
-        "type": ["ValueDescriptor"],
-        "description": "An incrementing index for reference",
-        "unitCode": "C62",
-        "unitText": "dimensionless",
-        "dataSchema": "iudx:Number"
-      },
-      "f_name": {
-        "type": ["ValueDescriptor"],
-        "description": "Name/Type of this feature. ENUM: ['Bridge on road 1st importance (C)', 'Bridge on railway B/G double-line (C)', 'Bridge on road 2nd importance (C)', 'Bridge on railway B/G single-line (C)', 'Aerodrome', 'Bridge on railway O/G single-line (C)', 'Railway B/G single-line distance stone tick', 'Bridge on road others (C)', 'Toll', 'BRIDGE ON EX_HIGHWAY', 'Road 2nd importance distance stone tick', 'Road others distance stone tick', 'Railway station hut', 'Railway B/G double-line distance stone tick', 'Helipad', 'Pass', 'Bridge on track/foot path (C)', 'Road 1st importance distance stone tick', 'Railway station enclosure (C)', 'Railway O/G single-line distance stone tick', 'BRIDGE ON SH 2_IMP D_C_WAY']",
-        "dataSchema": "iudx:Text"
-      }
-    },
-    "dataSample": {
-      "type": "Feature",
-      "properties": {
-        "f_name": "Pass"
-      },
-      "id": 1,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [77.23473858983735, 13.151465107118401]
-      }
-    },
-    "dataset": "65ae3cafd7c0d61c11164450",
-    "description": "Feature layer of surveyed communication points related to transit",
-    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
-    "instance": "surveyofindia",
-    "itemCreatedAt": "2023-03-15T05:38:31.000Z",
-    "itemStatus": "ACTIVE",
-    "label": "Surveyed Communication Points",
-    "location": {
-      "type": "Place",
-      "address": "Bangalore",
-      "geometry": {
-        "coordinates": [
-          [
-            [77.28284231710057, 13.28596860930142],
-            [77.28284231710057, 12.66293067694862],
-            [77.90667901628791, 12.66293067694862],
-            [77.90667901628791, 13.28596860930142],
-            [77.28284231710057, 13.28596860930142]
-          ]
-        ],
-        "type": "Polygon"
-      }
-    },
-    "name": "bangalore_communication_points",
-    "ogc": "feature",
-    "provider": "64ccf364d7c0d61c11e8def9",
-    "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.697Z"
-  },
-  {
-    "_id": "65ae3cafd7c0d61c11164456",
-    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_prominent_buildings",
-    "__v": 0,
-    "createdAt": "2024-01-22T10:00:15.447Z",
-    "dataDescriptor": {
-      "@context": "https://voc.iudx.org.in/",
-      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
-      "dataDescriptorLabel": "Data Descriptor for Building points",
-      "description": "Data Descriptor for Building points",
-      "geometry": {
-        "description": "Geojson Points corresponding to the areas surveyed",
-        "type": ["ValueDescriptor"],
-        "dataSchema": "iudx:Point"
-      },
-      "fid": {
-        "type": ["ValueDescriptor"],
-        "description": "An incrementing index for reference",
-        "unitCode": "C62",
-        "unitText": "dimensionless",
-        "dataSchema": "iudx:Number"
-      },
-      "f_name": {
-        "type": ["ValueDescriptor"],
-        "description": "Name/Type of this feature. ENUM: ['Temple', 'Gopuram', 'Watch-tower', 'Hut oblong permanent', 'Police Station', 'Church', 'Chimney', 'Hospital', 'Vetnary Dispensary', 'Deserted site', 'Hut permanent', 'Fort conventional', 'Hut oblong temporary', 'Mosque', 'Rest House', 'Dispensary', 'Christian memorial', 'CIRCUIT HOUSE', 'Post Office', 'Monument', 'Idgah', 'Chhatri', 'Pagoda', 'Tomb', 'Hut temporary']",
-        "dataSchema": "iudx:Text"
-      }
-    },
-    "dataSample": {
-      "type": "Feature",
-      "properties": {
-        "f_name": "Fort conventional"
-      },
-      "id": 2,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [77.23925057449685, 13.1274876065328]
-      }
-    },
-    "dataset": "65ae3cafd7c0d61c11164450",
-    "description": "Feature layer of surveyed buildings",
-    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
-    "instance": "surveyofindia",
-    "itemCreatedAt": "2023-03-15T05:40:08.000Z",
-    "itemStatus": "ACTIVE",
-    "label": "Surveyed Buildings",
-    "location": {
-      "type": "Place",
-      "address": "Bangalore",
-      "geometry": {
-        "coordinates": [
-          [
-            [77.28284231710057, 13.28596860930142],
-            [77.28284231710057, 12.66293067694862],
-            [77.90667901628791, 12.66293067694862],
-            [77.90667901628791, 13.28596860930142],
-            [77.28284231710057, 13.28596860930142]
-          ]
-        ],
-        "type": "Polygon"
-      }
-    },
-    "name": "bangalore_prominent_buildings",
-    "ogc": "feature",
-    "provider": "64ccf364d7c0d61c11e8def9",
-    "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.703Z"
-  },
-  {
-    "_id": "65ae3cafd7c0d61c11164458",
-    "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_dominant_vegetation",
-    "__v": 0,
-    "createdAt": "2024-01-22T10:00:15.451Z",
-    "dataDescriptor": {
-      "@context": "https://voc.iudx.org.in/",
-      "type": ["iudx:DataDescriptor", "iudx:FeaturesOfInterest"],
-      "dataDescriptorLabel": "Data Descriptor for Vegetation points",
-      "description": "Data Descriptor for Vegetation points",
-      "geometry": {
-        "description": "Geojson Points corresponding to the areas surveyed",
-        "type": ["ValueDescriptor"],
-        "dataSchema": "iudx:Point"
-      },
-      "fid": {
-        "type": ["ValueDescriptor"],
-        "description": "An incrementing index for reference",
-        "unitCode": "C62",
-        "unitText": "dimensionless",
-        "dataSchema": "iudx:Number"
-      },
-      "f_name": {
-        "type": ["ValueDescriptor"],
-        "description": "Name/Type of this feature. ENUM: ['Grass', 'Other tree small', 'Palm inclined', 'Cactus or aloes', 'Palm upright', 'Plantain', 'Bamboo', 'Betelnut', 'Other tree big', 'Surveyed tree', 'Conifer (pine, fir etc.)', 'Palmyra']",
-        "dataSchema": "iudx:Text"
-      }
-    },
-    "dataSample": {
-      "type": "Feature",
-      "properties": {
-        "f_name": "Palmyra"
-      },
-      "id": 1,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [77.22557093696196, 13.117005806924018]
-      }
-    },
-    "dataset": "65ae3cafd7c0d61c11164450",
-    "description": "Feature layer of dominant vegetation points surveyed",
-    "icon": "https://iudx-catalogue-assets.s3.ap-south-1.amazonaws.com/instances/default-city.png",
-    "instance": "surveyofindia",
-    "itemCreatedAt": "2023-03-15T05:41:08.000Z",
-    "itemStatus": "ACTIVE",
-    "label": "Surveyed Dominant Vegetation Points",
-    "location": {
-      "type": "Place",
-      "address": "Bangalore",
-      "geometry": {
-        "coordinates": [
-          [
-            [77.28284231710057, 13.28596860930142],
-            [77.28284231710057, 12.66293067694862],
-            [77.90667901628791, 12.66293067694862],
-            [77.90667901628791, 13.28596860930142],
-            [77.28284231710057, 13.28596860930142]
-          ]
-        ],
-        "type": "Polygon"
-      }
-    },
-    "name": "bangalore_dominant_vegetation",
-    "ogc": "feature",
-    "provider": "64ccf364d7c0d61c11e8def9",
-    "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.708Z"
-  },
-  {
     "_id": "65ae3cafd7c0d61c1116445a",
     "id": "datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/bangalore_features_of_interest/bangalore_hydrographical_lines",
     "__v": 0,
@@ -286,7 +82,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.712Z"
+    "updatedAt": "2024-01-31T04:00:11.712Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116445c",
@@ -366,7 +163,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.720Z"
+    "updatedAt": "2024-01-31T04:00:11.720Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116445e",
@@ -471,7 +269,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.726Z"
+    "updatedAt": "2024-01-31T04:00:11.726Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116447a",
@@ -603,7 +402,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.823Z"
+    "updatedAt": "2024-01-31T04:00:11.823Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116447c",
@@ -745,7 +545,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.829Z"
+    "updatedAt": "2024-01-31T04:00:11.829Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116447e",
@@ -873,7 +674,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.835Z"
+    "updatedAt": "2024-01-31T04:00:11.835Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c11164480",
@@ -997,7 +799,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.841Z"
+    "updatedAt": "2024-01-31T04:00:11.841Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c11164482",
@@ -1095,7 +898,8 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def9",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.847Z"
+    "updatedAt": "2024-01-31T04:00:11.847Z",
+    "access_status": "Private"
   },
   {
     "_id": "65ae3cafd7c0d61c1116448d",
@@ -1328,6 +1132,7 @@
     "ogc": "feature",
     "provider": "64ccf364d7c0d61c11e8def7",
     "resourceType": "OGC",
-    "updatedAt": "2024-01-31T04:00:11.883Z"
+    "updatedAt": "2024-01-31T04:00:11.883Z",
+    "access_status": "Public"
   }
 ]

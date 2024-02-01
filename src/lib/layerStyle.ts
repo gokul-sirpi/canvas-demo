@@ -2,7 +2,7 @@ import { FeatureLike } from 'ol/Feature';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 
-const opacity = '66'; //hex value for opacity
+const opacity = '99'; //hex value for opacity
 
 const image = new CircleStyle({
   radius: 5,
@@ -18,6 +18,7 @@ function styleFunction(feature: FeatureLike, color: string) {
     style = new Style({
       stroke: new Stroke({
         color: color,
+        width: 2,
       }),
     });
   } else if (

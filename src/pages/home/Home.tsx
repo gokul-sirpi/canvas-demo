@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import keycloak from '../../lib/keycloak';
 import ugixLogo from '../../assets/images/gsix-logo.svg';
-import axios from 'axios';
+import { axiosAuthClient } from '../../lib/axiosConfig';
 
 function Home() {
   const isRun = useRef(false);
@@ -81,11 +81,7 @@ function Home() {
 
   async function checkUserProfile() {
     try {
-      const response = await axios.get(
-        'https://gsx-auth.iudx.io/auth/v1/user/profile',
-        { headers: { Authorization: `Bearer ${keycloak.token}` } }
-      );
-      console.log(response);
+      const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
         if (response.data.results.roles.length > 0) {
           navigate('/canvas');

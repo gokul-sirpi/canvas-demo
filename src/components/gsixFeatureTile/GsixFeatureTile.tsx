@@ -11,6 +11,7 @@ import { SetStateAction, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
 import { axiosAuthClient } from '../../lib/axiosConfig';
+import envurls from '../../utils/config';
 function GsixFeatureTile({
   resource,
   dialogCloseTrigger,
@@ -26,7 +27,7 @@ function GsixFeatureTile({
 
   function handleInfoOpen() {
     const groupId = resource.id.split('/').slice(0, -1).join('-');
-    const path = 'https://catalogue.gsx.iudx.io/dataset/' + groupId;
+    const path = envurls.gsixCatalogue + 'dataset/' + groupId;
     window.open(path, '_blank');
   }
 
@@ -41,30 +42,32 @@ function GsixFeatureTile({
         body.itemId = 'rs.iudx.io';
         body.itemType = 'resource_server';
       }
-      const response = await axiosAuthClient.post('auth/v1/token', body);
-      console.log(response);
+      const response = await axiosAuthClient.post('v1/token', body);
       if (response.status === 200) {
         if (response.data.title === 'Token created') {
           getGsixLayerData(response.data.results.accessToken);
         }
       }
-    } catch (err) {
-      console.log(err);
-      setNoAccess(true);
+    } catch (error) {
+      console.log(error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          setNoAccess(true);
+        }
+      }
     }
   }
   async function getGsixLayerData(accessToken: string) {
     try {
-      const url =
-        'https://gsx.iudx.io/ogc/v1/collections/' + resource.id + '/items';
-      const pathParams = {
+      const url = envurls.gsixOgcServer + resource.id + '/items';
+      const queryParams = {
         f: 'json',
         offset: 1,
         limit: limit,
       };
       const response = await axios.get(url, {
         headers: { Token: accessToken },
-        params: pathParams,
+        params: queryParams,
       });
       if (response.status === 200) {
         const geoJsonData: GeoJsonObj = response.data.results;
@@ -91,7 +94,6 @@ function GsixFeatureTile({
       <div className={styles.tile_description_container}>
         <div className={styles.tile_img_container}>
           <img src={soiImg} alt="Survey Of India" className={styles.soi_img} />
-          {/* <span className={styles.soiText}>Survey Of India</span> */}
         </div>
         <div className={styles.title_container}>
           <h2 className={styles.tile_title}>{resource.label}</h2>

@@ -1,8 +1,9 @@
 import axios from 'axios';
 import keycloak from './keycloak';
+import envurls from '../utils/config';
 
 export const axiosAuthClient = axios.create({
-  baseURL: 'https://gsx-auth.iudx.io',
+  baseURL: envurls.gsixAuthServer,
 });
 
 axiosAuthClient.interceptors.request.use((config) => {

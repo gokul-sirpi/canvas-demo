@@ -1,18 +1,23 @@
 import Keycloak from 'keycloak-js';
+import { keycloakEnv } from '../utils/config';
 
 const keycloak: Keycloak = new Keycloak({
-  url: 'https://keycloak-docker.iudx.io/auth',
-  realm: 'demo',
-  clientId: 'angular-iudx-client',
+  url: keycloakEnv.keycloakUrl,
+  realm: keycloakEnv.realm,
+  clientId: keycloakEnv.clientId,
 });
 
 keycloak.onTokenExpired = () => {
-  console.log('token expired');
+  if (keycloak.authenticated) {
+    keycloak
+      .updateToken()
+      .then(() => {
+        console.log('token updated');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 };
-// const keycloak = new Keycloak({
-//   url: 'http://localhost:8080',
-//   realm: 'MultiAuth',
-//   clientId: 'auth_app_one',
-// });
 
 export default keycloak;

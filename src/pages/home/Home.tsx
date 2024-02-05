@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import keycloak from '../../lib/keycloak';
 import ugixLogo from '../../assets/images/gsix-logo.svg';
-import axios from 'axios';
+import { axiosAuthClient } from '../../lib/axiosConfig';
+import envurls from '../../utils/config';
 
 function Home() {
   const isRun = useRef(false);
@@ -24,9 +25,7 @@ function Home() {
         onLoad: 'check-sso',
       })
       .then((authenticated: boolean) => {
-        console.log(authenticated);
         if (authenticated) {
-          // navigate('/canvas');
           checkUserProfile();
         } else {
           setCookie('gsx-ui-sso', '');
@@ -43,8 +42,7 @@ function Home() {
   }
 
   function handleLogin() {
-    // windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
-    windowref.current = window.open('https://authsso.gsx.iudx.io/', '_blank');
+    windowref.current = window.open(envurls.authReduirectUrl, '_blank');
     intervalId.current = setInterval(() => {
       checkLoginStatus();
     }, 500);
@@ -81,11 +79,7 @@ function Home() {
 
   async function checkUserProfile() {
     try {
-      const response = await axios.get(
-        'https://gsx-auth.iudx.io/auth/v1/user/profile',
-        { headers: { Authorization: `Bearer ${keycloak.token}` } }
-      );
-      console.log(response);
+      const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
         if (response.data.results.roles.length > 0) {
           navigate('/canvas');

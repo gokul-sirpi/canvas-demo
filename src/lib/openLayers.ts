@@ -41,6 +41,7 @@ const openLayerMap = {
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
       zoom: 5,
+      minZoom: 5,
     }),
     controls: [scaleControl, attribution],
     layers: [standardLayer],

@@ -27,11 +27,21 @@ function BrowseDataDialog({
     getResourceData();
   }, []);
 
-  async function getResourceData() {
+  function getResourceData() {
     //@ts-expect-error till api is done
     const allresource = resourceList as Resource[];
-    setResources(allresource);
+    const sortedResources = allresource.sort((a, b) => {
+      const nameA = a.label.toLowerCase();
+      const nameB = b.label.toLowerCase();
+      if (nameA < nameB)
+        return -1;
+      if (nameA > nameB) return 1;
+      return 0; 
+    });
+    setResources(sortedResources);
   }
+
+
   return (
     <Dialog.Root open={isDialogOpen}>
       <Dialog.Portal>

@@ -17,7 +17,7 @@
 
 .layer_title_container {
   white-space: noWrap;
-  width: 11rem;
+  width: 9rem;
 }
 .layer_title {
   overflow: hidden;
@@ -51,4 +51,23 @@
 .btn_icon_container {
   display: flex;
   align-items: center;
+}
+
+.layer_controllers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.color_picker {
+  background-color: transparent;
+  border: none;
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.color_picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+  padding: 0;
 }

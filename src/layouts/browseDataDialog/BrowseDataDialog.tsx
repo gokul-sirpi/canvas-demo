@@ -9,6 +9,7 @@ import resourceList from '../../data/resources.json';
 import { Resource } from '../../types/resource';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
+import { PiSelection } from 'react-icons/pi';
 
 function BrowseDataDialog({
   isDialogOpen,
@@ -97,19 +98,27 @@ function BrowseDataDialog({
             </button>
           </Dialog.Title>
           <Dialog.Description className={styles.dialog_description}>
-            <FaSearch className={styles.search_icon} />
-            <input
-              type="text"
-              placeholder="Explore data sets"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-
-            <button>
-              <div className={styles.btn_icon_container}>
-                <BsArrowRight style={{ fontSize: '1.5rem' }} />
-              </div>
-            </button>
+            <section className={styles.input_container}>
+              <FaSearch className={styles.search_icon} />
+              <input
+                type="text"
+                placeholder="Explore data sets"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <button>
+                <div className={styles.btn_icon_container}>
+                  <BsArrowRight style={{ fontSize: '1.5rem' }} />
+                </div>
+              </button>
+            </section>
+            <section className={styles.bbox_btn_container}>
+              <button className={styles.bbox_btn}>
+                <div className={styles.btn_icon_container}>
+                  <PiSelection size={25} /> bbox
+                </div>
+              </button>
+            </section>
           </Dialog.Description>
           <div className={styles.feature_tile_container}>
             {resources.length > 0 ? (

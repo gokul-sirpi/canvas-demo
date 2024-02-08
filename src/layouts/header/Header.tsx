@@ -1,5 +1,4 @@
 import { LiaFileDownloadSolid } from 'react-icons/lia';
-import { IoLayersOutline } from 'react-icons/io5';
 import { TbWorldSearch } from 'react-icons/tb';
 //
 import DrawingTool from '../../components/drawingTool/DrawingTool';
@@ -7,10 +6,12 @@ import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
 import { useState } from 'react';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
+import BaseMaps from '../../components/basemaps/BaseMaps';
 
 function Header() {
   const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
     useState<boolean>(false);
+
   return (
     <>
       <header className={styles.container}>
@@ -24,11 +25,7 @@ function Header() {
           <DrawingTool toolType="Circle" />
           <DrawingTool toolType="Box" />
           <DrawingTool toolType="Point" />
-          <button>
-            <div className={styles.btn_icon_container}>
-              <IoLayersOutline size={25} />
-            </div>
-          </button>
+          <BaseMaps />
           {/* <hr /> */}
           <button>
             <div className={styles.btn_icon_container}>

@@ -2,7 +2,7 @@ import { Feature, Map, View } from 'ol';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
-import Draw, { createBox } from 'ol/interaction/Draw';
+import Draw, { DrawEvent, createBox } from 'ol/interaction/Draw';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
@@ -120,7 +120,7 @@ const openLayerMap = {
   addDrawFeature(
     type: 'Circle' | 'Box',
     source: VectorSource,
-    callback?: () => void
+    callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
     let geometryFunction;
@@ -134,9 +134,9 @@ const openLayerMap = {
     });
     this.map.addInteraction(this.draw);
     this.drawing = true;
-    this.draw.on('drawend', () => {
+    this.draw.on('drawend', (event) => {
       if (callback) {
-        callback();
+        callback(event);
       }
     });
   },
@@ -177,6 +177,7 @@ const openLayerMap = {
     }
     const vectorSource = new VectorSource({
       features: new GeoJson().readFeatures(geojsonData),
+      format: new GeoJson(),
     });
     // const layerColor = getRandomColor();
     const layerColor = '#8d0505';

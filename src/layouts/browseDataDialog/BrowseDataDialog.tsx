@@ -18,6 +18,7 @@ function BrowseDataDialog({
   setIsDialogOpen: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const [searchInput, setSearchInput] = useState<string>('');
+  const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const plottedLayers = useSelector((state: RootState) => {
     return state.gsixLayer.layers;
@@ -27,20 +28,55 @@ function BrowseDataDialog({
     getResourceData();
   }, []);
 
+  useEffect(() => {
+    if (searchInput != '') {
+      const filteredResources = allResrources.filter((resource) => {
+        if (resource.label.toLowerCase().includes(searchInput.toLowerCase())) {
+          return resource;
+        }
+        return;
+      });
+      const sortedResources = sortResources(filteredResources);
+      setResources(sortedResources);
+    } else {
+      getResourceData();
+    }
+  }, [searchInput]);
+
   function getResourceData() {
     //@ts-expect-error till api is done
-    const allresource = resourceList as Resource[];
-    const sortedResources = allresource.sort((a, b) => {
-      const nameA = a.label.toLowerCase();
-      const nameB = b.label.toLowerCase();
-      if (nameA < nameB)
-        return -1;
-      if (nameA > nameB) return 1;
-      return 0; 
-    });
+    const sortedResources = sortResources(resourceList);
+    setAllResources(sortedResources);
     setResources(sortedResources);
   }
 
+  function sortResources(allResrources: Resource[]) {
+    return allResrources.sort((a, b) => {
+      return compareLetters(a.label, b.label);
+    });
+  }
+
+  function compareLetters(a: string, b: string) {
+    const first = a.toLowerCase().split(' ').join('');
+    const second = b.toLowerCase().split(' ').join('');
+
+    let counter = 0;
+    while (counter < first.length) {
+      if (first[counter] < second[counter]) {
+        return -1;
+      } else if (first[counter] > second[counter]) {
+        return +1;
+      }
+      counter++;
+    }
+    return 0;
+  }
+
+  function resetDialogState() {
+    setSearchInput('');
+    setResources([]);
+    setAllResources([]);
+  }
 
   return (
     <Dialog.Root open={isDialogOpen}>
@@ -50,7 +86,10 @@ function BrowseDataDialog({
           <Dialog.Title className={styles.dialog_title}>
             <button
               className={styles.close_btn}
-              onClick={() => setIsDialogOpen(false)}
+              onClick={() => {
+                resetDialogState();
+                setIsDialogOpen(false);
+              }}
             >
               <div className={styles.btn_icon_container}>
                 <IoMdClose size={20} onClick={() => setIsDialogOpen(false)} />
@@ -73,20 +112,30 @@ function BrowseDataDialog({
             </button>
           </Dialog.Description>
           <div className={styles.feature_tile_container}>
-            {resources.map((resource) => {
-              const matched = plottedLayers.filter(
-                (layer) => layer.gsixLayerId === resource.id
-              );
-              const plotted = matched.length > 0;
-              return (
-                <GsixFeatureTile
-                  plotted={plotted}
-                  key={resource._id}
-                  resource={resource}
-                  dialogCloseTrigger={setIsDialogOpen}
-                />
-              );
-            })}
+            {resources.length > 0 ? (
+              resources.map((resource) => {
+                const matched = plottedLayers.filter(
+                  (layer) => layer.gsixLayerId === resource.id
+                );
+                const plotted = matched.length > 0;
+                return (
+                  <GsixFeatureTile
+                    plotted={plotted}
+                    key={resource._id}
+                    resource={resource}
+                    dialogCloseTrigger={setIsDialogOpen}
+                  />
+                );
+              })
+            ) : (
+              <div className={styles.error_container}>
+                {searchInput !== '' ? (
+                  <h4>No matching projects</h4>
+                ) : (
+                  <h4>No projects found!</h4>
+                )}
+              </div>
+            )}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

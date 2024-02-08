@@ -1,6 +1,7 @@
 .container {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.788);
+  background-color: rgba(237, 237, 237, 0.7);
+  border-bottom: 0.5px solid var(--color-accent);
   display: flex;
   padding: 0.2rem 1rem;
   justify-content: space-between;
@@ -10,22 +11,35 @@
 }
 
 .logo_img {
-  width: 7rem;
+  width: 10rem;
 }
 
 .tools_container {
   display: flex;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0.2rem;
   height: 100%;
+  background-color: #ffffff;
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0px 4px 4px rgba(155, 155, 155, 0.5);
 }
+
+.tools_divider_line {
+  /* width: 2px; */
+  height: 1.4rem;
+  background-image: linear-gradient(#9fd181, #e48a52);
+}
+
 .tools_container > button {
   border-radius: var(--radius-sm);
-  padding-inline: 0.2rem;
+  /* padding-inline: 0.2rem; */
 }
+
 .tools_container > button:focus-visible {
   outline-color: var(--color-primary);
 }
+
 .tools_container > button[aria-selected='true'] {
   background-color: var(--color-accent);
 }
@@ -44,10 +58,32 @@
 .btn_icon_container {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.2rem;
+  padding: 0.3rem 0rem;
   color: var(--color-primary);
 }
 
 .tools_container button:hover {
   background-color: var(--color-accent);
+}
+
+.profile_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile_container > h3 {
+  font-size: var(--font-md);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.profile_icon_border {
+  border: 3px solid rgba(5, 28, 6, 0.572);
+  border-radius: 80%;
+  height: fit-content;
+}
+
+.profile_icon {
+  padding: 0.2rem;
 }

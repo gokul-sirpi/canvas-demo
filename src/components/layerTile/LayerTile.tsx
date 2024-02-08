@@ -63,7 +63,6 @@ function LayerTile({
     dispatch(
       updateLayerColor({ layerId: layer.layerId, newColor: selectedColor })
     );
-    console.log(layer);
   }
 
   return (

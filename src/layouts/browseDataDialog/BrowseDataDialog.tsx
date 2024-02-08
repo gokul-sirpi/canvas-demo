@@ -29,19 +29,8 @@ function BrowseDataDialog({
   }, []);
 
   useEffect(() => {
-    if (searchInput != '') {
-      const filteredResources = allResrources.filter((resource) => {
-        if (resource.label.toLowerCase().includes(searchInput.toLowerCase())) {
-          return resource;
-        }
-        return;
-      });
-      const sortedResources = sortResources(filteredResources);
-      setResources(sortedResources);
-    } else {
-      getResourceData();
-    }
-  }, [searchInput]);
+    getResourceData();
+  }, [isDialogOpen]);
 
   function getResourceData() {
     //@ts-expect-error till api is done
@@ -52,30 +41,42 @@ function BrowseDataDialog({
 
   function sortResources(allResrources: Resource[]) {
     return allResrources.sort((a, b) => {
-      return compareLetters(a.label, b.label);
+      // return compareLetters(a.label, b.label);
+      if (a.label > b.label) {
+        return 1;
+      }
+      return -1;
     });
   }
-
-  function compareLetters(a: string, b: string) {
-    const first = a.toLowerCase().split(' ').join('');
-    const second = b.toLowerCase().split(' ').join('');
-
-    let counter = 0;
-    while (counter < first.length) {
-      if (first[counter] < second[counter]) {
-        return -1;
-      } else if (first[counter] > second[counter]) {
-        return +1;
+  function handleInputChange(text: string) {
+    const filteredResources = allResrources.filter((resource) => {
+      if (resource.label.toLowerCase().includes(text.toLowerCase())) {
+        return resource;
       }
-      counter++;
-    }
-    return 0;
+      return;
+    });
+    const sortedResources = sortResources(filteredResources);
+    setSearchInput(text);
+    setResources(sortedResources);
   }
+  // function compareLetters(a: string, b: string) {
+  //   const first = a.toLowerCase().split(' ').join('');
+  //   const second = b.toLowerCase().split(' ').join('');
+
+  //   let counter = 0;
+  //   while (counter < first.length) {
+  //     if (first[counter] < second[counter]) {
+  //       return -1;
+  //     } else if (first[counter] > second[counter]) {
+  //       return +1;
+  //     }
+  //     counter++;
+  //   }
+  //   return 0;
+  // }
 
   function resetDialogState() {
     setSearchInput('');
-    setResources([]);
-    setAllResources([]);
   }
 
   return (
@@ -102,7 +103,7 @@ function BrowseDataDialog({
               type="text"
               placeholder="Explore data sets"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
             />
 
             <button>

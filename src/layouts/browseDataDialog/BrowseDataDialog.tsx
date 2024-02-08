@@ -52,8 +52,6 @@ function BrowseDataDialog({
 
   function resetDialogState() {
     setSearchInput('');
-    setResources([]);
-    setAllResources([]);
   }
 
   function handleChange(text: string) {

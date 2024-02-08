@@ -71,6 +71,12 @@
   display: flex;
   align-items: center;
 }
+.btn_icon_container_primary {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0rem;
+  color: var(--color-primary);
+}
 .input_container > input {
   font-size: 1rem;
   width: 100%;

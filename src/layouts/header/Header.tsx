@@ -1,28 +1,27 @@
 import { LiaFileDownloadSolid } from 'react-icons/lia';
 import { IoLayersOutline } from 'react-icons/io5';
-import { TbWorldSearch } from 'react-icons/tb';
 //
 import DrawingTool from '../../components/drawingTool/DrawingTool';
 import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
-import { useState } from 'react';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import { GrUserManager } from 'react-icons/gr';
 import { MdArrowDropDown } from 'react-icons/md';
 
 function Header() {
-  const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
-    useState<boolean>(false);
+  // const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
+  // useState<boolean>(false);
   return (
     <>
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
         <div className={styles.tools_container}>
-          <button autoFocus onClick={() => setIsBrowseCatalogDialogOpen(true)}>
+          {/* <button autoFocus onClick={() => setIsBrowseCatalogDialogOpen(true)}>
             <div className={styles.btn_icon_container}>
               <TbWorldSearch size={25} />
             </div>
-          </button>
+          </button> */}
+          <BrowseDataDialog />
 
           <span className={styles.tools_divider_line}></span>
           <DrawingTool toolType="Circle" />
@@ -31,8 +30,8 @@ function Header() {
           <span className={styles.tools_divider_line}></span>
           <DrawingTool toolType="Point" />
           <span className={styles.tools_divider_line}></span>
-          <button >
-            <div className={styles.btn_icon_container} >
+          <button>
+            <div className={styles.btn_icon_container}>
               <IoLayersOutline size={25} />
             </div>
           </button>
@@ -56,10 +55,6 @@ function Header() {
           <MdArrowDropDown color="#124A00" size={35} />
         </div>
       </header>
-      <BrowseDataDialog
-        isDialogOpen={isBrowseCatalogDialogOpen}
-        setIsDialogOpen={() => setIsBrowseCatalogDialogOpen(false)}
-      />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 import { BsArrowRight } from 'react-icons/bs';
 import { IoMdClose } from 'react-icons/io';
@@ -10,23 +10,25 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
 import axios from 'axios';
+import openLayerMap from '../../lib/openLayers';
+import { TbWorldSearch } from 'react-icons/tb';
+import { Extent } from 'ol/extent';
 
-function BrowseDataDialog({
-  isDialogOpen,
-  setIsDialogOpen,
-}: {
-  isDialogOpen: boolean;
-  setIsDialogOpen: React.Dispatch<SetStateAction<boolean>>;
-}) {
+function BrowseDataDialog() {
   const [searchInput, setSearchInput] = useState<string>('');
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const plottedLayers = useSelector((state: RootState) => {
     return state.gsixLayer.layers;
   });
 
   useEffect(() => {
-    isDialogOpen === true && getResourceData();
+    if (isDialogOpen === true) {
+      if (allResrources.length === 0) {
+        getResourceData();
+      }
+    }
   }, [isDialogOpen]);
 
   async function getResourceData() {
@@ -53,6 +55,8 @@ function BrowseDataDialog({
 
   function resetDialogState() {
     setSearchInput('');
+    setResources(allResrources);
+    setIsDialogOpen(false);
   }
 
   function handleChange(text: string) {
@@ -64,33 +68,81 @@ function BrowseDataDialog({
         }
         return;
       });
-      const sortedResources = sortResources(filteredResources);
-      setResources(sortedResources);
+      setResources(filteredResources);
     } else {
       setResources(allResrources);
     }
   }
 
+  function handleBboxSelection() {
+    setIsDialogOpen(false);
+    const bboxLayer = openLayerMap.createNewLayer('bbox-drawer');
+    openLayerMap.addDrawFeature('Box', bboxLayer.source, (event) => {
+      openLayerMap.removeDrawInteraction();
+      openLayerMap.removeLayer(bboxLayer.layerId);
+      const extent = event.feature.getGeometry()?.getExtent();
+      if (extent) {
+        getIntersectingResources(extent);
+      }
+      setIsDialogOpen(true);
+    });
+  }
+  function getIntersectingResources(extent: Extent) {
+    const filtered = [];
+    for (let i = 0; i < allResrources.length; i++) {
+      const resource = allResrources[i];
+      const coordinate = resource.location.geometry.coordinates[0];
+      const localMin = [...coordinate[0]];
+      const localMax = [...coordinate[0]];
+      for (let j = 0; j < 4; j++) {
+        const element = coordinate[j];
+        if (element[0] < localMin[0]) {
+          localMin[0] = element[0];
+        }
+        if (element[1] < localMin[1]) {
+          localMin[1] = element[1];
+        }
+        if (element[0] > localMax[0]) {
+          localMax[0] = element[0];
+        }
+        if (element[1] > localMax[1]) {
+          localMax[1] = element[1];
+        }
+      }
+      const bboxMin = [extent[0], extent[1]];
+      const bboxMax = [extent[2], extent[3]];
+      if (localMin[0] > bboxMax[0] || localMax[0] < bboxMin[0]) {
+        continue;
+      }
+      if (localMin[1] > bboxMax[1] || localMax[1] < bboxMin[1]) {
+        continue;
+      }
+      filtered.push(resource);
+    }
+    setResources(filtered);
+  }
+
   return (
     <Dialog.Root open={isDialogOpen}>
+      <Dialog.Trigger asChild>
+        <button autoFocus onClick={() => setIsDialogOpen(true)}>
+          <div className={styles.btn_icon_container_primary}>
+            <TbWorldSearch size={25} />
+          </div>
+        </button>
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.dialog_overlay} />
         <Dialog.Content className={styles.dialog_content}>
           <Dialog.Title className={styles.dialog_title}>
-            <button
-              className={styles.close_btn}
-              onClick={() => {
-                resetDialogState();
-                setIsDialogOpen(false);
-              }}
-            >
+            <button className={styles.close_btn} onClick={resetDialogState}>
               <div className={styles.btn_icon_container}>
                 <IoMdClose size={20} onClick={() => setIsDialogOpen(false)} />
               </div>
             </button>
           </Dialog.Title>
-          <Dialog.Description className={styles.dialog_description}>
-            <section className={styles.input_container}>
+          <section className={styles.dialog_description}>
+            <div className={styles.input_container}>
               <FaSearch className={styles.search_icon} />
               <input
                 type="text"
@@ -103,15 +155,15 @@ function BrowseDataDialog({
                   <BsArrowRight style={{ fontSize: '1.5rem' }} />
                 </div>
               </button>
-            </section>
-            <section className={styles.bbox_btn_container}>
-              <button className={styles.bbox_btn}>
+            </div>
+            <div className={styles.bbox_btn_container}>
+              <button onClick={handleBboxSelection} className={styles.bbox_btn}>
                 <div className={styles.btn_icon_container}>
                   <PiSelection size={25} /> bbox
                 </div>
               </button>
-            </section>
-          </Dialog.Description>
+            </div>
+          </section>
           <div className={styles.feature_tile_container}>
             {resources.length > 0 ? (
               resources.map((resource) => {

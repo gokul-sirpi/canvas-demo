@@ -4,4 +4,5 @@ export type UserLayer = {
   selected: boolean;
   visible: boolean;
   isCompleted: boolean;
+  layerColor: string;
 };

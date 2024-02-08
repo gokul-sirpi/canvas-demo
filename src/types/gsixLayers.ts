@@ -5,4 +5,5 @@ export type GsixLayer = {
   visible: boolean;
   selected: boolean;
   isCompleted: boolean;
+  layerColor: string;
 };

@@ -47,6 +47,16 @@ const openLayerMap = {
     layers: [standardLayer],
     // target: 'ol-map',
   }),
+
+  replaceBasemap(newLayers: TileLayer<OSM>) {
+    this.map.getLayers().forEach(layer => {
+      if (layer instanceof TileLayer) {
+        this.map.removeLayer(layer);
+      }
+    });
+    this.map.getLayers().insertAt(0, newLayers);
+  },
+
   setOlTarget(target: string) {
     this.map.setTarget(target);
   },
@@ -94,9 +104,17 @@ const openLayerMap = {
       selected: true,
       visible: true,
       isCompleted: false,
+      layerColor: featureColor,
     };
     this.map.addLayer(layer);
     return newLayer;
+  },
+
+  changeLayerColor(layerId: string, color: string) {
+    const layer = this.getLayer(layerId);
+    if (layer) {
+      layer.setStyle((feature) => styleFunction(feature, color));
+    }
   },
 
   addDrawFeature(
@@ -179,6 +197,7 @@ const openLayerMap = {
       selected: true,
       visible: true,
       isCompleted: true,
+      layerColor,
     };
     return newLayer;
   },
@@ -218,7 +237,7 @@ const openLayerMap = {
       6371 *
       Math.acos(
         Math.sin(lat1) * Math.sin(lat2) +
-          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+        Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
       );
     return distance;
   },

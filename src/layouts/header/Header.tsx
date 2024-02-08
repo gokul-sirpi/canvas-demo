@@ -1,5 +1,4 @@
 import { LiaFileDownloadSolid } from 'react-icons/lia';
-import { IoLayersOutline } from 'react-icons/io5';
 import { TbWorldSearch } from 'react-icons/tb';
 //
 import DrawingTool from '../../components/drawingTool/DrawingTool';
@@ -7,12 +6,14 @@ import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
 import { useState } from 'react';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
+import BaseMaps from '../../components/basemaps/BaseMaps';
 import { GrUserManager } from 'react-icons/gr';
 import { MdArrowDropDown } from 'react-icons/md';
 
 function Header() {
   const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
     useState<boolean>(false);
+
   return (
     <>
       <header className={styles.container}>
@@ -30,13 +31,7 @@ function Header() {
           <DrawingTool toolType="Box" />
           <span className={styles.tools_divider_line}></span>
           <DrawingTool toolType="Point" />
-          <span className={styles.tools_divider_line}></span>
-          <button >
-            <div className={styles.btn_icon_container} >
-              <IoLayersOutline size={25} />
-            </div>
-          </button>
-          <span className={styles.tools_divider_line}></span>
+          <BaseMaps />
           {/* <hr /> */}
           <button>
             <div className={styles.btn_icon_container}>

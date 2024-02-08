@@ -10,6 +10,7 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import {
   deleteUserLayer,
+  updateLayerColor,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
@@ -25,6 +26,8 @@ function LayerTile({
   const [visible, setVisible] = useState<boolean | undefined>(
     openLayerMap.getLayerVisibility(layer.layerId)
   );
+  const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+
   const dispatch = useDispatch();
   function toggleLayerVisibility() {
     if (visible) {
@@ -54,6 +57,14 @@ function LayerTile({
     dispatch(deleteUserLayer(layer.layerId));
   }
 
+  function handleColorChange(text: string) {
+    setSelectedColor(text);
+    openLayerMap.changeLayerColor(layer.layerId,selectedColor)
+    dispatch(
+      updateLayerColor({ layerId: layer.layerId, newColor: selectedColor })
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.input_container}>
@@ -77,7 +88,14 @@ function LayerTile({
       </div>
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
-          <>
+          <div className={styles.layer_controllers}>
+            <input
+              type="color"
+              className={styles.color_picker}
+              defaultValue={selectedColor}
+              color={selectedColor}
+              onChange={(e) => handleColorChange(e.target.value)}
+            />
             <button>
               <div className={styles.btn_icon_container}>
                 <PiDotsThreeOutlineFill size={20} />
@@ -88,7 +106,7 @@ function LayerTile({
                 <IoSettingsOutline size={20} />
               </div>
             </button>
-          </>
+          </div>
         ) : (
           <>
             <button>

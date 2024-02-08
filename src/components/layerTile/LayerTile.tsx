@@ -59,7 +59,7 @@ function LayerTile({
 
   function handleColorChange(text: string) {
     setSelectedColor(text);
-    openLayerMap.changeLayerColor(layer.layerId,selectedColor)
+    openLayerMap.changeLayerColor(layer.layerId, selectedColor);
     dispatch(
       updateLayerColor({ layerId: layer.layerId, newColor: selectedColor })
     );

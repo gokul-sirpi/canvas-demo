@@ -94,9 +94,17 @@ const openLayerMap = {
       selected: true,
       visible: true,
       isCompleted: false,
+      layerColor: featureColor,
     };
     this.map.addLayer(layer);
     return newLayer;
+  },
+
+  changeLayerColor(layerId: string, color: string) {
+    const layer = this.getLayer(layerId);
+    if (layer) {
+      layer.setStyle((feature) => styleFunction(feature, color));
+    }
   },
 
   addDrawFeature(
@@ -178,6 +186,7 @@ const openLayerMap = {
       selected: true,
       visible: true,
       isCompleted: true,
+      layerColor,
     };
     return newLayer;
   },

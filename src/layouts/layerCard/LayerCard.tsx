@@ -13,7 +13,7 @@ function LayerCard() {
   return (
     <section className={styles.container}>
       <div className={styles.user_layer_container}>
-        <h2>GSIX Layers</h2>
+        <h2>UGIX Layers</h2>
         <div className={styles.layer_container}>
           {gsixLayers.map((layer, index) => {
             return (
@@ -23,7 +23,7 @@ function LayerCard() {
         </div>
       </div>
       <div className={styles.user_layer_container}>
-        <h2>User layers</h2>
+        <h2>User Layers</h2>
         <div className={styles.layer_container}>
           {userLayers.map((layer, index) => {
             return (

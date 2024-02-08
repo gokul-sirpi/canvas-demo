@@ -5,11 +5,11 @@ import { BsArrowRight } from 'react-icons/bs';
 import { IoMdClose } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
 import GsixFeatureTile from '../../components/gsixFeatureTile/GsixFeatureTile';
-import resourceList from '../../data/resources.json';
 import { Resource } from '../../types/resource';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
+import axios from 'axios';
 
 function BrowseDataDialog({
   isDialogOpen,
@@ -26,13 +26,40 @@ function BrowseDataDialog({
   });
 
   useEffect(() => {
-    getResourceData();
-  }, []);
+    isDialogOpen === true && getResourceData();
+  }, [isDialogOpen]);
 
-  useEffect(() => {
-    if (searchInput != '') {
+  async function getResourceData() {
+    const result = await axios.get(
+      'https://iudx.s3.ap-south-1.amazonaws.com/resources.json'
+    );
+    if (result.status === 200 && result.data.length !== 0) {
+      const sortedResources = sortResources(result.data);
+      setAllResources(sortedResources);
+      setResources(sortedResources);
+    }
+  }
+
+  function sortResources(allResrources: Resource[]) {
+    return allResrources.sort((a, b) => {
+      if (a.label < b.label) {
+        return -1;
+      } else if (a.label > b.label) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
+  function resetDialogState() {
+    setSearchInput('');
+  }
+
+  function handleChange(text: string) {
+    setSearchInput(text);
+    if (text != '') {
       const filteredResources = allResrources.filter((resource) => {
-        if (resource.label.toLowerCase().includes(searchInput.toLowerCase())) {
+        if (resource.label.toLowerCase().includes(text.toLowerCase())) {
           return resource;
         }
         return;
@@ -40,43 +67,8 @@ function BrowseDataDialog({
       const sortedResources = sortResources(filteredResources);
       setResources(sortedResources);
     } else {
-      getResourceData();
+      setResources(allResrources);
     }
-  }, [searchInput]);
-
-  function getResourceData() {
-    //@ts-expect-error till api is done
-    const sortedResources = sortResources(resourceList);
-    setAllResources(sortedResources);
-    setResources(sortedResources);
-  }
-
-  function sortResources(allResrources: Resource[]) {
-    return allResrources.sort((a, b) => {
-      return compareLetters(a.label, b.label);
-    });
-  }
-
-  function compareLetters(a: string, b: string) {
-    const first = a.toLowerCase().split(' ').join('');
-    const second = b.toLowerCase().split(' ').join('');
-
-    let counter = 0;
-    while (counter < first.length) {
-      if (first[counter] < second[counter]) {
-        return -1;
-      } else if (first[counter] > second[counter]) {
-        return +1;
-      }
-      counter++;
-    }
-    return 0;
-  }
-
-  function resetDialogState() {
-    setSearchInput('');
-    setResources([]);
-    setAllResources([]);
   }
 
   return (
@@ -104,7 +96,7 @@ function BrowseDataDialog({
                 type="text"
                 placeholder="Explore data sets"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => handleChange(e.target.value)}
               />
               <button>
                 <div className={styles.btn_icon_container}>

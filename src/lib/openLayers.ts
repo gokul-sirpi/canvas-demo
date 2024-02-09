@@ -2,17 +2,23 @@ import { Feature, Map, View } from 'ol';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
-import Draw, { DrawEvent, createBox } from 'ol/interaction/Draw';
+import Draw, {
+  DrawEvent,
+  SketchCoordType,
+  createBox,
+} from 'ol/interaction/Draw';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { Point } from 'ol/geom';
+import { Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
 import styleFunction from './layerStyle';
 import { GsixLayer } from '../types/gsixLayers';
+import { getDistance } from 'ol/sphere.js';
+import { circular } from 'ol/geom/Polygon';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -49,7 +55,7 @@ const openLayerMap = {
   }),
 
   replaceBasemap(newLayers: TileLayer<OSM>) {
-    this.map.getLayers().forEach(layer => {
+    this.map.getLayers().forEach((layer) => {
       if (layer instanceof TileLayer) {
         this.map.removeLayer(layer);
       }
@@ -123,15 +129,20 @@ const openLayerMap = {
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
-    let geometryFunction;
     if (type === 'Box') {
-      geometryFunction = createBox();
+      createBox();
+      this.draw = new Draw({
+        type: 'Circle',
+        source: source,
+        geometryFunction: createBox(),
+      });
+    } else {
+      this.draw = new Draw({
+        type: 'Circle',
+        source,
+        geometryFunction: circleGeomatryFunction,
+      });
     }
-    this.draw = new Draw({
-      type: 'Circle',
-      source: source,
-      geometryFunction,
-    });
     this.map.addInteraction(this.draw);
     this.drawing = true;
     this.draw.on('drawend', (event) => {
@@ -237,13 +248,100 @@ const openLayerMap = {
       6371 *
       Math.acos(
         Math.sin(lat1) * Math.sin(lat2) +
-        Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
       );
     return distance;
+  },
+  exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
+    const mapCanvas = document.createElement('canvas');
+    const allCanvas = this.map
+      .getViewport()
+      .querySelectorAll(
+        '.ol-layer canvas, canvas.ol-layer'
+      ) as NodeListOf<HTMLCanvasElement>;
+
+    mapCanvas.width = allCanvas[0].width;
+    mapCanvas.height = allCanvas[0].height;
+    const mapContext = mapCanvas.getContext('2d');
+    if (!mapContext) return [new Error('No context found')];
+
+    this.map.once('rendercomplete', function () {
+      for (const canvas of allCanvas) {
+        if (canvas.width > 0) {
+          mapContext.globalAlpha = 1;
+          let matrix = [
+            parseFloat(canvas.style.width) / canvas.width,
+            0,
+            0,
+            parseFloat(canvas.style.height) / canvas.height,
+            0,
+            0,
+          ] as DOMMatrix2DInit;
+          const transform = canvas.style.transform;
+          if (transform) {
+            const newMatrix = transform.match(/^matrix\(([^(]*)\)$/);
+            if (newMatrix) {
+              const num = newMatrix[1].split(',').map(Number);
+              matrix = num as DOMMatrix2DInit;
+            }
+          }
+          mapContext.setTransform(matrix);
+          mapContext.drawImage(canvas, 0, 0);
+        }
+      }
+      mapContext.setTransform(1, 0, 0, 1, 0, 0);
+      anchor.href = mapCanvas.toDataURL();
+      anchor.download = `${imageName}.jpeg`;
+      anchor.click();
+    });
+    this.map.renderSync();
+    return null;
+  },
+  exportAsGeoJson(anchor: HTMLAnchorElement, exportName: string) {
+    let allGeoData: undefined | GeoJsonObj;
+    this.map.getLayers().forEach((layer) => {
+      const layerId = layer.get('layer-id');
+      if (layerId && layer instanceof VectorLayer) {
+        const source = layer.getSource() as VectorSource;
+        const features = source.getFeatures();
+        const geojsonData = new GeoJson().writeFeaturesObject(features);
+        console.log(geojsonData);
+        if (!allGeoData) {
+          allGeoData = geojsonData;
+        } else {
+          allGeoData.features = allGeoData.features.concat(
+            geojsonData.features
+          );
+        }
+      }
+    });
+    console.log(allGeoData);
+    const file = new Blob([JSON.stringify(allGeoData)], {
+      type: 'text/json;charset=utf-8',
+    });
+    anchor.href = URL.createObjectURL(file);
+    anchor.download = `${exportName}.json`;
+    anchor.click();
   },
 };
 // basic map interactions
 
+function circleGeomatryFunction(
+  coordinates: SketchCoordType,
+  geometry: SimpleGeometry
+) {
+  const center = coordinates[0] as number[];
+  const last = coordinates[coordinates.length - 1] as number[];
+  const radius = getDistance(center, last);
+  const circle = circular(center, radius, 128);
+  const coord = circle.getCoordinates();
+  if (!geometry) {
+    geometry = new Polygon(coord);
+  } else {
+    geometry.setCoordinates(coord);
+  }
+  return geometry;
+}
 //creates unique id for layers
 let id = 0;
 function createUniqueId() {

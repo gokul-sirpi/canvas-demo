@@ -31,7 +31,7 @@
   background-image: linear-gradient(#9fd181, #e48a52);
 }
 
-.tools_container > button {
+.tools_container button {
   border-radius: var(--radius-sm);
   /* padding-inline: 0.2rem; */
 }
@@ -53,13 +53,6 @@
   );
   background-repeat: no-repeat;
   border: 1px solid transparent;
-}
-
-.btn_icon_container {
-  display: flex;
-  align-items: center;
-  padding: 0.3rem 0rem;
-  color: var(--color-primary);
 }
 
 .tools_container button:hover {

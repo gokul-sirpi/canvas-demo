@@ -1,17 +1,20 @@
 .container {
   position: absolute;
   /* z-index: 10; */
-  padding: 1rem;
+  padding: 0.5rem;
   top: 8rem;
   left: 1rem;
   background-color: white;
   border-radius: var(--radius-md);
-  min-width: 18rem;
-  max-width: 21rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* min-width: 18rem; */
+  /* max-width: 18rem; */
 }
 
 .layer_container {
-  padding: 0.3rem 0rem;
+  padding: 0.3rem 0.3rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -64,7 +67,7 @@
 
 .accordion_trigger {
   background-color: transparent;
-  padding: 0 20px;
+  padding: 0 0.6rem;
   height: 45px;
   flex: 1;
   display: flex;
@@ -85,7 +88,6 @@
 .accordion_content {
   overflow: hidden;
   font-size: 15px;
-  background-color: #faf9fb;
 }
 .accordion_content[data-state='open'] {
   animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);

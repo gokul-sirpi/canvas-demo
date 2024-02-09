@@ -68,22 +68,17 @@
 
 .profile_container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .profile_container > h3 {
   font-size: var(--font-md);
-  color: rgba(0, 0, 0, 0.7);
-}
-
-.profile_icon_border {
-  border: 3px solid rgba(5, 28, 6, 0.572);
-  border-radius: 80%;
-  height: fit-content;
 }
 
 .profile_icon {
-  padding: 0.2rem;
+  border-radius: 100rem;
+  padding: 0.5rem 0.5rem;
+  background-color: var(--color-secondary);
+  color: white;
+  line-height: 1.3rem;
 }

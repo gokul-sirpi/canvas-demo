@@ -32,7 +32,9 @@ function BaseMaps() {
     <>
       <Popover.Root>
         <Popover.Trigger className={styles.popover_trigger}>
-          <IoLayersOutline size={25} className={styles.btn_icon_container} />
+          <div className={styles.btn_icon_container}>
+            <IoLayersOutline size={25} />
+          </div>
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content className={styles.popover_content}>

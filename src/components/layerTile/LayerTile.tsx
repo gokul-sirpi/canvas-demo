@@ -10,7 +10,7 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import {
   deleteUserLayer,
-  updateLayerColor,
+  updateUserLayerColor,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
@@ -61,7 +61,7 @@ function LayerTile({
     setSelectedColor(text);
     openLayerMap.changeLayerColor(layer.layerId, selectedColor);
     dispatch(
-      updateLayerColor({ layerId: layer.layerId, newColor: selectedColor })
+      updateUserLayerColor({ layerId: layer.layerId, newColor: selectedColor })
     );
   }
 

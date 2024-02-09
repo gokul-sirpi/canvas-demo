@@ -24,9 +24,19 @@ export const gsixLayerSlice = createSlice({
         return layer.layerId !== payload;
       });
     },
+    updateGsixLayerColor(state, action) {
+      const updatedLayers = state.layers.map((layer) => {
+        if (layer.layerId === action.payload.layerId) {
+          layer.layerColor = action.payload.newColor;
+        }
+        return layer;
+      });
+      console.log(updatedLayers)
+      state.layers = updatedLayers;
+    },
   },
 });
 
-export const { addGsixLayer, deleteGsixLayer, updateGsixLayer } =
+export const { addGsixLayer, deleteGsixLayer, updateGsixLayer, updateGsixLayerColor } =
   gsixLayerSlice.actions;
 export default gsixLayerSlice.reducer;

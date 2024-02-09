@@ -12,7 +12,8 @@ function LayerCard() {
   });
   const gsixLayers = useSelector((state: RootState) => {
     return state.gsixLayer.layers;
-  });
+  }); 
+  console.log(gsixLayers.length);
 
   return (
     <section className={styles.container}>

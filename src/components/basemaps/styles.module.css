@@ -43,6 +43,9 @@
 .popover_content div button span img {
   border: 0.5px solid gray;
 }
+.popover_content div button:hover {
+  background: rgba(128, 128, 128, 0.288);
+}
 
 .selected {
   color: var(--color-primary);

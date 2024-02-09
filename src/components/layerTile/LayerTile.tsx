@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PiDotsThreeOutlineFill } from 'react-icons/pi';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
@@ -14,6 +14,7 @@ import {
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
+import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 
 function LayerTile({
   layer,
@@ -27,6 +28,9 @@ function LayerTile({
     openLayerMap.getLayerVisibility(layer.layerId)
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+  const [isTextOverflowing, setIsTextOverflowing] = useState(false);
+
+  const titleRef = useRef<HTMLParagraphElement>(null);
 
   const dispatch = useDispatch();
   function toggleLayerVisibility() {
@@ -65,6 +69,14 @@ function LayerTile({
     );
   }
 
+  useEffect(() => {
+    const layerTitle = titleRef.current;
+    if (layerTitle) {
+      const isOverflowing = layerTitle.scrollWidth > layerTitle.clientWidth;
+      setIsTextOverflowing(isOverflowing);
+    }
+  }, [layer.layerName]);
+
   return (
     <div className={styles.container}>
       <div className={styles.input_container}>
@@ -74,9 +86,21 @@ function LayerTile({
           </div>
         </button>
         {layer.isCompleted ? (
-          <div className={styles.layer_title_container}>
-            <p className={styles.layer_title}>{layer.layerName}</p>
-          </div>
+          isTextOverflowing ? (
+            <TooltipWrapper content={layer.layerName}>
+              <div className={styles.layer_title_container}>
+                <p ref={titleRef} className={styles.layer_title}>
+                  {layer.layerName}
+                </p>
+              </div>
+            </TooltipWrapper>
+          ) : (
+            <div className={styles.layer_title_container}>
+              <p ref={titleRef} className={styles.layer_title}>
+                {layer.layerName}
+              </p>
+            </div>
+          )
         ) : (
           <input
             placeholder={`default name - Layer${index + 1}`}

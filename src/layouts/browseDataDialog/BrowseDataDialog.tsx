@@ -13,6 +13,7 @@ import axios from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
 import { Extent } from 'ol/extent';
+import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 
 function BrowseDataDialog() {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -126,9 +127,11 @@ function BrowseDataDialog() {
     <Dialog.Root open={isDialogOpen}>
       <Dialog.Trigger asChild>
         <button autoFocus onClick={() => setIsDialogOpen(true)}>
-          <div className={styles.btn_icon_container_primary}>
-            <TbWorldSearch size={25} />
-          </div>
+          <TooltipWrapper content="browse data">
+            <div className={styles.btn_icon_container_primary}>
+              <TbWorldSearch size={25} />
+            </div>
+          </TooltipWrapper>
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>

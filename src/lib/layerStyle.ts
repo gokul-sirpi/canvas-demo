@@ -33,6 +33,7 @@ function styleFunction(feature: FeatureLike, color: string) {
       }),
       stroke: new Stroke({
         color: color,
+        width: 2,
       }),
     });
   } else if (type === 'Point' || type === 'MultiPoint') {

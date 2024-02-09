@@ -5,8 +5,6 @@ import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import BaseMaps from '../../components/basemaps/BaseMaps';
-import { GrUserManager } from 'react-icons/gr';
-import { MdArrowDropDown } from 'react-icons/md';
 
 function Header() {
   // const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
@@ -38,15 +36,7 @@ function Header() {
           </button>
         </div>
         <div className={styles.profile_container}>
-          <div className={styles.profile_icon_border}>
-            <GrUserManager
-              color="#124A00"
-              size={30}
-              className={styles.profile_icon}
-            />
-          </div>
-          <h3>User</h3>
-          <MdArrowDropDown color="#124A00" size={35} />
+          <div className={styles.profile_icon}>PP</div>
         </div>
       </header>
     </>

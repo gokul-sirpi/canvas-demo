@@ -159,8 +159,9 @@ function BrowseDataDialog() {
             <div className={styles.bbox_btn_container}>
               <button onClick={handleBboxSelection} className={styles.bbox_btn}>
                 <div className={styles.btn_icon_container}>
-                  <PiSelection size={25} /> bbox
+                  <PiSelection size={25} />
                 </div>
+                <p>Area Search</p>
               </button>
             </div>
           </section>

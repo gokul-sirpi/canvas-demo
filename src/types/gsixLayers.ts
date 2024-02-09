@@ -1,4 +1,5 @@
 export type GsixLayer = {
+  layerType: 'GsixLayer'
   layerName: string;
   layerId: string;
   gsixLayerId: string;

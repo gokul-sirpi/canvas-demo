@@ -31,7 +31,6 @@ export const gsixLayerSlice = createSlice({
         }
         return layer;
       });
-      console.log(updatedLayers)
       state.layers = updatedLayers;
     },
   },

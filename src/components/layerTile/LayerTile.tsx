@@ -14,6 +14,7 @@ import {
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
+import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
 
 function LayerTile({
   layer,
@@ -58,11 +59,20 @@ function LayerTile({
   }
 
   function handleColorChange(text: string) {
-    setSelectedColor(text);
     openLayerMap.changeLayerColor(layer.layerId, selectedColor);
-    dispatch(
-      updateUserLayerColor({ layerId: layer.layerId, newColor: selectedColor })
-    );
+    if (layer.layerType === 'GsixLayer') {
+      dispatch(
+        updateGsixLayerColor({ layerId: layer.layerId, newColor: text })
+      );
+    } else {
+      dispatch(
+        updateUserLayerColor({
+          layerId: layer.layerId,
+          newColor: text,
+        })
+      );
+    }
+    setSelectedColor(text);
   }
 
   return (

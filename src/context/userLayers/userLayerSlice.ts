@@ -30,12 +30,15 @@ export const userLayerSlice = createSlice({
         }
         return layer;
       });
-      console.log(updatedLayers)
       state.layers = updatedLayers;
     },
   },
 });
 
-export const { addUserLayer, updateUserLayer, deleteUserLayer, updateUserLayerColor } =
-  userLayerSlice.actions;
+export const {
+  addUserLayer,
+  updateUserLayer,
+  deleteUserLayer,
+  updateUserLayerColor,
+} = userLayerSlice.actions;
 export default userLayerSlice.reducer;

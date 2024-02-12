@@ -5,6 +5,7 @@ import ugix_logo from '../../assets/images/gsix-logo.svg';
 import styles from './styles.module.css';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import BaseMaps from '../../components/basemaps/BaseMaps';
+import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 
 function Header() {
   // const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
@@ -21,19 +22,30 @@ function Header() {
           </button> */}
           <BrowseDataDialog />
 
-          <span className={styles.tools_divider_line}></span>
-          <DrawingTool toolType="Circle" />
-          <span className={styles.tools_divider_line}></span>
-          <DrawingTool toolType="Box" />
-          <span className={styles.tools_divider_line}></span>
-          <DrawingTool toolType="Point" />
+          <TooltipWrapper content="circle">
+            <span>
+              <DrawingTool toolType="Circle" />
+            </span>
+          </TooltipWrapper>
+          <TooltipWrapper content="box ">
+            <span>
+              <DrawingTool toolType="Box" />
+            </span>
+          </TooltipWrapper>
+          <TooltipWrapper content="point">
+            <span>
+              <DrawingTool toolType="Point" />
+            </span>
+          </TooltipWrapper>
           <BaseMaps />
           {/* <hr /> */}
-          <button>
-            <div className={styles.btn_icon_container}>
-              <LiaFileDownloadSolid size={25} />
-            </div>
-          </button>
+          <TooltipWrapper content="download">
+            <button>
+              <div className={styles.btn_icon_container}>
+                <LiaFileDownloadSolid size={25} />
+              </div>
+            </button>
+          </TooltipWrapper>
         </div>
         <div className={styles.profile_container}>
           <div className={styles.profile_icon}>PP</div>

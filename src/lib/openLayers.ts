@@ -7,7 +7,7 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { Geometry, Point } from 'ol/geom';
+import { Point } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';

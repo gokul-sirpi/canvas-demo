@@ -49,6 +49,9 @@
 .export_btn:nth-child(1) {
   background-color: var(--color-secondary);
 }
+.export_btn:nth-child(1):focus-visible {
+  outline: 1px solid var(--color-secondary);
+}
 .export_btn:focus-visible {
   outline: 1px solid var(--color-primary);
   outline-offset: 1px;

@@ -7,8 +7,6 @@
   max-height: 80vh;
   overflow-y: auto;
   overflow-x: hidden;
-  /* min-width: 18rem; */
-  /* max-width: 20rem; */
   display: none;
 }
 
@@ -23,6 +21,7 @@
 .card_container {
   background-color: white;
   border-radius: var(--radius-md);
+  border-top-right-radius: 0rem;
 }
 
 .small_card_container {
@@ -34,6 +33,7 @@
 
 .small_card_container > div {
   border-radius: var(--radius-sm);
+  border-top-right-radius: 0rem;
   font-weight: 600;
   background-color: white;
   padding: 0.5rem 1rem;
@@ -155,10 +155,12 @@
 
 .min_max_icons_container {
   height: fit-content;
-  cursor: pointer;
-}
-.min_max_icons_container:hover {
-  background-color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+  background-color: white;
 }
 
 .min_max_icon {

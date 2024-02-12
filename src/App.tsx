@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import keycloak from './lib/keycloak';
 import envurls from './utils/config';
 import { axiosAuthClient } from './lib/axiosConfig';
+import { UserProfile } from './types/UserProfile';
 
 function App() {
   const isRun = useRef(false);
   const windowref = useRef<Window | null>(null);
   const intervalId = useRef<number>();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [profileData, setProfileData] = useState<UserProfile>();
 
   useEffect(() => {
     if (isRun.current) return;
@@ -79,7 +81,9 @@ function App() {
     try {
       const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
-        if (response.data.results.roles.length > 0) {
+        const user = response.data.results as UserProfile;
+        if (user.roles.length > 0) {
+          setProfileData(user);
           setLoggedIn(true);
         }
       }
@@ -87,7 +91,7 @@ function App() {
       console.log(error);
     }
   }
-  return <>{loggedIn ? <Canvas /> : <Home />}</>;
+  return <>{loggedIn ? <Canvas profileData={profileData} /> : <Home />}</>;
 }
 
 export default App;

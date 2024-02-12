@@ -17,12 +17,12 @@ function Header() {
         <div className={styles.tools_container}>
           <BrowseDataDialog />
 
-          <TooltipWrapper content="circle">
+          <TooltipWrapper content="Circle">
             <span>
               <DrawingTool toolType="Circle" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="box ">
+          <TooltipWrapper content="Box ">
             <span>
               <DrawingTool toolType="Box" />
             </span>

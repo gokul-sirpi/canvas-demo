@@ -126,13 +126,13 @@ function BrowseDataDialog() {
   return (
     <Dialog.Root open={isDialogOpen}>
       <Dialog.Trigger asChild>
-        <button autoFocus onClick={() => setIsDialogOpen(true)}>
-          <TooltipWrapper content="browse data">
+        <TooltipWrapper content="Browse Data">
+          <button autoFocus onClick={() => setIsDialogOpen(true)}>
             <div className={styles.btn_icon_container_primary}>
               <TbWorldSearch size={25} />
             </div>
-          </TooltipWrapper>
-        </button>
+          </button>
+        </TooltipWrapper>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.dialog_overlay} />

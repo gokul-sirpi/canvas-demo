@@ -1,6 +1,6 @@
 .tile_container {
   display: flex;
-  justify-content: space-between;
+  gap: 1rem;
   align-items: center;
   position: relative;
 }
@@ -9,12 +9,15 @@
   height: 1.5rem;
 }
 .tile_description_container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: min-content minmax(calc(100% - 10rem), 1fr) min-content;
+  gap: 0.5rem;
+  align-items: center;
+  max-width: calc(100% - 8rem);
   border: 1px solid #aaa;
   border-radius: var(--radius-sm);
   padding: 1rem;
-  display: flex;
-  flex-grow: 1;
-  gap: 0.5rem;
 }
 .tile_img_container {
   display: flex;
@@ -29,11 +32,11 @@
 }
 .title_container {
   flex: 1;
+}
+.tile_title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-.tile_title {
   font-weight: normal;
   font-size: var(--font-md);
 }
@@ -41,12 +44,11 @@
 .badge {
   background-color: #009e5e;
   color: #fff;
-  padding: 5px 10px;
-  margin-left: auto;
-  text-align: center;
-  border-radius: 3px;
-  width: fit-content;
-  font-size: 12px;
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
 }
 .badge_private {
   background-color: #c77d00;

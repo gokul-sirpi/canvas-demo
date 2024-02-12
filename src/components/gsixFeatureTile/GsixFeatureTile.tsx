@@ -26,6 +26,7 @@ function GsixFeatureTile({
   const limit = 300;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   function handleInfoOpen() {
     const groupId = resource.id.split('/').slice(0, -1).join('-');
@@ -34,6 +35,7 @@ function GsixFeatureTile({
   }
 
   async function handleGsixLayerAddition() {
+    setAdding(true);
     try {
       const body = {
         itemId: resource.id,
@@ -79,6 +81,8 @@ function GsixFeatureTile({
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setAdding(false);
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
@@ -97,9 +101,11 @@ function GsixFeatureTile({
         <div className={styles.tile_img_container}>
           <img src={soiImg} alt="Survey Of India" className={styles.soi_img} />
         </div>
-        <div className={styles.title_container}>
-          <h2 className={styles.tile_title}>{resource.label}</h2>
-        </div>
+        <TooltipWrapper content={resource.label}>
+          <div className={styles.title_container}>
+            <h2 className={styles.tile_title}>{resource.label}</h2>
+          </div>
+        </TooltipWrapper>
         {resource.access_status === 'Public' ? (
           <div className={styles.badge}>
             <FaUnlock /> {resource.access_status}
@@ -113,7 +119,10 @@ function GsixFeatureTile({
       {/* icon container */}
       <div className={styles.icon_container}>
         <TooltipWrapper content="add">
-          <button disabled={plotted} onClick={handleGsixLayerAddition}>
+          <button
+            disabled={plotted || adding}
+            onClick={handleGsixLayerAddition}
+          >
             <div className={styles.add_icon}>
               <AiFillPlusCircle />
             </div>

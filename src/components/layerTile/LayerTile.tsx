@@ -10,10 +10,11 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import {
   deleteUserLayer,
-  updateLayerColor,
+  updateUserLayerColor,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
+import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 
 function LayerTile({
@@ -62,11 +63,20 @@ function LayerTile({
   }
 
   function handleColorChange(text: string) {
-    setSelectedColor(text);
     openLayerMap.changeLayerColor(layer.layerId, selectedColor);
-    dispatch(
-      updateLayerColor({ layerId: layer.layerId, newColor: selectedColor })
-    );
+    if (layer.layerType === 'GsixLayer') {
+      dispatch(
+        updateGsixLayerColor({ layerId: layer.layerId, newColor: text })
+      );
+    } else {
+      dispatch(
+        updateUserLayerColor({
+          layerId: layer.layerId,
+          newColor: text,
+        })
+      );
+    }
+    setSelectedColor(text);
   }
 
   useEffect(() => {

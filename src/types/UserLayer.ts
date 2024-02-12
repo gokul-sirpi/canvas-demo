@@ -1,4 +1,5 @@
 export type UserLayer = {
+  layerType: 'UserLayer';
   layerName: string;
   layerId: string;
   selected: boolean;

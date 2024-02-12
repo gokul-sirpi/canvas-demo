@@ -7,7 +7,7 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { Point } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
@@ -49,7 +49,7 @@ const openLayerMap = {
   }),
 
   replaceBasemap(newLayers: TileLayer<OSM>) {
-    this.map.getLayers().forEach(layer => {
+    this.map.getLayers().forEach((layer) => {
       if (layer instanceof TileLayer) {
         this.map.removeLayer(layer);
       }
@@ -98,6 +98,7 @@ const openLayerMap = {
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
     const newLayer = {
+      layerType: 'UserLayer' as const,
       layerName: layerName,
       layerId,
       source,
@@ -191,6 +192,7 @@ const openLayerMap = {
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
     const newLayer: GsixLayer = {
+      layerType: 'GsixLayer',
       layerName: layerName,
       layerId,
       gsixLayerId: gsixId,
@@ -237,7 +239,7 @@ const openLayerMap = {
       6371 *
       Math.acos(
         Math.sin(lat1) * Math.sin(lat2) +
-        Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
       );
     return distance;
   },

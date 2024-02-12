@@ -4,13 +4,39 @@
   padding: 0.5rem;
   top: 8rem;
   left: 1rem;
-  background-color: white;
-  border-radius: var(--radius-md);
   max-height: 80vh;
   overflow-y: auto;
   overflow-x: hidden;
   /* min-width: 18rem; */
-  /* max-width: 18rem; */
+  /* max-width: 20rem; */
+  display: none;
+}
+
+.visible {
+  display: flex;
+}
+
+.invisible {
+  display: none;
+}
+
+.card_container {
+  background-color: white;
+  border-radius: var(--radius-md);
+}
+
+.small_card_container {
+  display: flex;
+  position: absolute;
+  top: 8rem;
+  left: 1rem;
+}
+
+.small_card_container > div {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  background-color: white;
+  padding: 0.5rem 1rem;
 }
 
 .layer_container {
@@ -125,4 +151,17 @@
   to {
     height: 0;
   }
+}
+
+.min_max_icons_container {
+  height: fit-content;
+  cursor: pointer;
+}
+.min_max_icons_container:hover {
+  background-color: var(--color-accent);
+}
+
+.min_max_icon {
+  font-size: var(--font-md);
+  color: var(--color-secondary);
 }

@@ -7,7 +7,6 @@ import { OSM } from 'ol/source';
 import { useState } from 'react';
 import osmImg from '../../assets/images/osm.png';
 import humImg from '../../assets/images/humanitarian.png';
-import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
@@ -32,13 +31,11 @@ function BaseMaps() {
   return (
     <>
       <Popover.Root>
-        <TooltipWrapper content="Base Maps">
-          <Popover.Trigger className={styles.popover_trigger}>
-            <div className={styles.btn_icon_container}>
-              <IoLayersOutline size={25} />
-            </div>
-          </Popover.Trigger>
-        </TooltipWrapper>
+        <Popover.Trigger className={styles.popover_trigger}>
+          <div className={styles.btn_icon_container}>
+            <IoLayersOutline size={25} />
+          </div>
+        </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content className={styles.popover_content}>
             <div>

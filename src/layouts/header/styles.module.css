@@ -15,10 +15,11 @@
 }
 
 .tools_container {
+  position: absolute;
+  translate: calc(50vw - 50%);
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  height: 100%;
   background-color: #ffffff;
   padding: 0.3rem 1rem;
   border-radius: var(--radius-md);
@@ -36,7 +37,7 @@
   /* padding-inline: 0.2rem; */
 }
 
-.tools_container > button:focus-visible {
+.tools_container button:focus-visible {
   outline-color: var(--color-primary);
 }
 

@@ -12,7 +12,7 @@ import {
 import { useState } from 'react';
 
 function LayerCard() {
-  const [isCardOpen, setIsCardOpen] = useState<boolean>(false);
+  const [isCardOpen, setIsCardOpen] = useState<boolean>(true);
   const userLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });

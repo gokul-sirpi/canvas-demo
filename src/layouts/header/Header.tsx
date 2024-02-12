@@ -6,16 +6,27 @@ import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import BaseMaps from '../../components/basemaps/BaseMaps';
 import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
 import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
+import { UserProfile } from '../../types/UserProfile';
 
-function Header() {
-  // const [isBrowseCatalogDialogOpen, setIsBrowseCatalogDialogOpen] =
-  // useState<boolean>(false);
+function Header({ profileData }: { profileData: UserProfile | undefined }) {
+  const userIconName = () => {
+    const firstLetter = profileData?.name.firstName[0];
+    const secondLetter = profileData?.name.lastName[0];
+    if (firstLetter && secondLetter) {
+      return firstLetter + secondLetter;
+    }
+    return 'user';
+  };
   return (
     <>
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
         <div className={styles.tools_container}>
-          <BrowseDataDialog />
+          <TooltipWrapper content="Browse Data">
+            <span>
+              <BrowseDataDialog />
+            </span>
+          </TooltipWrapper>
 
           <TooltipWrapper content="Circle">
             <span>
@@ -32,11 +43,19 @@ function Header() {
               <DrawingTool toolType="Point" />
             </span>
           </TooltipWrapper>
-          <BaseMaps />
-          <ExportDataDialog />
+          <TooltipWrapper content="Base Maps">
+            <span>
+              <BaseMaps />
+            </span>
+          </TooltipWrapper>
+          <TooltipWrapper content="Export as">
+            <span>
+              <ExportDataDialog />
+            </span>
+          </TooltipWrapper>
         </div>
         <div className={styles.profile_container}>
-          <div className={styles.profile_icon}>PP</div>
+          <div className={styles.profile_icon}>{userIconName()}</div>
         </div>
       </header>
     </>

@@ -304,6 +304,7 @@ const openLayerMap = {
     this.map.getLayers().forEach((layer) => {
       const layerId = layer.get('layer-id');
       if (layerId && layer instanceof VectorLayer) {
+        if (!layer.getVisible()) return;
         const source = layer.getSource() as VectorSource;
         const features = source.getFeatures();
         const geojsonData = new GeoJson().writeFeaturesObject(features);

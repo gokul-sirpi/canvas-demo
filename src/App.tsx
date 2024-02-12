@@ -87,7 +87,7 @@ function App() {
       console.log(error);
     }
   }
-  return <>{loggedIn ? <Home /> : <Canvas />}</>;
+  return <>{loggedIn ? <Canvas /> : <Home />}</>;
 }
 
 export default App;

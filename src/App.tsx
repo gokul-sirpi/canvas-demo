@@ -5,6 +5,7 @@ import keycloak from './lib/keycloak';
 import envurls from './utils/config';
 import { axiosAuthClient } from './lib/axiosConfig';
 import { UserProfile } from './types/UserProfile';
+import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
 
 function App() {
   const isRun = useRef(false);
@@ -91,7 +92,13 @@ function App() {
       console.log(error);
     }
   }
-  return <>{loggedIn ? <Canvas profileData={profileData} /> : <Home />}</>;
+  return (
+    <>
+      <LoadingWrapper>
+        {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
+      </LoadingWrapper>
+    </>
+  );
 }
 
 export default App;

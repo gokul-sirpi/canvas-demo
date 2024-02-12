@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PiDotsThreeOutlineFill } from 'react-icons/pi';
-import { IoSettingsOutline } from 'react-icons/io5';
+import { PiDotsThreeOutlineVerticalFill } from 'react-icons/pi';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
@@ -129,17 +128,26 @@ function LayerTile({
               defaultValue={selectedColor}
               color={selectedColor}
               onChange={(e) => handleColorChange(e.target.value)}
+              id="color-picker"
+              tabIndex={-1}
             />
-            <button>
-              <div className={styles.btn_icon_container}>
-                <PiDotsThreeOutlineFill size={20} />
-              </div>
-            </button>
-            <button>
+            <label
+              htmlFor="color-picker"
+              style={{ backgroundColor: `${selectedColor}` }}
+              className={styles.color_label}
+            ></label>
+            <TooltipWrapper content="More">
+              <button>
+                <div className={styles.btn_icon_container}>
+                  <PiDotsThreeOutlineVerticalFill size={20} />
+                </div>
+              </button>
+            </TooltipWrapper>
+            {/* <button>
               <div className={styles.btn_icon_container}>
                 <IoSettingsOutline size={20} />
               </div>
-            </button>
+            </button> */}
           </div>
         ) : (
           <>

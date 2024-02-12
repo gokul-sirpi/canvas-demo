@@ -146,6 +146,7 @@ function BrowseDataDialog() {
               <FaSearch className={styles.search_icon} />
               <input
                 type="text"
+                autoFocus
                 placeholder="Explore data sets"
                 value={searchInput}
                 onChange={(e) => handleChange(e.target.value)}

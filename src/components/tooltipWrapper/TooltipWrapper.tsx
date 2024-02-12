@@ -10,7 +10,7 @@ function TooltipWrapper({
   content: string;
 }) {
   return (
-    <div>
+    <>
       <Tooltip.Provider delayDuration={100}>
         <Tooltip.Root>
           <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
@@ -22,7 +22,7 @@ function TooltipWrapper({
           </Tooltip.Portal>
         </Tooltip.Root>
       </Tooltip.Provider>
-    </div>
+    </>
   );
 }
 

@@ -12,6 +12,8 @@ import { useDispatch } from 'react-redux';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
 import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
+import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+
 function GsixFeatureTile({
   resource,
   dialogCloseTrigger,
@@ -110,16 +112,20 @@ function GsixFeatureTile({
       </div>
       {/* icon container */}
       <div className={styles.icon_container}>
-        <button disabled={plotted} onClick={handleGsixLayerAddition}>
-          <div className={styles.add_icon}>
-            <AiFillPlusCircle />
-          </div>
-        </button>
-        <button onClick={handleInfoOpen}>
-          <div className={styles.add_icon}>
-            <RiInformationFill />
-          </div>
-        </button>
+        <TooltipWrapper content="add">
+          <button disabled={plotted} onClick={handleGsixLayerAddition}>
+            <div className={styles.add_icon}>
+              <AiFillPlusCircle />
+            </div>
+          </button>
+        </TooltipWrapper>
+        <TooltipWrapper content="info">
+          <button onClick={handleInfoOpen}>
+            <div className={styles.add_icon}>
+              <RiInformationFill />
+            </div>
+          </button>
+        </TooltipWrapper>
       </div>
       {noAccess && (
         <div className={styles.warn_text}>

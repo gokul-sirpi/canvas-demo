@@ -64,12 +64,12 @@
 .color_picker {
   background-color: transparent;
   border: none;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 0rem;
+  height: 0rem;
 }
-
-.color_picker::-webkit-color-swatch {
-  border: none;
-  border-radius: 100rem;
-  padding: 0;
+.color_label {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 10rem;
+  cursor: pointer;
 }

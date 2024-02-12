@@ -38,7 +38,13 @@ function styleFunction(feature: FeatureLike, color: string) {
     });
   } else if (type === 'Point' || type === 'MultiPoint') {
     style = new Style({
-      image: image,
+      image: new CircleStyle({
+        radius: 4,
+        fill: new Fill({
+          color: color + opacity,
+        }),
+        stroke: new Stroke({ color: color, width: 1 }),
+      }),
     });
   } else {
     style = style = new Style({

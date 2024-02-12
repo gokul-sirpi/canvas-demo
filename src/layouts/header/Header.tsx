@@ -10,8 +10,8 @@ import { UserProfile } from '../../types/UserProfile';
 
 function Header({ profileData }: { profileData: UserProfile | undefined }) {
   const userIconName = () => {
-    const firstLetter = profileData?.name.firstName[0];
-    const secondLetter = profileData?.name.lastName[0];
+    const firstLetter = profileData?.name.firstName[0] || '';
+    const secondLetter = profileData?.name.lastName[0] || '';
     if (firstLetter && secondLetter) {
       return firstLetter + secondLetter;
     }

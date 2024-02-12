@@ -13,6 +13,7 @@ import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
 import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
 
 function GsixFeatureTile({
   resource,
@@ -36,6 +37,7 @@ function GsixFeatureTile({
 
   async function handleGsixLayerAddition() {
     setAdding(true);
+    dispatch(updateLoadingState(true));
     try {
       const body = {
         itemId: resource.id,
@@ -54,6 +56,7 @@ function GsixFeatureTile({
       }
     } catch (error) {
       console.log(error);
+      cleanUpSideEffects();
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403 || error.response?.status === 401) {
           setNoAccess(true);
@@ -82,7 +85,7 @@ function GsixFeatureTile({
     } catch (error) {
       console.log(error);
     } finally {
-      setAdding(false);
+      cleanUpSideEffects();
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
@@ -93,6 +96,10 @@ function GsixFeatureTile({
     );
     openLayerMap.zoomToFit(resource.location);
     dispatch(addGsixLayer(newLayer));
+  }
+  function cleanUpSideEffects() {
+    setAdding(false);
+    dispatch(updateLoadingState(false));
   }
   return (
     <div className={styles.tile_container}>

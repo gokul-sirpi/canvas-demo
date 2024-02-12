@@ -97,7 +97,8 @@ const openLayerMap = {
     });
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
-    const newLayer = {
+    const newLayer:UserLayer = {
+      layerType:'UserLayer',
       layerName: layerName,
       layerId,
       source,
@@ -191,6 +192,7 @@ const openLayerMap = {
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
     const newLayer: GsixLayer = {
+      layerType:'GsixLayer',
       layerName: layerName,
       layerId,
       gsixLayerId: gsixId,

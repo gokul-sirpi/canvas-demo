@@ -23,19 +23,22 @@ export const userLayerSlice = createSlice({
         return layer.layerId !== payload;
       });
     },
-    updateLayerColor(state, action) {
+    updateUserLayerColor(state, action) {
       const updatedLayers = state.layers.map((layer) => {
         if (layer.layerId === action.payload.layerId) {
           layer.layerColor = action.payload.newColor;
         }
         return layer;
       });
-      console.log(updatedLayers)
       state.layers = updatedLayers;
     },
   },
 });
 
-export const { addUserLayer, updateUserLayer, deleteUserLayer, updateLayerColor } =
-  userLayerSlice.actions;
+export const {
+  addUserLayer,
+  updateUserLayer,
+  deleteUserLayer,
+  updateUserLayerColor,
+} = userLayerSlice.actions;
 export default userLayerSlice.reducer;

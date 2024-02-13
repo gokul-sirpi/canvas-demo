@@ -12,6 +12,9 @@ import { useDispatch } from 'react-redux';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
 import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
+import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
+
 function GsixFeatureTile({
   resource,
   dialogCloseTrigger,
@@ -24,6 +27,7 @@ function GsixFeatureTile({
   const limit = 300;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   function handleInfoOpen() {
     const groupId = resource.id.split('/').slice(0, -1).join('-');
@@ -32,6 +36,8 @@ function GsixFeatureTile({
   }
 
   async function handleGsixLayerAddition() {
+    setAdding(true);
+    dispatch(updateLoadingState(true));
     try {
       const body = {
         itemId: resource.id,
@@ -50,6 +56,7 @@ function GsixFeatureTile({
       }
     } catch (error) {
       console.log(error);
+      cleanUpSideEffects();
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403 || error.response?.status === 401) {
           setNoAccess(true);
@@ -77,6 +84,8 @@ function GsixFeatureTile({
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      cleanUpSideEffects();
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
@@ -88,6 +97,10 @@ function GsixFeatureTile({
     openLayerMap.zoomToFit(resource.location);
     dispatch(addGsixLayer(newLayer));
   }
+  function cleanUpSideEffects() {
+    setAdding(false);
+    dispatch(updateLoadingState(false));
+  }
   return (
     <div className={styles.tile_container}>
       {/* content */}
@@ -95,9 +108,11 @@ function GsixFeatureTile({
         <div className={styles.tile_img_container}>
           <img src={soiImg} alt="Survey Of India" className={styles.soi_img} />
         </div>
-        <div className={styles.title_container}>
-          <h2 className={styles.tile_title}>{resource.label}</h2>
-        </div>
+        <TooltipWrapper content={resource.label}>
+          <div className={styles.title_container}>
+            <h2 className={styles.tile_title}>{resource.label}</h2>
+          </div>
+        </TooltipWrapper>
         {resource.access_status === 'Public' ? (
           <div className={styles.badge}>
             <FaUnlock /> {resource.access_status}
@@ -110,16 +125,23 @@ function GsixFeatureTile({
       </div>
       {/* icon container */}
       <div className={styles.icon_container}>
-        <button disabled={plotted} onClick={handleGsixLayerAddition}>
-          <div className={styles.add_icon}>
-            <AiFillPlusCircle />
-          </div>
-        </button>
-        <button onClick={handleInfoOpen}>
-          <div className={styles.add_icon}>
-            <RiInformationFill />
-          </div>
-        </button>
+        <TooltipWrapper content="add">
+          <button
+            disabled={plotted || adding}
+            onClick={handleGsixLayerAddition}
+          >
+            <div className={styles.add_icon}>
+              <AiFillPlusCircle />
+            </div>
+          </button>
+        </TooltipWrapper>
+        <TooltipWrapper content="info">
+          <button onClick={handleInfoOpen}>
+            <div className={styles.add_icon}>
+              <RiInformationFill />
+            </div>
+          </button>
+        </TooltipWrapper>
       </div>
       {noAccess && (
         <div className={styles.warn_text}>

@@ -5,6 +5,7 @@
   box-sizing: border-box;
   margin: 0;
   font-family: Epilogue, sans-serif;
+  scrollbar-width: thin;
 }
 dialog {
   margin: auto;

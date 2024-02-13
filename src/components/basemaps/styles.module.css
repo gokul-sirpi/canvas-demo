@@ -1,0 +1,92 @@
+.btn_icon_container {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  padding: 0.3rem 0rem;
+}
+
+.popover_trigger:focus-visible {
+  outline-color: var(--color-primary);
+}
+
+.popover_content {
+  padding: 0.7rem;
+  width: fit-content;
+  background-color: #ffff;
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  /* border: 0.1px solid var(--color-accent); */
+  border-radius: var(--radius-sm);
+}
+.popover_content[data-state='open'][data-side='top'] {
+  animation-name: slideDownAndFade;
+}
+.popover_content[data-state='open'][data-side='right'] {
+  animation-name: slideLeftAndFade;
+}
+.popover_content[data-state='open'][data-side='bottom'] {
+  animation-name: slideUpAndFade;
+}
+.popover_content[data-state='open'][data-side='left'] {
+  animation-name: slideRightAndFade;
+}
+.popover_content div {
+  display: flex;
+  flex-direction: column;
+}
+.popover_content div button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.popover_content div button span img {
+  border: 0.5px solid gray;
+}
+.popover_content div button:hover {
+  background: rgba(128, 128, 128, 0.288);
+}
+
+.selected {
+  color: var(--color-primary);
+  font-weight: bold;
+  /* border: 1px solid var(--color-primary); */
+}
+.popover_arrow {
+  fill: var(--color-accent);
+}
+@keyframes slideRightAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideDownAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeftAndFade {
+  from {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

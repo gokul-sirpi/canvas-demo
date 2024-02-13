@@ -1,0 +1,120 @@
+/* button,
+fieldset,
+input {
+  all: unset;
+} */
+
+.dialog_overlay {
+  background-color: rgba(155, 155, 155, 0.238);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog_content {
+  background-color: rgba(235, 235, 235, 0.8);
+  border-radius: 6px;
+  box-shadow:
+    hsl(210, 22%, 7%, 0.35) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  min-width: max(40%, 43rem);
+  max-width: fit-content;
+  /* min-height: 40%; */
+  max-height: 85vh;
+  padding: 25px;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.dialog_content:focus {
+  outline: none;
+}
+
+.dialog_title {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  font-size: 2rem;
+}
+
+.close_btn {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.1rem;
+  padding: 0;
+  color: rgb(77, 76, 76);
+}
+.close_btn:hover {
+  color: black;
+}
+
+.dialog_description {
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--color-accent);
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.search_icon {
+  /* color: var(--color-primary); */
+}
+.btn_icon_container {
+  display: flex;
+  align-items: center;
+}
+.dialog_description > input {
+  font-size: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+}
+.dialog_description > input:focus {
+  outline: none;
+}
+
+.feature_tile_container {
+  background-color: white;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.dialog_footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

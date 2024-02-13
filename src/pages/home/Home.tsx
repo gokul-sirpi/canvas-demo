@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import keycloak from '../../lib/keycloak';
 import ugixLogo from '../../assets/images/gsix-logo.svg';
+import { axiosAuthClient } from '../../lib/axiosConfig';
+import envurls from '../../utils/config';
 
 function Home() {
   const isRun = useRef(false);
@@ -22,29 +24,33 @@ function Home() {
       .init({
         onLoad: 'check-sso',
       })
-      .then((authenticated) => {
-        console.log(authenticated);
+      .then((authenticated: boolean) => {
         if (authenticated) {
-          navigate('/canvas');
+          checkUserProfile();
         } else {
+          setCookie('gsx-ui-sso', '');
           handleLogin();
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         console.log(err);
       });
   }
 
+  function setCookie(key: string, val: string) {
+    document.cookie = `${key}=${val};domain=iudx.io`;
+  }
+
   function handleLogin() {
-    windowref.current = window.open('https://catalogue.iudx.io/auth', '_blank');
+    windowref.current = window.open(envurls.authReduirectUrl, '_blank');
     intervalId.current = setInterval(() => {
       checkLoginStatus();
-    }, 1000);
+    }, 500);
   }
+
   function getCookieValue(cname: string) {
     const cookies = document.cookie.split(';');
     let returnVal;
-    console.log(cookies);
     for (const cookie of cookies) {
       if (!cookie) continue;
       const cookieKey = cookie.split('=')[0].trim();
@@ -55,22 +61,35 @@ function Home() {
     }
     return returnVal;
   }
+
   function checkLoginStatus() {
-    console.log('interval');
-    const cookieResponse = getCookieValue('iudx-ui-sso');
-    console.log(cookieResponse);
+    const cookieResponse = getCookieValue('gsx-ui-sso');
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);
       closeAuthTab();
-      // keycloak.login({ redirectUri: window.location.href });
       window.location.reload();
     }
   }
+
   function closeAuthTab() {
     if (windowref.current) {
       windowref.current.close();
     }
   }
+
+  async function checkUserProfile() {
+    try {
+      const response = await axiosAuthClient.get('v1/user/profile');
+      if (response.status === 200 && response.data.results) {
+        if (response.data.results.roles.length > 0) {
+          navigate('/canvas');
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <section className={styles.container}>
       <div>

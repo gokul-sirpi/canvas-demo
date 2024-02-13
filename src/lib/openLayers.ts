@@ -1,4 +1,5 @@
 import { Feature, Map, View } from 'ol';
+import { drawType } from '../types/UserLayer';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
@@ -39,6 +40,7 @@ const markerStyle = new Style({
   }),
 });
 
+// Map properties and methods
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
@@ -94,7 +96,10 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createNewLayer(layerName: string): UserLayer & { source: VectorSource } {
+  createNewLayer(
+    layerName: string,
+    featureType: drawType
+  ): UserLayer & { source: VectorSource } {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
     const layer = new VectorLayer({
@@ -112,6 +117,7 @@ const openLayerMap = {
       visible: true,
       isCompleted: false,
       layerColor: featureColor,
+      featureType: featureType,
     };
     this.map.addLayer(layer);
     return newLayer;

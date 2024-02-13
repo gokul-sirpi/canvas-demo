@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PiDotsThreeOutlineVerticalFill } from 'react-icons/pi';
-import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
 //
@@ -15,6 +14,9 @@ import {
 import { GsixLayer } from '../../types/gsixLayers';
 import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
+import { GoCircle } from 'react-icons/go';
+import { IoSquareOutline } from 'react-icons/io5';
 
 function LayerTile({
   layer,
@@ -29,10 +31,9 @@ function LayerTile({
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
   const [isTextOverflowing, setIsTextOverflowing] = useState(false);
-
   const titleRef = useRef<HTMLParagraphElement>(null);
-
   const dispatch = useDispatch();
+
   function toggleLayerVisibility() {
     if (visible) {
       openLayerMap.toggleLayerVisibility(layer.layerId, false);
@@ -104,11 +105,13 @@ function LayerTile({
               </div>
             </TooltipWrapper>
           ) : (
-            <div className={styles.layer_title_container}>
-              <p ref={titleRef} className={styles.layer_title}>
-                {layer.layerName}
-              </p>
-            </div>
+            <>
+              <div className={styles.layer_title_container}>
+                <p ref={titleRef} className={styles.layer_title}>
+                  {layer.layerName}
+                </p>
+              </div>
+            </>
           )
         ) : (
           <input
@@ -122,27 +125,34 @@ function LayerTile({
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
-            <input
-              type="color"
-              className={styles.color_picker}
-              defaultValue={selectedColor}
-              color={selectedColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              id="color-picker"
-              tabIndex={-1}
-            />
-            <label
-              htmlFor="color-picker"
-              style={{ backgroundColor: `${selectedColor}` }}
-              className={styles.color_label}
-            ></label>
-            <TooltipWrapper content="More">
-              <button>
-                <div className={styles.btn_icon_container}>
-                  <PiDotsThreeOutlineVerticalFill size={20} />
-                </div>
-              </button>
-            </TooltipWrapper>
+            {layer.layerType === 'UserLayer' &&
+            layer.featureType === 'Marker' ? null : (
+              <>
+                <input
+                  type="color"
+                  className={styles.color_picker}
+                  defaultValue={selectedColor}
+                  color={selectedColor}
+                  onChange={(e) => handleColorChange(e.target.value)}
+                  id={layer.layerId}
+                  tabIndex={-1}
+                />
+                <label
+                  htmlFor={layer.layerId}
+                  style={{ backgroundColor: `${selectedColor}` }}
+                  className={styles.color_label}
+                ></label>
+              </>
+            )}
+            {layer.layerType === 'UserLayer' && (
+              <>
+                {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
+                {layer.featureType === 'Circle' && <GoCircle size={13} />}
+                {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+              </>
+            )}
+
+            <LayerMorePopover layer={layer} />
             {/* <button>
               <div className={styles.btn_icon_container}>
                 <IoSettingsOutline size={20} />

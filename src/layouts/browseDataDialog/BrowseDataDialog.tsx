@@ -33,7 +33,7 @@ function BrowseDataDialog() {
 
   async function getResourceData() {
     const result = await axios.get(
-      'https://iudx.s3.ap-south-1.amazonaws.com/resources.json'
+      'https://iudx.s3.ap-south-1.amazonaws.com/ugix_resources.json'
     );
     if (result.status === 200 && result.data.length !== 0) {
       const sortedResources = sortResources(result.data);
@@ -76,7 +76,7 @@ function BrowseDataDialog() {
 
   function handleBboxSelection() {
     setIsDialogOpen(false);
-    const bboxLayer = openLayerMap.createNewLayer('bbox-drawer');
+    const bboxLayer = openLayerMap.createNewLayer('bbox-drawer', 'Box');
     openLayerMap.addDrawFeature('Box', bboxLayer.source, (event) => {
       openLayerMap.removeDrawInteraction();
       openLayerMap.removeLayer(bboxLayer.layerId);

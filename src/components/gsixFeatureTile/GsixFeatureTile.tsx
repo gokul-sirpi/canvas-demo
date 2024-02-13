@@ -29,9 +29,13 @@ function GsixFeatureTile({
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  function handleInfoOpen() {
+  function getinfoLink() {
     const groupId = resource.id.split('/').slice(0, -1).join('-');
     const path = envurls.gsixCatalogue + 'dataset/' + groupId;
+    return path;
+  }
+  function handleInfoOpen() {
+    const path = getinfoLink();
     window.open(path, '_blank');
   }
 
@@ -146,13 +150,7 @@ function GsixFeatureTile({
       {noAccess && (
         <div className={styles.warn_text}>
           You do not have access to view this data, please visit{' '}
-          <a
-            onClick={(e) => {
-              e.preventDefault();
-              handleInfoOpen();
-            }}
-            href=""
-          >
+          <a href={getinfoLink()} target="_blank">
             gsx page
           </a>{' '}
           to request access

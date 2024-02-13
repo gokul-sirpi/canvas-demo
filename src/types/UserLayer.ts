@@ -1,3 +1,5 @@
+export type drawType = 'Circle' | 'Box' | 'Marker';
+
 export type UserLayer = {
   layerType: 'UserLayer';
   layerName: string;
@@ -6,4 +8,5 @@ export type UserLayer = {
   visible: boolean;
   isCompleted: boolean;
   layerColor: string;
+  featureType: drawType;
 };

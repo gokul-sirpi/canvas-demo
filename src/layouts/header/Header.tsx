@@ -40,7 +40,7 @@ function Header({ profileData }: { profileData: UserProfile | undefined }) {
           </TooltipWrapper>
           <TooltipWrapper content="Marker">
             <span>
-              <DrawingTool toolType="Point" />
+              <DrawingTool toolType="Marker" />
             </span>
           </TooltipWrapper>
           <TooltipWrapper content="Base Maps">

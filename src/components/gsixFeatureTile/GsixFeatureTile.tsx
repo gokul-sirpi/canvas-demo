@@ -31,7 +31,7 @@ function GsixFeatureTile({
 
   function getinfoLink() {
     const groupId = resource.id.split('/').slice(0, -1).join('-');
-    const path = envurls.gsixCatalogue + 'dataset/' + groupId;
+    const path = envurls.ugixCatalogue + 'dataset/' + groupId;
     return path;
   }
   function handleInfoOpen() {
@@ -70,7 +70,7 @@ function GsixFeatureTile({
   }
   async function getGsixLayerData(accessToken: string) {
     try {
-      const url = envurls.gsixOgcServer + resource.id + '/items';
+      const url = envurls.ugixOgcServer + resource.id + '/items';
       const queryParams = {
         f: 'json',
         offset: 1,

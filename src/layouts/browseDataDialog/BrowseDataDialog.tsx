@@ -13,6 +13,7 @@ import axios from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
 import { Extent } from 'ol/extent';
+import envurls from '../../utils/config';
 
 function BrowseDataDialog() {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -32,11 +33,12 @@ function BrowseDataDialog() {
   }, [isDialogOpen]);
 
   async function getResourceData() {
-    const result = await axios.get(
-      'https://iudx.s3.ap-south-1.amazonaws.com/ugix_resources.json'
+    const response = await axios.get(
+      envurls.ugixServer +
+        'cat/v1/search?property=[type]&value=[[iudx:Resource]]&filter=[name,label,id]'
     );
-    if (result.status === 200 && result.data.length !== 0) {
-      const sortedResources = sortResources(result.data);
+    if (response.status === 200 && response.data.results.length !== 0) {
+      const sortedResources = sortResources(response.data.results);
       setAllResources(sortedResources);
       setResources(sortedResources);
     }

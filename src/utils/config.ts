@@ -1,10 +1,9 @@
 const envs = import.meta.env;
 
-const gsixServer = envs.VITE_GSIX_SERVER;
-const gsixAuthServer = envs.VITE_GSIX_AUTH_SERVER;
-const gsixOgcServer = envs.VITE_GSIX_OGC_SERVER;
-const soiOgcServer = envs.VITE_SOI_OGC_SERVER;
-const gsixCatalogue = envs.VITE_GSIX_CATALOGUE;
+const ugixServer = envs.VITE_UGIX_SERVER;
+const ugixAuthServer = envs.VITE_UGIX_AUTH_SERVER;
+const ugixOgcServer = envs.VITE_UGIX_OGC_SERVER;
+const ugixCatalogue = envs.VITE_UGIX_CATALOGUE;
 const authReduirectUrl = envs.VITE_AUTH_REDIRECT_URI;
 //keycloak
 const keycloakUrl = envs.VITE_KEYCLOAK_URL;
@@ -18,11 +17,10 @@ export const keycloakEnv = {
 };
 
 const envurls = {
-  gsixServer,
-  gsixAuthServer,
-  gsixOgcServer,
-  soiOgcServer,
-  gsixCatalogue,
+  ugixServer,
+  ugixAuthServer,
+  ugixOgcServer,
+  ugixCatalogue,
   authReduirectUrl,
 };
 

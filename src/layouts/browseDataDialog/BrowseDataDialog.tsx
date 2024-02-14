@@ -9,13 +9,11 @@ import { Resource } from '../../types/resource';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
-import axios from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
 import { Extent } from 'ol/extent';
-import envurls from '../../utils/config';
 
-function BrowseDataDialog() {
+function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [searchInput, setSearchInput] = useState<string>('');
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -27,22 +25,25 @@ function BrowseDataDialog() {
   useEffect(() => {
     if (isDialogOpen === true) {
       if (allResrources.length === 0) {
-        getResourceData();
+        // getResourceData();
+        const sortedData = sortResources(resourceList);
+        setAllResources(sortedData);
+        setResources(sortedData);
       }
     }
   }, [isDialogOpen]);
 
-  async function getResourceData() {
-    const response = await axios.get(
-      envurls.ugixServer +
-        'cat/v1/search?property=[type]&value=[[iudx:Resource]]&filter=[name,label,id]'
-    );
-    if (response.status === 200 && response.data.results.length !== 0) {
-      const sortedResources = sortResources(response.data.results);
-      setAllResources(sortedResources);
-      setResources(sortedResources);
-    }
-  }
+  // async function getResourceData() {
+  //   const response = await axios.get(
+  //     envurls.ugixServer +
+  //       'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
+  //   );
+  //   if (response.status === 200 && response.data.results.length !== 0) {
+  //     const sortedResources = sortResources(response.data.results);
+  //     setAllResources(sortedResources);
+  //     setResources(sortedResources);
+  //   }
+  // }
 
   function sortResources(allResrources: Resource[]) {
     return allResrources.sort((a, b) => {

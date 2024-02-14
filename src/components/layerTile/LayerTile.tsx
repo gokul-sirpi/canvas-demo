@@ -1,7 +1,5 @@
-import { useRef, useState } from 'react';
-import { PiDotsThreeOutlineFill } from 'react-icons/pi';
-import { IoSettingsOutline } from 'react-icons/io5';
-import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import { FaMapMarkerAlt, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
 //
@@ -10,9 +8,15 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import {
   deleteUserLayer,
+  updateUserLayerColor,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { GsixLayer } from '../../types/gsixLayers';
+import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
+import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
+import { GoCircle } from 'react-icons/go';
+import { IoSquareOutline } from 'react-icons/io5';
 
 function LayerTile({
   layer,
@@ -25,7 +29,11 @@ function LayerTile({
   const [visible, setVisible] = useState<boolean | undefined>(
     openLayerMap.getLayerVisibility(layer.layerId)
   );
+  const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+  const [isTextOverflowing, setIsTextOverflowing] = useState(false);
+  const titleRef = useRef<HTMLParagraphElement>(null);
   const dispatch = useDispatch();
+
   function toggleLayerVisibility() {
     if (visible) {
       openLayerMap.toggleLayerVisibility(layer.layerId, false);
@@ -54,6 +62,31 @@ function LayerTile({
     dispatch(deleteUserLayer(layer.layerId));
   }
 
+  function handleColorChange(text: string) {
+    openLayerMap.changeLayerColor(layer.layerId, selectedColor);
+    if (layer.layerType === 'GsixLayer') {
+      dispatch(
+        updateGsixLayerColor({ layerId: layer.layerId, newColor: text })
+      );
+    } else {
+      dispatch(
+        updateUserLayerColor({
+          layerId: layer.layerId,
+          newColor: text,
+        })
+      );
+    }
+    setSelectedColor(text);
+  }
+
+  useEffect(() => {
+    const layerTitle = titleRef.current;
+    if (layerTitle) {
+      const isOverflowing = layerTitle.scrollWidth > layerTitle.clientWidth;
+      setIsTextOverflowing(isOverflowing);
+    }
+  }, [layer.layerName]);
+
   return (
     <div className={styles.container}>
       <div className={styles.input_container}>
@@ -63,9 +96,23 @@ function LayerTile({
           </div>
         </button>
         {layer.isCompleted ? (
-          <div className={styles.layer_title_container}>
-            <p className={styles.layer_title}>{layer.layerName}</p>
-          </div>
+          isTextOverflowing ? (
+            <TooltipWrapper content={layer.layerName}>
+              <div className={styles.layer_title_container}>
+                <p ref={titleRef} className={styles.layer_title}>
+                  {layer.layerName}
+                </p>
+              </div>
+            </TooltipWrapper>
+          ) : (
+            <>
+              <div className={styles.layer_title_container}>
+                <p ref={titleRef} className={styles.layer_title}>
+                  {layer.layerName}
+                </p>
+              </div>
+            </>
+          )
         ) : (
           <input
             placeholder={`default name - Layer${index + 1}`}
@@ -77,18 +124,41 @@ function LayerTile({
       </div>
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
-          <>
-            <button>
-              <div className={styles.btn_icon_container}>
-                <PiDotsThreeOutlineFill size={20} />
-              </div>
-            </button>
-            <button>
+          <div className={styles.layer_controllers}>
+            {layer.layerType === 'UserLayer' &&
+            layer.featureType === 'Marker' ? null : (
+              <>
+                <input
+                  type="color"
+                  className={styles.color_picker}
+                  defaultValue={selectedColor}
+                  color={selectedColor}
+                  onChange={(e) => handleColorChange(e.target.value)}
+                  id={layer.layerId}
+                  tabIndex={-1}
+                />
+                <label
+                  htmlFor={layer.layerId}
+                  style={{ backgroundColor: `${selectedColor}` }}
+                  className={styles.color_label}
+                ></label>
+              </>
+            )}
+            {layer.layerType === 'UserLayer' && (
+              <>
+                {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
+                {layer.featureType === 'Circle' && <GoCircle size={13} />}
+                {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+              </>
+            )}
+
+            <LayerMorePopover layer={layer} />
+            {/* <button>
               <div className={styles.btn_icon_container}>
                 <IoSettingsOutline size={20} />
               </div>
-            </button>
-          </>
+            </button> */}
+          </div>
         ) : (
           <>
             <button>

@@ -1,14 +1,14 @@
-const gsixServer = 'https://gsx.iudx.io/ogc/v1/collections/';
-const gsixAuthServer = 'https://gsx-auth.iudx.io/auth/';
-const gsixOgcServer = 'https://soi.iudx.io/ogc/v1/collections/';
-const soiOgcServer = 'https://mlayer-gsx.iudx.io/';
-const gsixCatalogue = 'https://catalogue.gsx.iudx.io/';
-const authReduirectUrl = 'https://authsso.gsx.iudx.io/';
+const envs = import.meta.env;
 
+const ugixServer = envs.VITE_UGIX_SERVER;
+const ugixAuthServer = envs.VITE_UGIX_AUTH_SERVER;
+const ugixOgcServer = envs.VITE_UGIX_OGC_SERVER;
+const ugixCatalogue = envs.VITE_UGIX_CATALOGUE;
+const authReduirectUrl = envs.VITE_AUTH_REDIRECT_URI;
 //keycloak
-const keycloakUrl = 'https://keycloak-docker.iudx.io/auth';
-const realm = 'demo';
-const clientId = 'angular-iudx-client';
+const keycloakUrl = envs.VITE_KEYCLOAK_URL;
+const realm = envs.VITE_REALM;
+const clientId = envs.VITE_CLIENT_ID;
 
 export const keycloakEnv = {
   keycloakUrl,
@@ -17,11 +17,10 @@ export const keycloakEnv = {
 };
 
 const envurls = {
-  gsixServer,
-  gsixAuthServer,
-  gsixOgcServer,
-  soiOgcServer,
-  gsixCatalogue,
+  ugixServer,
+  ugixAuthServer,
+  ugixOgcServer,
+  ugixCatalogue,
   authReduirectUrl,
 };
 

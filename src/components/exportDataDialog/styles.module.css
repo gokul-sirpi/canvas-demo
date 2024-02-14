@@ -1,0 +1,93 @@
+.dialog_overlay {
+  background-color: #9898985f;
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog_content {
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.dialog_content > div {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+.dialog_input,
+.dialog_select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+}
+.dialog_input:focus-visible,
+.dialog_select:focus-visible {
+  outline: 1px solid #4e4d4d;
+}
+.export_btn {
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.5rem;
+}
+.btn_container {
+  justify-content: space-between;
+}
+.export_btn:nth-child(1) {
+  background-color: var(--color-secondary);
+}
+.export_btn:nth-child(1):focus-visible {
+  outline: 1px solid var(--color-secondary);
+}
+.export_btn:focus-visible {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+.btn_icon_container {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0rem;
+  color: var(--color-primary);
+}
+.option_container > button {
+  padding: 0.3rem 0.5rem;
+  width: 100%;
+  text-align: start;
+  border-radius: var(--radius-sm);
+}
+.option_container > button:hover {
+  background-color: var(--color-accent);
+}

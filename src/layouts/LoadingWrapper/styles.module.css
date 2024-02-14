@@ -1,0 +1,40 @@
+.loader {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #414f7ab6;
+  z-index: 999;
+}
+.loading_text {
+  position: absolute;
+  color: white;
+  font-size: var(--font-md);
+}
+
+.round_frame {
+  position: absolute;
+  animation: rotator 2s infinite linear;
+}
+.circle {
+  stroke-dasharray: 1 104;
+  animation: reducer 1600ms infinite linear reverse;
+}
+
+@keyframes reducer {
+  50% {
+    stroke-dasharray: 95 10;
+  }
+  100% {
+    stroke-dasharray: 1 104;
+  }
+}
+
+@keyframes rotator {
+  100% {
+    rotate: 360deg;
+  }
+}

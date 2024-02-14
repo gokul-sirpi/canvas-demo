@@ -16,7 +16,7 @@
 
 .tools_container {
   position: absolute;
-  translate: calc(50vw - 50%);
+  translate: calc(50vw - 58%);
   display: flex;
   align-items: center;
   gap: 0.2rem;

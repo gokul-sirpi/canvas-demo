@@ -9,7 +9,7 @@ import Draw, {
   createBox,
 } from 'ol/interaction/Draw';
 import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/Vector';
+import VectorLayer from 'ol/layer/VectorImage';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
 import { Point, Polygon, SimpleGeometry } from 'ol/geom';
@@ -196,15 +196,14 @@ const openLayerMap = {
     const vectorSource = new VectorSource({
       features: new GeoJson().readFeatures(geojsonData),
       format: new GeoJson(),
-    });
-    // const layerColor = getRandomColor();
-    const layerColor = '#8d0505';
+    }) as VectorSource;
+    const layerColor = getRandomColor();
+    // const layerColor = '#8d0505';
     const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
-      //@ts-expect-error vector source expects Feature<Geometry>
-      //but Geojson().readFeature() returns FeatureLike, known issue in openlayers
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
+      declutter: true,
     });
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
@@ -233,18 +232,20 @@ const openLayerMap = {
   },
 
   zoomToFit(feature: JsonFeature) {
-    let meanLat = 0;
-    let meanLng = 0;
-    for (let i = 0; i < 4; i++) {
-      const coord = feature.geometry.coordinates[0][i];
-      meanLat += coord[0];
-      meanLng += coord[1];
-    }
-    const position = [meanLat / 4, meanLng / 4];
-    // const origin = feature.geometry.coordinates[0][0];
+    const polygon = new Polygon(feature.geometry.coordinates);
     const view = this.map.getView();
-    view.setCenter(position);
-    view.setZoom(8);
+    view.fit(polygon, { padding: [100, 100, 100, 100] });
+    // let meanLat = 0;
+    // let meanLng = 0;
+    // for (let i = 0; i < 4; i++) {
+    //   const coord = feature.geometry.coordinates[0][i];
+    //   meanLat += coord[0];
+    //   meanLng += coord[1];
+    // }
+    // const position = [meanLat / 4, meanLng / 4];
+    // // const origin = feature.geometry.coordinates[0][0];
+    // view.setCenter(position);
+    // view.setZoom(8);
   },
 
   distanceBetweenPoints(point1: number[], point2: number[]) {
@@ -363,7 +364,7 @@ function createUniqueId() {
 function getRandomColor(): string {
   let num = '';
   for (let i = 0; i < 6; i++) {
-    num += Math.floor(Math.random() * 16).toString(16);
+    num += Math.floor(Math.random() * 11).toString(16);
   }
   return '#' + num;
 }

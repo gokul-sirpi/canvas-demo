@@ -43,16 +43,8 @@ function Header({ profileData }: { profileData: UserProfile | undefined }) {
               <DrawingTool toolType="Marker" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="Base Maps">
-            <span>
-              <BaseMaps />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Export as">
-            <span>
-              <ExportDataDialog />
-            </span>
-          </TooltipWrapper>
+          <BaseMaps />
+          <ExportDataDialog />
         </div>
         <div className={styles.profile_container}>
           <div className={styles.profile_icon}>{userIconName()}</div>

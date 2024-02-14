@@ -1,7 +1,5 @@
 .container {
   position: absolute;
-  /* z-index: 10; */
-  padding: 0.5rem;
   top: 8rem;
   left: 1rem;
   display: none;
@@ -17,6 +15,7 @@
 
 .card_container {
   max-height: 80vh;
+  padding: 0.1rem;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: white;

@@ -7,8 +7,15 @@ import BaseMaps from '../../components/basemaps/BaseMaps';
 import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
 import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
+import { Resource } from '../../types/resource';
 
-function Header({ profileData }: { profileData: UserProfile | undefined }) {
+function Header({
+  profileData,
+  resourceList,
+}: {
+  profileData: UserProfile | undefined;
+  resourceList: Resource[];
+}) {
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
     const secondLetter = profileData?.name.lastName[0] || '';
@@ -24,7 +31,7 @@ function Header({ profileData }: { profileData: UserProfile | undefined }) {
         <div className={styles.tools_container}>
           <TooltipWrapper content="Browse Data">
             <span>
-              <BrowseDataDialog />
+              <BrowseDataDialog resourceList={resourceList} />
             </span>
           </TooltipWrapper>
 

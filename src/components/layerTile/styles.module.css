@@ -59,6 +59,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .color_picker {
@@ -66,6 +67,7 @@
   border: none;
   width: 0rem;
   height: 0rem;
+  opacity: 0;
 }
 .color_label {
   width: 0.9rem;

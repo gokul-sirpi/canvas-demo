@@ -68,9 +68,11 @@ button:disabled > .add_icon {
 }
 .warn_text {
   position: absolute;
-  bottom: -0.7rem;
+  bottom: 0.1rem;
+  left: 3.4rem;
   font-size: var(--font-xsm);
   color: red;
+  width: calc(100% - 12rem);
 }
 .warn_text > a {
   color: inherit;

@@ -6,15 +6,15 @@ import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice';
+import { drawType } from '../../types/UserLayer';
 
-type drawType = 'Circle' | 'Box' | 'Point';
 function DrawingTool({ toolType }: { toolType: drawType }) {
   //   const [createLayerDialog, setCreateLayerDialog] = useState(false);
   const dispatch = useDispatch();
-  function drawBbox(type: drawType) {
-    const { source, ...newLayer } = openLayerMap.createNewLayer('');
+  function drawFeature(type: drawType) {
+    const { source, ...newLayer } = openLayerMap.createNewLayer('', type);
     let firstLayer = true;
-    if (type === 'Point') {
+    if (type === 'Marker') {
       openLayerMap.addMarkerFeature(source, () => {
         if (firstLayer) {
           dispatch(addUserLayer(newLayer));
@@ -33,21 +33,21 @@ function DrawingTool({ toolType }: { toolType: drawType }) {
   return (
     <>
       {toolType === 'Circle' && (
-        <button onClick={() => drawBbox('Circle')}>
+        <button onClick={() => drawFeature('Circle')}>
           <div className={styles.btn_icon_container}>
             <GoCircle size={25} />
           </div>
         </button>
       )}
       {toolType === 'Box' && (
-        <button onClick={() => drawBbox('Box')}>
+        <button onClick={() => drawFeature('Box')}>
           <div className={styles.btn_icon_container}>
             <IoSquareOutline size={25} />
           </div>
         </button>
       )}
-      {toolType === 'Point' && (
-        <button onClick={() => drawBbox('Point')}>
+      {toolType === 'Marker' && (
+        <button onClick={() => drawFeature('Marker')}>
           <div className={styles.btn_icon_container}>
             <SlLocationPin size={25} />
           </div>

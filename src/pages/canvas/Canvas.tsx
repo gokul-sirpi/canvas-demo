@@ -25,19 +25,19 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     getResourceData();
   }, []);
   async function getResourceData() {
-    const result = await axios.get(
-      'https://iudx.s3.ap-south-1.amazonaws.com/ugix_resources.json'
+    const response = await axios.get(
+      envurls.ugixServer +
+        'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
     );
-    if (result.status === 200 && result.data.length !== 0) {
-      setAllResources(result.data);
-      renderWishListItems(result.data);
+    if (response.status === 200 && response.data.results.length > 0) {
+      setAllResources(response.data.results);
+      renderWishListItems(response.data.results);
     }
   }
 
   function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue('resWishlist');
     console.log(wishList);
-
     if (wishList) {
       const parsedList = JSON.parse(wishList);
       if (Array.isArray(parsedList)) {

@@ -33,18 +33,6 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
     }
   }, [isDialogOpen]);
 
-  // async function getResourceData() {
-  //   const response = await axios.get(
-  //     envurls.ugixServer +
-  //       'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
-  //   );
-  //   if (response.status === 200 && response.data.results.length !== 0) {
-  //     const sortedResources = sortResources(response.data.results);
-  //     setAllResources(sortedResources);
-  //     setResources(sortedResources);
-  //   }
-  // }
-
   function sortResources(allResrources: Resource[]) {
     return allResrources.sort((a, b) => {
       if (a.label < b.label) {
@@ -179,7 +167,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
                 return (
                   <GsixFeatureTile
                     plotted={plotted}
-                    key={resource._id}
+                    key={resource.id}
                     resource={resource}
                     dialogCloseTrigger={setIsDialogOpen}
                   />

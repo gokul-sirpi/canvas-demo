@@ -24,7 +24,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | GsixLayer }) {
   function handleInfoOpen() {
     if (layer.layerType === 'GsixLayer') {
       const groupId = layer.gsixLayerId.split('/').slice(0, -1).join('-');
-      const path = envurls.gsixCatalogue + 'dataset/' + groupId;
+      const path = envurls.ugixCatalogue + 'dataset/' + groupId;
       window.open(path, '_blank');
     }
   }

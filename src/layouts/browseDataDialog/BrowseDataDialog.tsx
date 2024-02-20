@@ -9,12 +9,11 @@ import { Resource } from '../../types/resource';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
-import axios from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
 import { Extent } from 'ol/extent';
 
-function BrowseDataDialog() {
+function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [searchInput, setSearchInput] = useState<string>('');
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -26,21 +25,13 @@ function BrowseDataDialog() {
   useEffect(() => {
     if (isDialogOpen === true) {
       if (allResrources.length === 0) {
-        getResourceData();
+        // getResourceData();
+        const sortedData = sortResources(resourceList);
+        setAllResources(sortedData);
+        setResources(sortedData);
       }
     }
   }, [isDialogOpen]);
-
-  async function getResourceData() {
-    const result = await axios.get(
-      'https://iudx.s3.ap-south-1.amazonaws.com/ugix_resources.json'
-    );
-    if (result.status === 200 && result.data.length !== 0) {
-      const sortedResources = sortResources(result.data);
-      setAllResources(sortedResources);
-      setResources(sortedResources);
-    }
-  }
 
   function sortResources(allResrources: Resource[]) {
     return allResrources.sort((a, b) => {
@@ -176,7 +167,7 @@ function BrowseDataDialog() {
                 return (
                   <GsixFeatureTile
                     plotted={plotted}
-                    key={resource._id}
+                    key={resource.id}
                     resource={resource}
                     dialogCloseTrigger={setIsDialogOpen}
                   />

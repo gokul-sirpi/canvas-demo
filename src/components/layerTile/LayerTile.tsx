@@ -17,6 +17,7 @@ import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
 import { IoSquareOutline } from 'react-icons/io5';
+import { PiPolygon } from 'react-icons/pi';
 
 function LayerTile({
   layer,
@@ -149,6 +150,7 @@ function LayerTile({
                 {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
                 {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+                {layer.featureType === 'Polygon' && <PiPolygon size={13} />}
               </>
             )}
 

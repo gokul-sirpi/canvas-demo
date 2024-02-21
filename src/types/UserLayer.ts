@@ -1,4 +1,4 @@
-export type drawType = 'Circle' | 'Box' | 'Marker';
+export type drawType = 'Circle' | 'Box' | 'Marker' | 'Polygon' | 'Measure';
 
 export type UserLayer = {
   layerType: 'UserLayer';

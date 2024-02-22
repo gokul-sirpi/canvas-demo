@@ -21,6 +21,7 @@
   background-color: white;
   border-radius: var(--radius-md);
   border-top-right-radius: 0rem;
+  box-shadow: 0px 0px 2px 1px var(--color-accent);
 }
 
 .small_card_container {
@@ -36,6 +37,7 @@
   font-weight: 600;
   background-color: white;
   padding: 0.5rem 1rem;
+  box-shadow: 0px 0px 2px 1px var(--color-accent);
 }
 
 .layer_container {
@@ -160,6 +162,7 @@
   border-top-right-radius: var(--radius-sm);
   border-bottom-right-radius: var(--radius-sm);
   background-color: white;
+  box-shadow: 2px 0px 2px 1px var(--color-accent);
 }
 
 .min_max_icon {

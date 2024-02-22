@@ -78,3 +78,16 @@ export function measurementStyle() {
   });
   return style;
 }
+
+export function ogcLayerStyle(color: string) {
+  const style = new Style({
+    stroke: new Stroke({
+      width: 2,
+      color: color,
+    }),
+    fill: new Fill({
+      color: color + opacity,
+    }),
+  });
+  return style;
+}

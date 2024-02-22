@@ -22,6 +22,7 @@ import { getArea, getDistance, getLength } from 'ol/sphere.js';
 import { circular } from 'ol/geom/Polygon';
 import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
+import VectorImageLayer from 'ol/layer/VectorImage';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -61,12 +62,8 @@ const openLayerMap = {
     // target: 'ol-map',
   }),
 
-  replaceBasemap(newLayers: TileLayer<OSM>) {
-    this.map.getLayers().forEach((layer) => {
-      if (layer instanceof TileLayer) {
-        this.map.removeLayer(layer);
-      }
-    });
+  replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+    this.map.getLayers().removeAt(0);
     this.map.getLayers().insertAt(0, newLayers);
   },
 

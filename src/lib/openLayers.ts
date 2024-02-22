@@ -218,6 +218,19 @@ const openLayerMap = {
         callback(event);
       }
     });
+    this.draw.on('drawabort', () => {
+      if (this.tooltipElement) {
+        this.tooltipElement.remove();
+        this.tooltipElement = null;
+      }
+      if (this.measureTooltip) {
+        this.measureTooltip.dispose();
+        this.measureTooltip = null;
+      }
+      if (drawChangeListener) {
+        unByKey(drawChangeListener);
+      }
+    });
   },
 
   addMarkerFeature(source: VectorSource, callback?: () => void) {

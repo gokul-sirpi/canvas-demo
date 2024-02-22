@@ -11,7 +11,7 @@
 .tile_description_container {
   flex: 1;
   display: grid;
-  grid-template-columns: min-content minmax(calc(100% - 10rem), 1fr) min-content;
+  grid-template-columns: minmax(calc(100% - 10rem), 1fr) min-content;
   gap: 0.5rem;
   align-items: center;
   max-width: calc(100% - 8rem);

@@ -86,7 +86,7 @@ export function ogcLayerStyle(color: string) {
       color: color,
     }),
     fill: new Fill({
-      color: color + opacity,
+      color: color + '33',
     }),
   });
   return style;

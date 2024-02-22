@@ -30,7 +30,7 @@ function BaseMaps() {
         }) as VectorSource;
         const newOgcLayer = new VectorImageLayer({
           source: vectorSource,
-          style: ogcLayerStyle('#2c67f2'),
+          style: ogcLayerStyle('#99aabb'),
           declutter: true,
         });
         ogcLayer.current = newOgcLayer;
@@ -125,7 +125,7 @@ function BaseMaps() {
                     <img src={ogcImg} alt="osmpreview" height={26} width={26} />
                   </span>
                 </span>
-                OGC Layer
+                Basic Map
               </button>
             </div>
             {/* <button>Bharat Map</button> */}

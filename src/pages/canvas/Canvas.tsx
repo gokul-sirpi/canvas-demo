@@ -59,7 +59,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         itemType: 'resource',
         role: 'consumer',
       };
-      if (resource.access_status === 'Public') {
+      if (resource.accessPolicy === 'OPEN') {
         body.itemId = 'rs.iudx.io';
         body.itemType = 'resource_server';
       }

@@ -3,7 +3,7 @@ import keycloak from './keycloak';
 import envurls from '../utils/config';
 
 export const axiosAuthClient = axios.create({
-  baseURL: envurls.ugixAuthServer,
+  baseURL: envurls.ugixAuthServer + 'auth/',
 });
 
 axiosAuthClient.interceptors.request.use((config) => {

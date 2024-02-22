@@ -4,13 +4,41 @@ import * as Popover from '@radix-ui/react-popover';
 import openLayerMap from '../../lib/openLayers';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import osmImg from '../../assets/images/osm.png';
 import humImg from '../../assets/images/humanitarian.png';
+import ogcImg from '../../assets/images/india-OGC.png';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import VectorImageLayer from 'ol/layer/VectorImage';
+import VectorSource from 'ol/source/Vector';
+import GeoJSON from 'ol/format/GeoJSON';
+import { ogcLayerStyle } from '../../lib/layerStyle';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
+  const ogcLayer = useRef<VectorImageLayer<VectorSource> | undefined>();
+  useEffect(() => {
+    getDistrictBoundaries();
+  }, []);
+  function getDistrictBoundaries() {
+    fetch('https://iudx.s3.ap-south-1.amazonaws.com/state-boundaries.geojson')
+      .then((res) => res.json())
+      .then((response) => {
+        const vectorSource = new VectorSource({
+          features: new GeoJSON().readFeatures(response),
+          format: new GeoJSON(),
+        }) as VectorSource;
+        const newOgcLayer = new VectorImageLayer({
+          source: vectorSource,
+          style: ogcLayerStyle('#2c67f2'),
+          declutter: true,
+        });
+        ogcLayer.current = newOgcLayer;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   const standardLayer = new TileLayer({
     source: new OSM({}),
@@ -22,11 +50,25 @@ function BaseMaps() {
     }),
     visible: true,
   });
-  if (mapType === 'standard') {
-    openLayerMap.replaceBasemap(standardLayer);
-  }
-  if (mapType === 'humanitarian') {
-    openLayerMap.replaceBasemap(humanitarianLayer);
+  function toggleBaseMap(baseMapType: string) {
+    switch (baseMapType) {
+      case 'standard':
+        openLayerMap.replaceBasemap(standardLayer);
+        setMapType(baseMapType);
+        break;
+      case 'humanitarian':
+        openLayerMap.replaceBasemap(humanitarianLayer);
+        setMapType(baseMapType);
+        break;
+      case 'ogc-layer':
+        if (ogcLayer.current) {
+          openLayerMap.replaceBasemap(ogcLayer.current);
+          setMapType(baseMapType);
+        }
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -44,7 +86,7 @@ function BaseMaps() {
             <div>
               <button
                 onClick={() => {
-                  setMapType('standard');
+                  toggleBaseMap('standard');
                 }}
                 className={
                   mapType === 'standard' ? styles.selected : styles.unselected
@@ -57,7 +99,7 @@ function BaseMaps() {
               </button>
               <button
                 onClick={() => {
-                  setMapType('humanitarian');
+                  toggleBaseMap('humanitarian');
                 }}
                 className={
                   mapType === 'humanitarian'
@@ -71,6 +113,19 @@ function BaseMaps() {
                   </span>
                 </span>
                 Humanitarian
+              </button>
+              <button
+                onClick={() => toggleBaseMap('ogc-layer')}
+                className={
+                  mapType === 'ogc-layer' ? styles.selected : styles.unselected
+                }
+              >
+                <span>
+                  <span>
+                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
+                  </span>
+                </span>
+                OGC Layer
               </button>
             </div>
             {/* <button>Bharat Map</button> */}

@@ -1,4 +1,4 @@
-import { Feature, Map, View } from 'ol';
+import { Feature, Map, Overlay, View } from 'ol';
 import { drawType } from '../types/UserLayer';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
@@ -12,14 +12,16 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorImage';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { Point, Polygon, SimpleGeometry } from 'ol/geom';
+import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
-import styleFunction from './layerStyle';
+import { styleFunction, measurementStyle } from './layerStyle';
 import { GsixLayer } from '../types/gsixLayers';
-import { getDistance } from 'ol/sphere.js';
+import { getArea, getDistance, getLength } from 'ol/sphere.js';
 import { circular } from 'ol/geom/Polygon';
+import { unByKey } from 'ol/Observable';
+import { EventsKey } from 'ol/events';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -44,6 +46,9 @@ const markerStyle = new Style({
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
+  latestLayer: null as UserLayer | null,
+  measureTooltip: null as Overlay | null,
+  tooltipElement: null as HTMLDivElement | null,
   map: new Map({
     view: new View({
       center: [78.9629, 22.5397],
@@ -120,6 +125,7 @@ const openLayerMap = {
       featureType: featureType,
     };
     this.map.addLayer(layer);
+    this.latestLayer = newLayer;
     return newLayer;
   },
 
@@ -131,28 +137,86 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: 'Circle' | 'Box',
+    type: 'Circle' | 'Box' | 'Polygon' | 'Measure',
     source: VectorSource,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
-    if (type === 'Box') {
-      createBox();
-      this.draw = new Draw({
-        type: 'Circle',
-        source: source,
-        geometryFunction: createBox(),
-      });
-    } else {
-      this.draw = new Draw({
-        type: 'Circle',
-        source,
-        geometryFunction: circleGeomatryFunction,
-      });
+    switch (type) {
+      case 'Box':
+        this.draw = new Draw({
+          type: 'Circle',
+          source: source,
+          geometryFunction: createBox(),
+        });
+        break;
+      case 'Circle':
+        this.draw = new Draw({
+          type: 'Circle',
+          source: source,
+          geometryFunction: circleGeomatryFunction,
+        });
+        break;
+      case 'Polygon':
+        this.draw = new Draw({
+          type: 'Polygon',
+          source: source,
+        });
+        break;
+      case 'Measure':
+        this.draw = new Draw({
+          type: 'LineString',
+          source: source,
+          style: () => measurementStyle(),
+        });
+        break;
+      default:
+        this.removeDrawInteraction();
+        return;
     }
     this.map.addInteraction(this.draw);
     this.drawing = true;
+    if (this.measureTooltip) {
+      this.map.addOverlay(this.measureTooltip);
+    }
+    let drawChangeListener: EventsKey | undefined;
+    this.draw.on('drawstart', (evt) => {
+      const { measureTooltip, tooltipElement } = createMeasureTooltip();
+      this.measureTooltip = measureTooltip;
+      this.tooltipElement = tooltipElement;
+      this.map.addOverlay(measureTooltip);
+      const feature = evt.feature;
+      drawChangeListener = feature
+        .getGeometry()
+        ?.on('change', function (event) {
+          const geom = event.target;
+          let output = '';
+          let tooltipPosition;
+          if (geom instanceof LineString) {
+            output = formatLength(geom);
+            tooltipPosition = geom.getLastCoordinate();
+          } else if (geom instanceof Polygon) {
+            output = formatArea(geom);
+            tooltipPosition = geom.getInteriorPoint().getCoordinates();
+          }
+          if (output[0] !== '0') {
+            tooltipElement.innerHTML = output;
+            measureTooltip.setPosition(tooltipPosition);
+          }
+        });
+    });
     this.draw.on('drawend', (event) => {
+      if (this.tooltipElement) {
+        this.tooltipElement.remove();
+        this.tooltipElement = null;
+      }
+      if (this.measureTooltip) {
+        this.measureTooltip.dispose();
+        this.measureTooltip = null;
+      }
+      if (drawChangeListener) {
+        unByKey(drawChangeListener);
+      }
       if (callback) {
         callback(event);
       }
@@ -198,7 +262,6 @@ const openLayerMap = {
       format: new GeoJson(),
     }) as VectorSource;
     const layerColor = getRandomColor();
-    // const layerColor = '#8d0505';
     const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       source: vectorSource,
@@ -235,17 +298,6 @@ const openLayerMap = {
     const polygon = new Polygon(feature.geometry.coordinates);
     const view = this.map.getView();
     view.fit(polygon, { padding: [100, 100, 100, 100] });
-    // let meanLat = 0;
-    // let meanLng = 0;
-    // for (let i = 0; i < 4; i++) {
-    //   const coord = feature.geometry.coordinates[0][i];
-    //   meanLat += coord[0];
-    //   meanLng += coord[1];
-    // }
-    // const position = [meanLat / 4, meanLng / 4];
-    // // const origin = feature.geometry.coordinates[0][0];
-    // view.setCenter(position);
-    // view.setZoom(8);
   },
 
   distanceBetweenPoints(point1: number[], point2: number[]) {
@@ -336,6 +388,7 @@ const openLayerMap = {
 };
 // basic map interactions
 
+// Utility functions
 function circleGeomatryFunction(
   coordinates: SketchCoordType,
   geometry: SimpleGeometry
@@ -351,6 +404,40 @@ function circleGeomatryFunction(
     geometry.setCoordinates(coord);
   }
   return geometry;
+}
+
+function formatLength(line: LineString) {
+  const length = getLength(line, { projection: 'EPSG:4326' });
+  let output;
+  if (length > 1000) {
+    output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
+  } else {
+    output = Math.round(length * 100) / 100 + ' ' + 'm';
+  }
+  return output;
+}
+
+function formatArea(polygon: Polygon) {
+  const area = getArea(polygon, { projection: 'EPSG:4326' });
+  let output;
+  if (area > 10000) {
+    output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+  } else {
+    output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+  }
+  return output;
+}
+
+function createMeasureTooltip() {
+  const tooltipElement = document.createElement('div');
+  tooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+  const measureTooltip = new Overlay({
+    element: tooltipElement,
+    offset: [0, -5],
+    positioning: 'bottom-center',
+    stopEvent: false,
+  });
+  return { measureTooltip, tooltipElement };
 }
 //creates unique id for layers
 let id = 0;

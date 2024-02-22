@@ -29,7 +29,7 @@ function App() {
         if (authenticated) {
           checkUserProfile();
         } else {
-          setCookie('gsx-ui-sso', '');
+          setCookie(envurls.authCookie, '');
           handleLogin();
         }
       })
@@ -64,7 +64,7 @@ function App() {
   }
 
   function checkLoginStatus() {
-    const cookieResponse = getCookieValue('gsx-ui-sso');
+    const cookieResponse = getCookieValue(envurls.authCookie);
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);
       closeAuthTab();
@@ -80,7 +80,8 @@ function App() {
 
   async function checkUserProfile() {
     try {
-      const response = await axiosAuthClient.get('v1/user/profile');
+      const response = await axiosAuthClient.get('v1/user/roles');
+      // const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
         const user = response.data.results as UserProfile;
         if (user.roles.length > 0) {

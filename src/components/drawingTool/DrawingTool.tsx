@@ -7,9 +7,11 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice';
 import { drawType } from '../../types/UserLayer';
+import { PiPolygon } from 'react-icons/pi';
+import { RxRulerHorizontal } from 'react-icons/rx';
+import { LuMousePointer2 } from 'react-icons/lu';
 
-function DrawingTool({ toolType }: { toolType: drawType }) {
-  //   const [createLayerDialog, setCreateLayerDialog] = useState(false);
+function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
   const dispatch = useDispatch();
   function drawFeature(type: drawType) {
     const { source, ...newLayer } = openLayerMap.createNewLayer('', type);
@@ -21,6 +23,10 @@ function DrawingTool({ toolType }: { toolType: drawType }) {
         }
         firstLayer = false;
       });
+    } else if (type === 'Measure') {
+      openLayerMap.addDrawFeature(type, source, () => {
+        openLayerMap.removeLayer(newLayer.layerId);
+      });
     } else {
       openLayerMap.addDrawFeature(type, source, () => {
         if (firstLayer) {
@@ -28,6 +34,15 @@ function DrawingTool({ toolType }: { toolType: drawType }) {
         }
         firstLayer = false;
       });
+    }
+  }
+  function clearAllEvents() {
+    openLayerMap.removeDrawInteraction();
+    if (
+      openLayerMap.latestLayer &&
+      openLayerMap.latestLayer.featureType === 'Measure'
+    ) {
+      openLayerMap.removeLayer(openLayerMap.latestLayer.layerId);
     }
   }
   return (
@@ -50,6 +65,27 @@ function DrawingTool({ toolType }: { toolType: drawType }) {
         <button onClick={() => drawFeature('Marker')}>
           <div className={styles.btn_icon_container}>
             <SlLocationPin size={25} />
+          </div>
+        </button>
+      )}
+      {toolType === 'Polygon' && (
+        <button onClick={() => drawFeature('Polygon')}>
+          <div className={styles.btn_icon_container}>
+            <PiPolygon size={25} />
+          </div>
+        </button>
+      )}
+      {toolType === 'Measure' && (
+        <button onClick={() => drawFeature('Measure')}>
+          <div className={styles.btn_icon_container}>
+            <RxRulerHorizontal size={25} />
+          </div>
+        </button>
+      )}
+      {toolType === 'Cursor' && (
+        <button onClick={clearAllEvents}>
+          <div className={styles.btn_icon_container}>
+            <LuMousePointer2 size={25} />
           </div>
         </button>
       )}

@@ -39,7 +39,7 @@ function App() {
   }
 
   function setCookie(key: string, val: string) {
-    document.cookie = `${key}=${val};domain=iudx.io`;
+    document.cookie = `${key}=${val};domain=ugix.org.in`;
   }
 
   function handleLogin() {

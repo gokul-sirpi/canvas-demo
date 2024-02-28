@@ -80,7 +80,7 @@ function GsixFeatureTile({
         params: queryParams,
       });
       if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data.results;
+        const geoJsonData: GeoJsonObj = response.data;
         const layerName = resource.label;
         plotGsixLayerData(geoJsonData, layerName);
         dialogCloseTrigger(false);

@@ -97,12 +97,12 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, resource: Resource) {
-    const newLayer = openLayerMap.addGeoJsonFeature(
-      data,
+    const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id
     );
-    openLayerMap.zoomToFit(resource.location);
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
   function cleanUpSideEffects() {

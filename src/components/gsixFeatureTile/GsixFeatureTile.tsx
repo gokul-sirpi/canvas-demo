@@ -69,9 +69,9 @@ function GsixFeatureTile({
   }
   async function getGsixLayerData(accessToken: string) {
     try {
-      const url = envurls.ugixOgcServer + resource.id + '/items';
+      const url =
+        envurls.ugixOgcServer + '/collections/' + resource.id + '/items';
       const queryParams = {
-        f: 'json',
         offset: 1,
         limit: limit,
       };
@@ -92,12 +92,9 @@ function GsixFeatureTile({
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
-    const newLayer = openLayerMap.addGeoJsonFeature(
-      data,
-      layerName,
-      resource.id
-    );
-    openLayerMap.zoomToFit(resource.location);
+    const newLayer = openLayerMap.createNewUgixLayer(layerName, resource.id);
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
   function cleanUpSideEffects() {

@@ -8,6 +8,7 @@ import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog
 import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
 import { Resource } from '../../types/resource';
+import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 
 function Header({
   profileData,
@@ -50,6 +51,11 @@ function Header({
               <DrawingTool toolType="Polygon" />
             </span>
           </TooltipWrapper>
+          <TooltipWrapper content="Line">
+            <span>
+              <DrawingTool toolType="Line" />
+            </span>
+          </TooltipWrapper>
           <TooltipWrapper content="Marker">
             <span>
               <DrawingTool toolType="Marker" />
@@ -62,6 +68,7 @@ function Header({
           </TooltipWrapper>
           <BaseMaps />
           <ExportDataDialog />
+          <ImportDataInput />
         </div>
         <div className={styles.profile_container}>
           <div className={styles.profile_icon}>{userIconName()}</div>

@@ -1,4 +1,10 @@
-export type drawType = 'Circle' | 'Box' | 'Marker' | 'Polygon' | 'Measure';
+export type drawType =
+  | 'Circle'
+  | 'Box'
+  | 'Marker'
+  | 'Polygon'
+  | 'Measure'
+  | 'Line';
 
 export type UserLayer = {
   layerType: 'UserLayer';
@@ -8,5 +14,5 @@ export type UserLayer = {
   visible: boolean;
   isCompleted: boolean;
   layerColor: string;
-  featureType: drawType;
+  featureType: drawType | 'GeometryCollection';
 };

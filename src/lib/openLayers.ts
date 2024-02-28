@@ -15,7 +15,7 @@ import { Style, Icon } from 'ol/style';
 import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
-import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
+import { GeoJsonObj } from '../types/GeojsonType';
 import { styleFunction, measurementStyle } from './layerStyle';
 import { GsixLayer } from '../types/gsixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -59,7 +59,6 @@ const openLayerMap = {
     }),
     controls: [scaleControl, attribution],
     layers: [standardLayer],
-    // target: 'ol-map',
   }),
 
   replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
@@ -98,7 +97,7 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createNewLayer(
+  createDrawableUserLayer(
     layerName: string,
     featureType: drawType
   ): UserLayer & { source: VectorSource } {
@@ -125,6 +124,39 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
+  createNewUserLayer(
+    layerName: string,
+    featureType: drawType | 'GeometryCollection'
+  ) {
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+    const newLayer: UserLayer = {
+      layerType: 'UserLayer',
+      layerName: layerName,
+      layerId,
+      selected: true,
+      visible: true,
+      isCompleted: false,
+      layerColor,
+      featureType: featureType,
+    };
+    return newLayer;
+  },
+  createNewUgixLayer(layerName: string, ugixId: string) {
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+    const newLayer: GsixLayer = {
+      layerType: 'GsixLayer',
+      layerName: layerName,
+      layerId,
+      gsixLayerId: ugixId,
+      selected: true,
+      visible: true,
+      isCompleted: true,
+      layerColor,
+    };
+    return newLayer;
+  },
 
   changeLayerColor(layerId: string, color: string) {
     const layer = this.getLayer(layerId);
@@ -134,7 +166,7 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: 'Circle' | 'Box' | 'Polygon' | 'Measure',
+    type: 'Circle' | 'Box' | 'Polygon' | 'Measure' | 'Line',
     source: VectorSource,
     callback?: (event: DrawEvent) => void
   ) {
@@ -157,6 +189,12 @@ const openLayerMap = {
       case 'Polygon':
         this.draw = new Draw({
           type: 'Polygon',
+          source: source,
+        });
+        break;
+      case 'Line':
+        this.draw = new Draw({
+          type: 'LineString',
           source: source,
         });
         break;
@@ -255,8 +293,8 @@ const openLayerMap = {
 
   addGeoJsonFeature(
     geojsonData: GeoJsonObj,
-    layerName: string,
-    gsixId: string
+    layerId: string,
+    layerColor: string
   ) {
     geojsonData.crs = {
       type: 'name',
@@ -264,15 +302,13 @@ const openLayerMap = {
         name: 'EPSG:4326',
       },
     };
-    for (const feature of geojsonData.features) {
-      feature.type = 'Feature';
-    }
+    // for (const feature of geojsonData.features) {
+    //   feature.type = 'Feature';
+    // }
     const vectorSource = new VectorSource({
       features: new GeoJson().readFeatures(geojsonData),
       format: new GeoJson(),
     }) as VectorSource;
-    const layerColor = getRandomColor();
-    const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
@@ -280,17 +316,6 @@ const openLayerMap = {
     });
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
-    const newLayer: GsixLayer = {
-      layerType: 'GsixLayer',
-      layerName: layerName,
-      layerId,
-      gsixLayerId: gsixId,
-      selected: true,
-      visible: true,
-      isCompleted: true,
-      layerColor,
-    };
-    return newLayer;
   },
 
   toggleLayerVisibility(layerId: string, visible: boolean) {
@@ -304,10 +329,12 @@ const openLayerMap = {
     return this.getLayer(layerId)?.isVisible();
   },
 
-  zoomToFit(feature: JsonFeature) {
-    const polygon = new Polygon(feature.geometry.coordinates);
+  zoomToFit(layerId: string) {
+    const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
-    view.fit(polygon, { padding: [100, 100, 100, 100] });
+    if (extent) {
+      view.fit(extent, { padding: [100, 100, 100, 100] });
+    }
   },
 
   distanceBetweenPoints(point1: number[], point2: number[]) {
@@ -387,7 +414,6 @@ const openLayerMap = {
         }
       }
     });
-    console.log(allGeoData);
     const file = new Blob([JSON.stringify(allGeoData)], {
       type: 'text/json;charset=utf-8',
     });

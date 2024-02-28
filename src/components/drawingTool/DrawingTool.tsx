@@ -7,14 +7,17 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice';
 import { drawType } from '../../types/UserLayer';
-import { PiPolygon } from 'react-icons/pi';
+import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import { RxRulerHorizontal } from 'react-icons/rx';
 import { LuMousePointer2 } from 'react-icons/lu';
 
 function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
   const dispatch = useDispatch();
   function drawFeature(type: drawType) {
-    const { source, ...newLayer } = openLayerMap.createNewLayer('', type);
+    const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
+      '',
+      type
+    );
     let firstLayer = true;
     if (type === 'Marker') {
       openLayerMap.addMarkerFeature(source, () => {
@@ -86,6 +89,13 @@ function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
         <button onClick={clearAllEvents}>
           <div className={styles.btn_icon_container}>
             <LuMousePointer2 size={25} />
+          </div>
+        </button>
+      )}
+      {toolType === 'Line' && (
+        <button onClick={() => drawFeature('Line')}>
+          <div className={styles.btn_icon_container}>
+            <PiLineSegments size={25} />
           </div>
         </button>
       )}

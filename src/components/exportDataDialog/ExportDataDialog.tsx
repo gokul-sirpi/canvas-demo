@@ -1,9 +1,9 @@
-//
-import styles from './styles.module.css';
 import { LiaFileDownloadSolid } from 'react-icons/lia';
-import openLayerMap from '../../lib/openLayers';
 import { ChangeEvent, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
+//
+import styles from './styles.module.css';
+import openLayerMap from '../../lib/openLayers';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 
 function ExportDataDialog() {
@@ -42,12 +42,9 @@ function ExportDataDialog() {
       <Dialog.Root open={dialogOpenStatus}>
         <TooltipWrapper content="Export as">
           <Dialog.Trigger asChild>
-            <button
-              onClick={() => setDialogOpenStatus(true)}
-              aria-label="Update dimensions"
-            >
+            <button onClick={() => setDialogOpenStatus(true)}>
               <div className={styles.btn_icon_container}>
-                <LiaFileDownloadSolid size={25} />
+                <LiaFileDownloadSolid size={24} />
               </div>
             </button>
           </Dialog.Trigger>
@@ -89,7 +86,12 @@ function ExportDataDialog() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-      <a ref={exportAnchor} href=""></a>
+      <a
+        className={styles.invisible_anchor}
+        tabIndex={-1}
+        ref={exportAnchor}
+        href=""
+      ></a>
     </>
   );
 }

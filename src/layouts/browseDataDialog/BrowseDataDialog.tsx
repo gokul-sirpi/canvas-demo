@@ -67,7 +67,10 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
 
   function handleBboxSelection() {
     setIsDialogOpen(false);
-    const bboxLayer = openLayerMap.createNewLayer('bbox-drawer', 'Box');
+    const bboxLayer = openLayerMap.createDrawableUserLayer(
+      'bbox-drawer',
+      'Box'
+    );
     openLayerMap.addDrawFeature('Box', bboxLayer.source, (event) => {
       openLayerMap.removeDrawInteraction();
       openLayerMap.removeLayer(bboxLayer.layerId);

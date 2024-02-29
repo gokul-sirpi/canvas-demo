@@ -24,7 +24,7 @@ function GsixFeatureTile({
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
   plotted: boolean;
 }) {
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);

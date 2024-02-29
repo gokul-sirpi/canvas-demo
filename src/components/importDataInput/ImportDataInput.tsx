@@ -37,6 +37,10 @@ function ImportDataInput() {
         fr.onerror = () => {
           dispatch(updateLoadingState(false));
         };
+      } else {
+        console.log('not correct type');
+
+        dispatch(updateLoadingState(false));
       }
     }
   }

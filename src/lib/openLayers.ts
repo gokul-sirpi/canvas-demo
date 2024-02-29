@@ -403,8 +403,12 @@ const openLayerMap = {
         if (!layer.getVisible()) return;
         const source = layer.getSource() as VectorSource;
         const features = source.getFeatures();
-        const geojsonData = new GeoJson().writeFeaturesObject(features);
-        console.log(geojsonData);
+        const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(
+          features
+        );
+        geojsonData.features.forEach((feature) => {
+          feature.properties = {};
+        });
         if (!allGeoData) {
           allGeoData = geojsonData;
         } else {
@@ -418,7 +422,7 @@ const openLayerMap = {
       type: 'text/json;charset=utf-8',
     });
     anchor.href = URL.createObjectURL(file);
-    anchor.download = `${exportName}.json`;
+    anchor.download = `${exportName}.geojson`;
     anchor.click();
   },
 };

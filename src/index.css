@@ -63,3 +63,10 @@ button {
 .ol-tooltip-static:before {
   border-top-color: #ffcc33;
 }
+/* toastify toast */
+.react-toast {
+  opacity: 0.5;
+  background-color: red;
+  color: #058d05;
+  padding: 0.3rem;
+}

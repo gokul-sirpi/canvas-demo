@@ -13,6 +13,7 @@ import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
+import { emitToast } from '../../lib/toastEmitter.ts';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -124,7 +125,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   function handleFileDrop(event: React.DragEvent) {
     event.preventDefault();
-    console.log('file dropped');
     if (event.dataTransfer.files) {
       const files = event.dataTransfer.files;
       dispatch(updateLoadingState(true));
@@ -143,10 +143,11 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
             dispatch(updateLoadingState(false));
           };
           fr.onerror = () => {
+            emitToast('error', 'Unable to load file');
             dispatch(updateLoadingState(false));
           };
         } else {
-          console.log('not correct type');
+          emitToast('error', 'Invalid file format');
           dispatch(updateLoadingState(false));
         }
       }

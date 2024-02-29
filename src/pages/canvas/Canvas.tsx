@@ -12,11 +12,13 @@ import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
+import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
+import { emitToast } from '../../lib/toastEmitter.ts';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   useEffect(() => {
     if (singleRender.current) return;
@@ -76,9 +78,9 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   async function getGsixLayerData(accessToken: string, resource: Resource) {
     try {
-      const url = envurls.ugixOgcServer + resource.id + '/items';
+      const url =
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
-        f: 'json',
         offset: 1,
         limit: limit,
       };
@@ -121,8 +123,55 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
     return returnVal;
   }
+  function handleFileDrop(event: React.DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer.files) {
+      const files = event.dataTransfer.files;
+      dispatch(updateLoadingState(true));
+      for (const file of files) {
+        const nameSplit = file.name.split('.');
+        const type = nameSplit[nameSplit.length - 1];
+        if (type === 'json' || type === 'geojson') {
+          const fr = new FileReader();
+          fr.readAsText(file);
+          fr.onload = () => {
+            const output = fr.result as string;
+            const parsedData = JSON.parse(output) as GeoJsonObj;
+            nameSplit.pop();
+            const fileName = nameSplit.join();
+            plotGeojsonData(parsedData, fileName);
+            dispatch(updateLoadingState(false));
+          };
+          fr.onerror = () => {
+            emitToast('error', 'Unable to load file');
+            dispatch(updateLoadingState(false));
+          };
+        } else {
+          emitToast('error', 'Invalid file format');
+          dispatch(updateLoadingState(false));
+        }
+      }
+    }
+  }
+  function plotGeojsonData(data: GeoJsonObj, fileName: string) {
+    const newLayer = openLayerMap.createNewUserLayer(
+      fileName,
+      'GeometryCollection'
+    );
+    newLayer.isCompleted = true;
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
+    dispatch(addUserLayer(newLayer));
+  }
+  function handleDragOver(event: React.DragEvent) {
+    event.preventDefault();
+  }
   return (
-    <section className={styles.container}>
+    <section
+      onDrop={handleFileDrop}
+      onDragOver={handleDragOver}
+      className={styles.container}
+    >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
         <Header profileData={profileData} resourceList={allResrources} />

@@ -3,7 +3,7 @@ import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { Resource } from '../../types/resource';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { GeoJsonObj } from '../../types/GeojsonType';
 import { SetStateAction, useState } from 'react';
@@ -13,6 +13,7 @@ import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
+import { emitToast } from '../../lib/toastEmitter';
 
 function GsixFeatureTile({
   resource,
@@ -23,7 +24,7 @@ function GsixFeatureTile({
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
   plotted: boolean;
 }) {
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -62,6 +63,10 @@ function GsixFeatureTile({
       cleanUpSideEffects();
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403 || error.response?.status === 401) {
+          emitToast(
+            'error',
+            'Access denied. Please request access to the data.'
+          );
           setNoAccess(true);
         }
       }
@@ -70,7 +75,7 @@ function GsixFeatureTile({
   async function getGsixLayerData(accessToken: string) {
     try {
       const url =
-        envurls.ugixOgcServer + '/collections/' + resource.id + '/items';
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
         offset: 1,
         limit: limit,
@@ -87,6 +92,9 @@ function GsixFeatureTile({
       }
     } catch (error) {
       console.log(error);
+      if (error instanceof AxiosError) {
+        emitToast('error', 'Unable to access the data. Please try again');
+      }
     } finally {
       cleanUpSideEffects();
     }

@@ -1,11 +1,14 @@
+import { useEffect, useRef, useState } from 'react';
+//
 import Home from './pages/home/Home';
 import Canvas from './pages/canvas/Canvas';
-import { useEffect, useRef, useState } from 'react';
 import keycloak from './lib/keycloak';
 import envurls from './utils/config';
 import { axiosAuthClient } from './lib/axiosConfig';
 import { UserProfile } from './types/UserProfile';
 import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
+import { AxiosError } from 'axios';
+import { emitToast } from './lib/toastEmitter';
 
 function App() {
   const isRun = useRef(false);
@@ -90,15 +93,15 @@ function App() {
         }
       }
     } catch (error) {
-      console.log(error);
+      if (error instanceof AxiosError) {
+        emitToast('error', error.message);
+      }
     }
   }
   return (
-    <>
-      <LoadingWrapper>
-        {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
-      </LoadingWrapper>
-    </>
+    <LoadingWrapper>
+      {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
+    </LoadingWrapper>
   );
 }
 

@@ -75,7 +75,7 @@ function GsixFeatureTile({
   async function getGsixLayerData(accessToken: string) {
     try {
       const url =
-        envurls.ugixOgcServer + '/collections/' + resource.id + '/items';
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
         offset: 1,
         limit: limit,

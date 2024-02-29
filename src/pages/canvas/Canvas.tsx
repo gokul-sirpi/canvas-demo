@@ -18,7 +18,7 @@ import { emitToast } from '../../lib/toastEmitter.ts';
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   useEffect(() => {
     if (singleRender.current) return;
@@ -78,9 +78,9 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   async function getGsixLayerData(accessToken: string, resource: Resource) {
     try {
-      const url = envurls.ugixOgcServer + resource.id + '/items';
+      const url =
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
-        f: 'json',
         offset: 1,
         limit: limit,
       };

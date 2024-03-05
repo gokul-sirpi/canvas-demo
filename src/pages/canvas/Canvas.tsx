@@ -41,19 +41,18 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     const wishList = getCookieValue('resWishlist');
     console.log(wishList);
     if (wishList) {
-      const parsedList = JSON.parse(wishList);
+      const parsedList = wishList.split(',');
       if (Array.isArray(parsedList)) {
         for (const id of parsedList) {
           for (const resource of resourceList)
             if (resource.id === id) {
-              handleGsixLayerAddition(resource);
-              continue;
+              handleUgixLayerAddition(resource);
             }
         }
       }
     }
   }
-  async function handleGsixLayerAddition(resource: Resource) {
+  async function handleUgixLayerAddition(resource: Resource) {
     dispatch(updateLoadingState(true));
     try {
       const body = {
@@ -68,7 +67,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       const response = await axiosAuthClient.post('v1/token', body);
       if (response.status === 200) {
         if (response.data.title === 'Token created') {
-          getGsixLayerData(response.data.results.accessToken, resource);
+          getUgixLayerData(response.data.results.accessToken, resource);
         }
       }
     } catch (error) {
@@ -76,7 +75,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       cleanUpSideEffects();
     }
   }
-  async function getGsixLayerData(accessToken: string, resource: Resource) {
+  async function getUgixLayerData(accessToken: string, resource: Resource) {
     try {
       const url =
         envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
@@ -90,7 +89,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       });
       if (response.status === 200) {
         const geoJsonData: GeoJsonObj = response.data.results;
-        plotGsixLayerData(geoJsonData, resource);
+        plotUgixLayerData(geoJsonData, resource);
       }
     } catch (error) {
       console.log(error);
@@ -98,7 +97,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       cleanUpSideEffects();
     }
   }
-  function plotGsixLayerData(data: GeoJsonObj, resource: Resource) {
+  function plotUgixLayerData(data: GeoJsonObj, resource: Resource) {
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id

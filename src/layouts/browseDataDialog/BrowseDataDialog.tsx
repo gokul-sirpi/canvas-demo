@@ -71,15 +71,20 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
       'bbox-drawer',
       'Box'
     );
-    openLayerMap.addDrawFeature('Box', bboxLayer.source, (event) => {
-      openLayerMap.removeDrawInteraction();
-      openLayerMap.removeLayer(bboxLayer.layerId);
-      const extent = event.feature.getGeometry()?.getExtent();
-      if (extent) {
-        getIntersectingResources(extent);
+    openLayerMap.addDrawFeature(
+      'Box',
+      bboxLayer.source,
+      bboxLayer.style,
+      (event) => {
+        openLayerMap.removeDrawInteraction();
+        openLayerMap.removeLayer(bboxLayer.layerId);
+        const extent = event.feature.getGeometry()?.getExtent();
+        if (extent) {
+          getIntersectingResources(extent);
+        }
+        setIsDialogOpen(true);
       }
-      setIsDialogOpen(true);
-    });
+    );
   }
   function getIntersectingResources(extent: Extent) {
     const filtered = [];

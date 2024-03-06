@@ -12,7 +12,7 @@ import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
-import { ogcLayerStyle } from '../../lib/layerStyle';
+import { basicBaseLayerStyle } from '../../lib/layerStyle';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
@@ -30,7 +30,7 @@ function BaseMaps() {
         }) as VectorSource;
         const newOgcLayer = new VectorImageLayer({
           source: vectorSource,
-          style: ogcLayerStyle('#99aabb'),
+          style: basicBaseLayerStyle('#99aabb'),
           declutter: true,
         });
         ogcLayer.current = newOgcLayer;

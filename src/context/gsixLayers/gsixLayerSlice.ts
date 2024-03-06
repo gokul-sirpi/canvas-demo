@@ -1,8 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { GsixLayer } from '../../types/gsixLayers';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { UgixLayer } from '../../types/UgixLayers';
+import { FeatureStyle } from '../../types/FeatureStyle';
 
 type GsixLayerState = {
-  layers: GsixLayer[];
+  layers: UgixLayer[];
 };
 
 const initialState: GsixLayerState = {
@@ -24,10 +25,18 @@ export const gsixLayerSlice = createSlice({
         return layer.layerId !== payload;
       });
     },
-    updateGsixLayerColor(state, action) {
+    updateGsixLayerColor(
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        newColor: string;
+        style: FeatureStyle;
+      }>
+    ) {
       const updatedLayers = state.layers.map((layer) => {
         if (layer.layerId === action.payload.layerId) {
           layer.layerColor = action.payload.newColor;
+          layer.style = action.payload.style;
         }
         return layer;
       });
@@ -36,6 +45,10 @@ export const gsixLayerSlice = createSlice({
   },
 });
 
-export const { addGsixLayer, deleteGsixLayer, updateGsixLayer, updateGsixLayerColor } =
-  gsixLayerSlice.actions;
+export const {
+  addGsixLayer,
+  deleteGsixLayer,
+  updateGsixLayer,
+  updateGsixLayerColor,
+} = gsixLayerSlice.actions;
 export default gsixLayerSlice.reducer;

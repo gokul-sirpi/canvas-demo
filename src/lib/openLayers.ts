@@ -16,13 +16,19 @@ import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
-import { styleFunction, measurementStyle } from './layerStyle';
-import { GsixLayer } from '../types/gsixLayers';
+import {
+  styleFunction,
+  measurementStyle,
+  createFeatureStyle,
+  featureUniqueStyle,
+} from './layerStyle';
+import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
 import { circular } from 'ol/geom/Polygon';
 import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
+import { FeatureStyle } from '../types/FeatureStyle';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -60,7 +66,6 @@ const openLayerMap = {
     controls: [scaleControl, attribution],
     layers: [standardLayer],
   }),
-
   replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
     this.map.getLayers().removeAt(0);
     this.map.getLayers().insertAt(0, newLayers);
@@ -107,6 +112,7 @@ const openLayerMap = {
       source: source,
       style: (feature) => styleFunction(feature, featureColor),
     });
+    const featureStyle = createFeatureStyle(featureColor);
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
     const newLayer = {
@@ -119,6 +125,8 @@ const openLayerMap = {
       isCompleted: false,
       layerColor: featureColor,
       featureType: featureType,
+      style: featureStyle,
+      editable: true,
     };
     this.map.addLayer(layer);
     this.latestLayer = newLayer;
@@ -129,6 +137,7 @@ const openLayerMap = {
     featureType: drawType | 'GeometryCollection'
   ) {
     const layerColor = getRandomColor();
+    const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const newLayer: UserLayer = {
       layerType: 'UserLayer',
@@ -139,14 +148,17 @@ const openLayerMap = {
       isCompleted: false,
       layerColor,
       featureType: featureType,
+      style: featureStyle,
+      editable: true,
     };
     return newLayer;
   },
   createNewUgixLayer(layerName: string, ugixId: string) {
     const layerColor = getRandomColor();
+    const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
-    const newLayer: GsixLayer = {
-      layerType: 'GsixLayer',
+    const newLayer: UgixLayer = {
+      layerType: 'UgixLayer',
       layerName: layerName,
       layerId,
       gsixLayerId: ugixId,
@@ -154,6 +166,7 @@ const openLayerMap = {
       visible: true,
       isCompleted: true,
       layerColor,
+      style: featureStyle,
     };
     return newLayer;
   },
@@ -163,11 +176,20 @@ const openLayerMap = {
     if (layer) {
       layer.setStyle((feature) => styleFunction(feature, color));
     }
+    const featureStyle = createFeatureStyle(color);
+    const source = layer?.getSource();
+    if (source) {
+      source.getFeatures().forEach((feature) => {
+        feature.setProperties(featureStyle);
+      });
+    }
+    return featureStyle;
   },
 
   addDrawFeature(
     type: 'Circle' | 'Box' | 'Polygon' | 'Measure' | 'Line',
     source: VectorSource,
+    featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
@@ -241,6 +263,7 @@ const openLayerMap = {
         });
     });
     this.draw.on('drawend', (event) => {
+      event.feature.setProperties(featureStyle);
       if (this.tooltipElement) {
         this.tooltipElement.remove();
         this.tooltipElement = null;
@@ -294,7 +317,8 @@ const openLayerMap = {
   addGeoJsonFeature(
     geojsonData: GeoJsonObj,
     layerId: string,
-    layerColor: string
+    layerColor: string,
+    style: FeatureStyle
   ) {
     geojsonData.crs = {
       type: 'name',
@@ -302,11 +326,9 @@ const openLayerMap = {
         name: 'EPSG:4326',
       },
     };
-    // for (const feature of geojsonData.features) {
-    //   feature.type = 'Feature';
-    // }
+    const features = new GeoJson().readFeatures(geojsonData);
     const vectorSource = new VectorSource({
-      features: new GeoJson().readFeatures(geojsonData),
+      features: features,
       format: new GeoJson(),
     }) as VectorSource;
     const vectorLayer = new VectorLayer({
@@ -315,6 +337,59 @@ const openLayerMap = {
       declutter: true,
     });
     vectorLayer.set('layer-id', layerId);
+    vectorSource.getFeatures().forEach((feature) => {
+      feature.setProperties(style);
+    });
+    this.addLayer(vectorLayer);
+  },
+  addImportedGeojsonData(
+    geojsonData: GeoJsonObj,
+    layerId: string,
+    layerColor: string,
+    style: FeatureStyle
+  ) {
+    geojsonData.crs = {
+      type: 'name',
+      properties: {
+        name: 'EPSG:4326',
+      },
+    };
+    const features = new GeoJson().readFeatures(geojsonData);
+    const newStyleArr: FeatureStyle[] = [];
+    features.forEach((feature) => {
+      const properties = feature.getProperties();
+      const newStyle = {
+        fill: properties.fill || style.fill,
+        'fill-opacity': properties['fill-opacity'] || style['fill-opacity'],
+        stroke: properties.stroke || style.stroke,
+        'stroke-opacity':
+          properties['stroke-opacity'] || style['stroke-opacity'],
+        'stroke-width': properties['stroke-width'] || style['stroke-width'],
+      };
+      newStyleArr.push(newStyle);
+    });
+    const vectorSource = new VectorSource({
+      features: features,
+      format: new GeoJson(),
+    }) as VectorSource;
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: (feature) => styleFunction(feature, layerColor),
+      declutter: true,
+    });
+    vectorLayer.set('layer-id', layerId);
+    vectorSource.getFeatures().forEach((feature, index) => {
+      const newStyle = newStyleArr[index];
+      const newStyleobj = featureUniqueStyle(
+        newStyle.stroke,
+        newStyle.fill,
+        newStyle['stroke-opacity'],
+        newStyle['stroke-width'],
+        newStyle['fill-opacity']
+      );
+      feature.setStyle(newStyleobj);
+      feature.setProperties(newStyle);
+    });
     this.addLayer(vectorLayer);
   },
 
@@ -407,7 +482,9 @@ const openLayerMap = {
           features
         );
         geojsonData.features.forEach((feature) => {
-          feature.properties = {};
+          if (!feature.properties) {
+            feature.properties = {};
+          }
         });
         if (!allGeoData) {
           allGeoData = geojsonData;

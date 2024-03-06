@@ -101,7 +101,12 @@ function GsixFeatureTile({
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
     const newLayer = openLayerMap.createNewUgixLayer(layerName, resource.id);
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.addGeoJsonFeature(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }

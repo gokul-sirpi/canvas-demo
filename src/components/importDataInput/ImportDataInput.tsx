@@ -51,7 +51,13 @@ function ImportDataInput() {
       'GeometryCollection'
     );
     newLayer.isCompleted = true;
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    newLayer.editable = false;
+    openLayerMap.addImportedGeojsonData(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addUserLayer(newLayer));
   }

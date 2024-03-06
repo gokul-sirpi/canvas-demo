@@ -88,7 +88,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         params: queryParams,
       });
       if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data.results;
+        const geoJsonData: GeoJsonObj = response.data;
         plotUgixLayerData(geoJsonData, resource);
       }
     } catch (error) {
@@ -102,7 +102,12 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       resource.label,
       resource.id
     );
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.addGeoJsonFeature(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
@@ -158,7 +163,13 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       'GeometryCollection'
     );
     newLayer.isCompleted = true;
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    newLayer.editable = false;
+    openLayerMap.addImportedGeojsonData(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addUserLayer(newLayer));
   }

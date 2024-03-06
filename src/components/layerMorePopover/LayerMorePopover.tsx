@@ -7,22 +7,22 @@ import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import { deleteGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
 import { UserLayer } from '../../types/UserLayer';
-import { GsixLayer } from '../../types/gsixLayers';
+import { UgixLayer } from '../../types/UgixLayers';
 import { deleteUserLayer } from '../../context/userLayers/userLayerSlice';
 import envurls from '../../utils/config';
 
-function LayerMorePopover({ layer }: { layer: UserLayer | GsixLayer }) {
+function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const dispatch = useDispatch();
   function deleteLayer() {
     if (layer.layerType === 'UserLayer') {
       dispatch(deleteUserLayer(layer.layerId));
-    } else if (layer.layerType === 'GsixLayer') {
+    } else if (layer.layerType === 'UgixLayer') {
       dispatch(deleteGsixLayer(layer.layerId));
     }
     openLayerMap.removeLayer(layer.layerId);
   }
   function handleInfoOpen() {
-    if (layer.layerType === 'GsixLayer') {
+    if (layer.layerType === 'UgixLayer') {
       const groupId = layer.gsixLayerId.split('/').slice(0, -1).join('-');
       const path = envurls.ugixCatalogue + 'dataset/' + groupId;
       window.open(path, '_blank');
@@ -47,7 +47,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | GsixLayer }) {
                 Delete
               </button>
             </div>
-            {layer.layerType === 'GsixLayer' && (
+            {layer.layerType === 'UgixLayer' && (
               <div>
                 <button onClick={handleInfoOpen} className={styles.popover_btn}>
                   About

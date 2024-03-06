@@ -12,7 +12,7 @@ const image = new CircleStyle({
 const whiteFill = '#ffffff55';
 
 //returns different style for different types of feature eg-polygon,point
-function styleFunction(feature: FeatureLike, color: string) {
+export function styleFunction(feature: FeatureLike, color: string) {
   const type = feature.getGeometry()?.getType();
   let style: Style;
   if (type === 'LineString' || type === 'MultiLineString') {
@@ -47,7 +47,7 @@ function styleFunction(feature: FeatureLike, color: string) {
       }),
     });
   } else {
-    style = style = new Style({
+    style = new Style({
       fill: new Fill({
         color: color + opacity,
       }),
@@ -60,4 +60,34 @@ function styleFunction(feature: FeatureLike, color: string) {
   return style;
 }
 
-export default styleFunction;
+export function measurementStyle() {
+  const style = new Style({
+    stroke: new Stroke({
+      width: 2,
+      lineDash: [10, 10],
+    }),
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({
+        color: '#ffffff44',
+      }),
+      stroke: new Stroke({
+        width: 1,
+      }),
+    }),
+  });
+  return style;
+}
+
+export function ogcLayerStyle(color: string) {
+  const style = new Style({
+    stroke: new Stroke({
+      width: 2,
+      color: color,
+    }),
+    fill: new Fill({
+      color: color + '33',
+    }),
+  });
+  return style;
+}

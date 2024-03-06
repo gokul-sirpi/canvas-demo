@@ -91,3 +91,6 @@
 .option_container > button:hover {
   background-color: var(--color-accent);
 }
+.invisible_anchor {
+  display: none;
+}

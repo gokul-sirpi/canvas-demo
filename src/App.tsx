@@ -1,11 +1,14 @@
+import { useEffect, useRef, useState } from 'react';
+//
 import Home from './pages/home/Home';
 import Canvas from './pages/canvas/Canvas';
-import { useEffect, useRef, useState } from 'react';
 import keycloak from './lib/keycloak';
 import envurls from './utils/config';
 import { axiosAuthClient } from './lib/axiosConfig';
 import { UserProfile } from './types/UserProfile';
 import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
+import { AxiosError } from 'axios';
+import { emitToast } from './lib/toastEmitter';
 
 function App() {
   const isRun = useRef(false);
@@ -29,7 +32,7 @@ function App() {
         if (authenticated) {
           checkUserProfile();
         } else {
-          setCookie('gsx-ui-sso', '');
+          setCookie(envurls.authCookie, '');
           handleLogin();
         }
       })
@@ -39,7 +42,7 @@ function App() {
   }
 
   function setCookie(key: string, val: string) {
-    document.cookie = `${key}=${val};domain=iudx.io`;
+    document.cookie = `${key}=${val};domain=ugix.org.in`;
   }
 
   function handleLogin() {
@@ -64,7 +67,7 @@ function App() {
   }
 
   function checkLoginStatus() {
-    const cookieResponse = getCookieValue('gsx-ui-sso');
+    const cookieResponse = getCookieValue(envurls.authCookie);
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);
       closeAuthTab();
@@ -80,7 +83,8 @@ function App() {
 
   async function checkUserProfile() {
     try {
-      const response = await axiosAuthClient.get('v1/user/profile');
+      const response = await axiosAuthClient.get('v1/user/roles');
+      // const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
         const user = response.data.results as UserProfile;
         if (user.roles.length > 0) {
@@ -89,15 +93,15 @@ function App() {
         }
       }
     } catch (error) {
-      console.log(error);
+      if (error instanceof AxiosError) {
+        emitToast('error', error.message);
+      }
     }
   }
   return (
-    <>
-      <LoadingWrapper>
-        {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
-      </LoadingWrapper>
-    </>
+    <LoadingWrapper>
+      {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
+    </LoadingWrapper>
   );
 }
 

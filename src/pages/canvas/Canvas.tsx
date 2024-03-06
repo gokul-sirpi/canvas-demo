@@ -12,11 +12,13 @@ import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
+import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
+import { emitToast } from '../../lib/toastEmitter.ts';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   useEffect(() => {
     if (singleRender.current) return;
@@ -39,19 +41,18 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     const wishList = getCookieValue('resWishlist');
     console.log(wishList);
     if (wishList) {
-      const parsedList = JSON.parse(wishList);
+      const parsedList = wishList.split(',');
       if (Array.isArray(parsedList)) {
         for (const id of parsedList) {
           for (const resource of resourceList)
             if (resource.id === id) {
-              handleGsixLayerAddition(resource);
-              continue;
+              handleUgixLayerAddition(resource);
             }
         }
       }
     }
   }
-  async function handleGsixLayerAddition(resource: Resource) {
+  async function handleUgixLayerAddition(resource: Resource) {
     dispatch(updateLoadingState(true));
     try {
       const body = {
@@ -59,14 +60,14 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         itemType: 'resource',
         role: 'consumer',
       };
-      if (resource.access_status === 'Public') {
+      if (resource.accessPolicy === 'OPEN') {
         body.itemId = 'rs.iudx.io';
         body.itemType = 'resource_server';
       }
       const response = await axiosAuthClient.post('v1/token', body);
       if (response.status === 200) {
         if (response.data.title === 'Token created') {
-          getGsixLayerData(response.data.results.accessToken, resource);
+          getUgixLayerData(response.data.results.accessToken, resource);
         }
       }
     } catch (error) {
@@ -74,11 +75,11 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       cleanUpSideEffects();
     }
   }
-  async function getGsixLayerData(accessToken: string, resource: Resource) {
+  async function getUgixLayerData(accessToken: string, resource: Resource) {
     try {
-      const url = envurls.ugixOgcServer + resource.id + '/items';
+      const url =
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
-        f: 'json',
         offset: 1,
         limit: limit,
       };
@@ -88,7 +89,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       });
       if (response.status === 200) {
         const geoJsonData: GeoJsonObj = response.data.results;
-        plotGsixLayerData(geoJsonData, resource);
+        plotUgixLayerData(geoJsonData, resource);
       }
     } catch (error) {
       console.log(error);
@@ -96,13 +97,13 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       cleanUpSideEffects();
     }
   }
-  function plotGsixLayerData(data: GeoJsonObj, resource: Resource) {
-    const newLayer = openLayerMap.addGeoJsonFeature(
-      data,
+  function plotUgixLayerData(data: GeoJsonObj, resource: Resource) {
+    const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id
     );
-    openLayerMap.zoomToFit(resource.location);
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
   function cleanUpSideEffects() {
@@ -121,8 +122,55 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
     return returnVal;
   }
+  function handleFileDrop(event: React.DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer.files) {
+      const files = event.dataTransfer.files;
+      dispatch(updateLoadingState(true));
+      for (const file of files) {
+        const nameSplit = file.name.split('.');
+        const type = nameSplit[nameSplit.length - 1];
+        if (type === 'json' || type === 'geojson') {
+          const fr = new FileReader();
+          fr.readAsText(file);
+          fr.onload = () => {
+            const output = fr.result as string;
+            const parsedData = JSON.parse(output) as GeoJsonObj;
+            nameSplit.pop();
+            const fileName = nameSplit.join();
+            plotGeojsonData(parsedData, fileName);
+            dispatch(updateLoadingState(false));
+          };
+          fr.onerror = () => {
+            emitToast('error', 'Unable to load file');
+            dispatch(updateLoadingState(false));
+          };
+        } else {
+          emitToast('error', 'Invalid file format');
+          dispatch(updateLoadingState(false));
+        }
+      }
+    }
+  }
+  function plotGeojsonData(data: GeoJsonObj, fileName: string) {
+    const newLayer = openLayerMap.createNewUserLayer(
+      fileName,
+      'GeometryCollection'
+    );
+    newLayer.isCompleted = true;
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
+    dispatch(addUserLayer(newLayer));
+  }
+  function handleDragOver(event: React.DragEvent) {
+    event.preventDefault();
+  }
   return (
-    <section className={styles.container}>
+    <section
+      onDrop={handleFileDrop}
+      onDragOver={handleDragOver}
+      className={styles.container}
+    >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
         <Header profileData={profileData} resourceList={allResrources} />

@@ -8,6 +8,7 @@ import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog
 import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
 import { Resource } from '../../types/resource';
+import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 
 function Header({
   profileData,
@@ -34,7 +35,7 @@ function Header({
               <BrowseDataDialog resourceList={resourceList} />
             </span>
           </TooltipWrapper>
-
+          <DrawingTool toolType="Cursor" />
           <TooltipWrapper content="Circle">
             <span>
               <DrawingTool toolType="Circle" />
@@ -45,13 +46,29 @@ function Header({
               <DrawingTool toolType="Box" />
             </span>
           </TooltipWrapper>
+          <TooltipWrapper content="Polygon">
+            <span>
+              <DrawingTool toolType="Polygon" />
+            </span>
+          </TooltipWrapper>
+          <TooltipWrapper content="Line">
+            <span>
+              <DrawingTool toolType="Line" />
+            </span>
+          </TooltipWrapper>
           <TooltipWrapper content="Marker">
             <span>
               <DrawingTool toolType="Marker" />
             </span>
           </TooltipWrapper>
+          <TooltipWrapper content="Measure">
+            <span>
+              <DrawingTool toolType="Measure" />
+            </span>
+          </TooltipWrapper>
           <BaseMaps />
           <ExportDataDialog />
+          <ImportDataInput />
         </div>
         <div className={styles.profile_container}>
           <div className={styles.profile_icon}>{userIconName()}</div>

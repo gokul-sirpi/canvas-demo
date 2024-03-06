@@ -1,10 +1,9 @@
 import { FaLock, FaUnlock } from 'react-icons/fa';
-import soiImg from '../../assets/images/soi-logo.png';
 import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { Resource } from '../../types/resource';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import openLayerMap from '../../lib/openLayers';
 import { GeoJsonObj } from '../../types/GeojsonType';
 import { SetStateAction, useState } from 'react';
@@ -14,6 +13,7 @@ import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
+import { emitToast } from '../../lib/toastEmitter';
 
 function GsixFeatureTile({
   resource,
@@ -24,13 +24,13 @@ function GsixFeatureTile({
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
   plotted: boolean;
 }) {
-  const limit = 900;
+  const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
 
   function getinfoLink() {
-    const groupId = resource.id.split('/').slice(0, -1).join('-');
+    const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
     return path;
   }
@@ -48,7 +48,7 @@ function GsixFeatureTile({
         itemType: 'resource',
         role: 'consumer',
       };
-      if (resource.access_status === 'Public') {
+      if (resource.accessPolicy === 'OPEN') {
         body.itemId = 'rs.iudx.io';
         body.itemType = 'resource_server';
       }
@@ -63,6 +63,10 @@ function GsixFeatureTile({
       cleanUpSideEffects();
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403 || error.response?.status === 401) {
+          emitToast(
+            'error',
+            'Access denied. Please request access to the data.'
+          );
           setNoAccess(true);
         }
       }
@@ -70,9 +74,9 @@ function GsixFeatureTile({
   }
   async function getGsixLayerData(accessToken: string) {
     try {
-      const url = envurls.ugixOgcServer + resource.id + '/items';
+      const url =
+        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
       const queryParams = {
-        f: 'json',
         offset: 1,
         limit: limit,
       };
@@ -81,24 +85,24 @@ function GsixFeatureTile({
         params: queryParams,
       });
       if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data.results;
+        const geoJsonData: GeoJsonObj = response.data;
         const layerName = resource.label;
         plotGsixLayerData(geoJsonData, layerName);
         dialogCloseTrigger(false);
       }
     } catch (error) {
       console.log(error);
+      if (error instanceof AxiosError) {
+        emitToast('error', 'Unable to access the data. Please try again');
+      }
     } finally {
       cleanUpSideEffects();
     }
   }
   function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
-    const newLayer = openLayerMap.addGeoJsonFeature(
-      data,
-      layerName,
-      resource.id
-    );
-    openLayerMap.zoomToFit(resource.location);
+    const newLayer = openLayerMap.createNewUgixLayer(layerName, resource.id);
+    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
   function cleanUpSideEffects() {
@@ -109,21 +113,21 @@ function GsixFeatureTile({
     <div className={styles.tile_container}>
       {/* content */}
       <div className={styles.tile_description_container}>
-        <div className={styles.tile_img_container}>
+        {/* <div className={styles.tile_img_container}>
           <img src={soiImg} alt="Survey Of India" className={styles.soi_img} />
-        </div>
+        </div> */}
         <TooltipWrapper content={resource.label}>
           <div className={styles.title_container}>
             <h2 className={styles.tile_title}>{resource.label}</h2>
           </div>
         </TooltipWrapper>
-        {resource.access_status === 'Public' ? (
+        {resource.accessPolicy === 'OPEN' ? (
           <div className={styles.badge}>
-            <FaUnlock /> {resource.access_status}
+            <FaUnlock /> Public
           </div>
         ) : (
           <div className={`${styles.badge} ${styles.badge_private}`}>
-            <FaLock /> {resource.access_status}
+            <FaLock /> Private
           </div>
         )}
       </div>

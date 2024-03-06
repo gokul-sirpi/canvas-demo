@@ -1,4 +1,4 @@
-import { Feature, Map, View } from 'ol';
+import { Feature, Map, Overlay, View } from 'ol';
 import { drawType } from '../types/UserLayer';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
@@ -12,14 +12,17 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorImage';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { Point, Polygon, SimpleGeometry } from 'ol/geom';
+import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
-import { GeoJsonObj, JsonFeature } from '../types/GeojsonType';
-import styleFunction from './layerStyle';
+import { GeoJsonObj } from '../types/GeojsonType';
+import { styleFunction, measurementStyle } from './layerStyle';
 import { GsixLayer } from '../types/gsixLayers';
-import { getDistance } from 'ol/sphere.js';
+import { getArea, getDistance, getLength } from 'ol/sphere.js';
 import { circular } from 'ol/geom/Polygon';
+import { unByKey } from 'ol/Observable';
+import { EventsKey } from 'ol/events';
+import VectorImageLayer from 'ol/layer/VectorImage';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -44,6 +47,9 @@ const markerStyle = new Style({
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
+  latestLayer: null as UserLayer | null,
+  measureTooltip: null as Overlay | null,
+  tooltipElement: null as HTMLDivElement | null,
   map: new Map({
     view: new View({
       center: [78.9629, 22.5397],
@@ -53,15 +59,10 @@ const openLayerMap = {
     }),
     controls: [scaleControl, attribution],
     layers: [standardLayer],
-    // target: 'ol-map',
   }),
 
-  replaceBasemap(newLayers: TileLayer<OSM>) {
-    this.map.getLayers().forEach((layer) => {
-      if (layer instanceof TileLayer) {
-        this.map.removeLayer(layer);
-      }
-    });
+  replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+    this.map.getLayers().removeAt(0);
     this.map.getLayers().insertAt(0, newLayers);
   },
 
@@ -96,7 +97,7 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createNewLayer(
+  createDrawableUserLayer(
     layerName: string,
     featureType: drawType
   ): UserLayer & { source: VectorSource } {
@@ -120,6 +121,40 @@ const openLayerMap = {
       featureType: featureType,
     };
     this.map.addLayer(layer);
+    this.latestLayer = newLayer;
+    return newLayer;
+  },
+  createNewUserLayer(
+    layerName: string,
+    featureType: drawType | 'GeometryCollection'
+  ) {
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+    const newLayer: UserLayer = {
+      layerType: 'UserLayer',
+      layerName: layerName,
+      layerId,
+      selected: true,
+      visible: true,
+      isCompleted: false,
+      layerColor,
+      featureType: featureType,
+    };
+    return newLayer;
+  },
+  createNewUgixLayer(layerName: string, ugixId: string) {
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+    const newLayer: GsixLayer = {
+      layerType: 'GsixLayer',
+      layerName: layerName,
+      layerId,
+      gsixLayerId: ugixId,
+      selected: true,
+      visible: true,
+      isCompleted: true,
+      layerColor,
+    };
     return newLayer;
   },
 
@@ -131,30 +166,107 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: 'Circle' | 'Box',
+    type: 'Circle' | 'Box' | 'Polygon' | 'Measure' | 'Line',
     source: VectorSource,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
-    if (type === 'Box') {
-      createBox();
-      this.draw = new Draw({
-        type: 'Circle',
-        source: source,
-        geometryFunction: createBox(),
-      });
-    } else {
-      this.draw = new Draw({
-        type: 'Circle',
-        source,
-        geometryFunction: circleGeomatryFunction,
-      });
+    switch (type) {
+      case 'Box':
+        this.draw = new Draw({
+          type: 'Circle',
+          source: source,
+          geometryFunction: createBox(),
+        });
+        break;
+      case 'Circle':
+        this.draw = new Draw({
+          type: 'Circle',
+          source: source,
+          geometryFunction: circleGeomatryFunction,
+        });
+        break;
+      case 'Polygon':
+        this.draw = new Draw({
+          type: 'Polygon',
+          source: source,
+        });
+        break;
+      case 'Line':
+        this.draw = new Draw({
+          type: 'LineString',
+          source: source,
+        });
+        break;
+      case 'Measure':
+        this.draw = new Draw({
+          type: 'LineString',
+          source: source,
+          style: () => measurementStyle(),
+        });
+        break;
+      default:
+        this.removeDrawInteraction();
+        return;
     }
     this.map.addInteraction(this.draw);
     this.drawing = true;
+    if (this.measureTooltip) {
+      this.map.addOverlay(this.measureTooltip);
+    }
+    let drawChangeListener: EventsKey | undefined;
+    this.draw.on('drawstart', (evt) => {
+      const { measureTooltip, tooltipElement } = createMeasureTooltip();
+      this.measureTooltip = measureTooltip;
+      this.tooltipElement = tooltipElement;
+      this.map.addOverlay(measureTooltip);
+      const feature = evt.feature;
+      drawChangeListener = feature
+        .getGeometry()
+        ?.on('change', function (event) {
+          const geom = event.target;
+          let output = '';
+          let tooltipPosition;
+          if (geom instanceof LineString) {
+            output = formatLength(geom);
+            tooltipPosition = geom.getLastCoordinate();
+          } else if (geom instanceof Polygon) {
+            output = formatArea(geom);
+            tooltipPosition = geom.getInteriorPoint().getCoordinates();
+          }
+          if (output[0] !== '0') {
+            tooltipElement.innerHTML = output;
+            measureTooltip.setPosition(tooltipPosition);
+          }
+        });
+    });
     this.draw.on('drawend', (event) => {
+      if (this.tooltipElement) {
+        this.tooltipElement.remove();
+        this.tooltipElement = null;
+      }
+      if (this.measureTooltip) {
+        this.measureTooltip.dispose();
+        this.measureTooltip = null;
+      }
+      if (drawChangeListener) {
+        unByKey(drawChangeListener);
+      }
       if (callback) {
         callback(event);
+      }
+    });
+    this.draw.on('drawabort', () => {
+      if (this.tooltipElement) {
+        this.tooltipElement.remove();
+        this.tooltipElement = null;
+      }
+      if (this.measureTooltip) {
+        this.measureTooltip.dispose();
+        this.measureTooltip = null;
+      }
+      if (drawChangeListener) {
+        unByKey(drawChangeListener);
       }
     });
   },
@@ -181,8 +293,8 @@ const openLayerMap = {
 
   addGeoJsonFeature(
     geojsonData: GeoJsonObj,
-    layerName: string,
-    gsixId: string
+    layerId: string,
+    layerColor: string
   ) {
     geojsonData.crs = {
       type: 'name',
@@ -190,16 +302,13 @@ const openLayerMap = {
         name: 'EPSG:4326',
       },
     };
-    for (const feature of geojsonData.features) {
-      feature.type = 'Feature';
-    }
+    // for (const feature of geojsonData.features) {
+    //   feature.type = 'Feature';
+    // }
     const vectorSource = new VectorSource({
       features: new GeoJson().readFeatures(geojsonData),
       format: new GeoJson(),
     }) as VectorSource;
-    const layerColor = getRandomColor();
-    // const layerColor = '#8d0505';
-    const layerId = createUniqueId();
     const vectorLayer = new VectorLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
@@ -207,17 +316,6 @@ const openLayerMap = {
     });
     vectorLayer.set('layer-id', layerId);
     this.addLayer(vectorLayer);
-    const newLayer: GsixLayer = {
-      layerType: 'GsixLayer',
-      layerName: layerName,
-      layerId,
-      gsixLayerId: gsixId,
-      selected: true,
-      visible: true,
-      isCompleted: true,
-      layerColor,
-    };
-    return newLayer;
   },
 
   toggleLayerVisibility(layerId: string, visible: boolean) {
@@ -231,21 +329,12 @@ const openLayerMap = {
     return this.getLayer(layerId)?.isVisible();
   },
 
-  zoomToFit(feature: JsonFeature) {
-    const polygon = new Polygon(feature.geometry.coordinates);
+  zoomToFit(layerId: string) {
+    const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
-    view.fit(polygon, { padding: [100, 100, 100, 100] });
-    // let meanLat = 0;
-    // let meanLng = 0;
-    // for (let i = 0; i < 4; i++) {
-    //   const coord = feature.geometry.coordinates[0][i];
-    //   meanLat += coord[0];
-    //   meanLng += coord[1];
-    // }
-    // const position = [meanLat / 4, meanLng / 4];
-    // // const origin = feature.geometry.coordinates[0][0];
-    // view.setCenter(position);
-    // view.setZoom(8);
+    if (extent) {
+      view.fit(extent, { padding: [100, 100, 100, 100] });
+    }
   },
 
   distanceBetweenPoints(point1: number[], point2: number[]) {
@@ -314,8 +403,12 @@ const openLayerMap = {
         if (!layer.getVisible()) return;
         const source = layer.getSource() as VectorSource;
         const features = source.getFeatures();
-        const geojsonData = new GeoJson().writeFeaturesObject(features);
-        console.log(geojsonData);
+        const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(
+          features
+        );
+        geojsonData.features.forEach((feature) => {
+          feature.properties = {};
+        });
         if (!allGeoData) {
           allGeoData = geojsonData;
         } else {
@@ -325,17 +418,17 @@ const openLayerMap = {
         }
       }
     });
-    console.log(allGeoData);
     const file = new Blob([JSON.stringify(allGeoData)], {
       type: 'text/json;charset=utf-8',
     });
     anchor.href = URL.createObjectURL(file);
-    anchor.download = `${exportName}.json`;
+    anchor.download = `${exportName}.geojson`;
     anchor.click();
   },
 };
 // basic map interactions
 
+// Utility functions
 function circleGeomatryFunction(
   coordinates: SketchCoordType,
   geometry: SimpleGeometry
@@ -351,6 +444,40 @@ function circleGeomatryFunction(
     geometry.setCoordinates(coord);
   }
   return geometry;
+}
+
+function formatLength(line: LineString) {
+  const length = getLength(line, { projection: 'EPSG:4326' });
+  let output;
+  if (length > 1000) {
+    output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
+  } else {
+    output = Math.round(length * 100) / 100 + ' ' + 'm';
+  }
+  return output;
+}
+
+function formatArea(polygon: Polygon) {
+  const area = getArea(polygon, { projection: 'EPSG:4326' });
+  let output;
+  if (area > 10000) {
+    output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+  } else {
+    output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+  }
+  return output;
+}
+
+function createMeasureTooltip() {
+  const tooltipElement = document.createElement('div');
+  tooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+  const measureTooltip = new Overlay({
+    element: tooltipElement,
+    offset: [0, -5],
+    positioning: 'bottom-center',
+    stopEvent: false,
+  });
+  return { measureTooltip, tooltipElement };
 }
 //creates unique id for layers
 let id = 0;

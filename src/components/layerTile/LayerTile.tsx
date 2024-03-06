@@ -16,7 +16,8 @@ import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
-import { IoSquareOutline } from 'react-icons/io5';
+import { IoShapesOutline, IoSquareOutline } from 'react-icons/io5';
+import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 
 function LayerTile({
   layer,
@@ -149,6 +150,11 @@ function LayerTile({
                 {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
                 {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+                {layer.featureType === 'Polygon' && <PiPolygon size={13} />}
+                {layer.featureType === 'Line' && <PiLineSegments size={13} />}
+                {layer.featureType === 'GeometryCollection' && (
+                  <IoShapesOutline size={13} />
+                )}
               </>
             )}
 

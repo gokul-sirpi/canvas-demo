@@ -1,23 +1,27 @@
 import { GeoJsonObj, JsonFeature } from './GeojsonType';
 
 export type Resource = {
-  _id: string;
   id: string;
-  __v: number;
-  createdAt: string;
-  dataSample: GeoJsonObj;
-  dataset: string;
+  name: string;
+  label: string;
   description: string;
-  icon: string;
+  tags: string[];
+  itemStatus: string;
+  resourceGroup: string;
+  resourceServer: string;
+  provider: string;
+  accessPolicy: 'SECURE' | 'OPEN';
+  apdURL: string;
+  resourceType: string;
+  crs: string;
+  datum: string;
+  ogcResourceInfo: {
+    ogcResourceType: string;
+    geometryType: string;
+  };
+  location: JsonFeature;
+  dataSample: GeoJsonObj;
   instance: string;
   itemCreatedAt: string;
-  itemStatus: string;
-  label: string;
-  location: JsonFeature;
-  name: string;
-  ogc: string;
-  provider: string;
-  resourceType: string;
-  updatedAt: string;
-  access_status: 'Private' | 'Public';
+  ownerUserId: string;
 };

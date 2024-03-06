@@ -1,4 +1,5 @@
 import { Feature, Map, Overlay, View } from 'ol';
+import { Pixel } from 'ol/pixel';
 import { drawType } from '../types/UserLayer';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
@@ -29,6 +30,7 @@ import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
+import { FeatureLike } from 'ol/Feature';
 
 const standardLayer = new TileLayer({
   source: new OSM({}),
@@ -56,6 +58,7 @@ const openLayerMap = {
   latestLayer: null as UserLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
+  popupOverLay: new Overlay({}),
   map: new Map({
     view: new View({
       center: [78.9629, 22.5397],
@@ -236,6 +239,7 @@ const openLayerMap = {
     if (this.measureTooltip) {
       this.map.addOverlay(this.measureTooltip);
     }
+    const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
       const { measureTooltip, tooltipElement } = createMeasureTooltip();
@@ -251,9 +255,11 @@ const openLayerMap = {
           let tooltipPosition;
           if (geom instanceof LineString) {
             output = formatLength(geom);
+            featureProprties.length = output;
             tooltipPosition = geom.getLastCoordinate();
           } else if (geom instanceof Polygon) {
             output = formatArea(geom);
+            featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
           if (output[0] !== '0') {
@@ -263,7 +269,7 @@ const openLayerMap = {
         });
     });
     this.draw.on('drawend', (event) => {
-      event.feature.setProperties(featureStyle);
+      event.feature.setProperties({ ...featureStyle, ...featureProprties });
       if (this.tooltipElement) {
         this.tooltipElement.remove();
         this.tooltipElement = null;
@@ -501,6 +507,39 @@ const openLayerMap = {
     anchor.href = URL.createObjectURL(file);
     anchor.download = `${exportName}.geojson`;
     anchor.click();
+  },
+  initialiseMapClickEvent(
+    container: HTMLDivElement,
+    callback: (feature: FeatureLike) => void
+  ) {
+    this.popupOverLay.setElement(container);
+    this.map.addOverlay(this.popupOverLay);
+    this.map.on('click', (evt) => {
+      if (this.drawing) return;
+      const selectedFeature = this.getFeatureAtPixel(evt.pixel);
+      if (selectedFeature) {
+        this.popupOverLay.setPosition(evt.coordinate);
+        callback(selectedFeature);
+      } else {
+        this.closePopupOverLay();
+      }
+    });
+  },
+  closePopupOverLay() {
+    this.popupOverLay.setPosition(undefined);
+  },
+  getFeatureAtPixel(pixel: Pixel) {
+    let feature: FeatureLike | undefined;
+    this.map.forEachFeatureAtPixel(
+      pixel,
+      (selected) => {
+        if (!feature) {
+          feature = selected;
+        }
+      },
+      { hitTolerance: 3 }
+    );
+    return feature;
   },
 };
 // basic map interactions

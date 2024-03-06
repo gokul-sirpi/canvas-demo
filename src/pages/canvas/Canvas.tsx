@@ -14,6 +14,7 @@ import { Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
+import Popup from '../../components/popup/Popup.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -184,6 +185,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
+        <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />
       </>

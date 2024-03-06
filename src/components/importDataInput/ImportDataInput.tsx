@@ -8,6 +8,7 @@ import { GeoJsonObj } from '../../types/GeojsonType';
 import openLayerMap from '../../lib/openLayers';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
+import { emitToast } from '../../lib/toastEmitter';
 
 function ImportDataInput() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,8 +36,12 @@ function ImportDataInput() {
           dispatch(updateLoadingState(false));
         };
         fr.onerror = () => {
+          emitToast('error', 'Unable to load file');
           dispatch(updateLoadingState(false));
         };
+      } else {
+        emitToast('error', 'Invalid file format');
+        dispatch(updateLoadingState(false));
       }
     }
   }

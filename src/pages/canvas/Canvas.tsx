@@ -88,7 +88,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         params: queryParams,
       });
       if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data.results;
+        const geoJsonData: GeoJsonObj = response.data;
         plotUgixLayerData(geoJsonData, resource);
       }
     } catch (error) {

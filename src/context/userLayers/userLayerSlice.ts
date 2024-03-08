@@ -1,5 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserLayer } from '../../types/UserLayer';
+import { FeatureStyle } from '../../types/FeatureStyle';
 type UserLayerState = {
   layers: UserLayer[];
 };
@@ -23,10 +24,18 @@ export const userLayerSlice = createSlice({
         return layer.layerId !== payload;
       });
     },
-    updateUserLayerColor(state, action) {
+    updateUserLayerColor(
+      state,
+      action: PayloadAction<{
+        layerId: string;
+        newColor: string;
+        style: FeatureStyle;
+      }>
+    ) {
       const updatedLayers = state.layers.map((layer) => {
         if (layer.layerId === action.payload.layerId) {
           layer.layerColor = action.payload.newColor;
+          layer.style = action.payload.style;
         }
         return layer;
       });

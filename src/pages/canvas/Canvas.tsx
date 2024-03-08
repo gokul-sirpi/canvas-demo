@@ -14,6 +14,7 @@ import { Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
+import Popup from '../../components/popup/Popup.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -102,7 +103,12 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       resource.label,
       resource.id
     );
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    openLayerMap.addGeoJsonFeature(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addGsixLayer(newLayer));
   }
@@ -158,7 +164,13 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       'GeometryCollection'
     );
     newLayer.isCompleted = true;
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
+    newLayer.editable = false;
+    openLayerMap.addImportedGeojsonData(
+      data,
+      newLayer.layerId,
+      newLayer.layerColor,
+      newLayer.style
+    );
     openLayerMap.zoomToFit(newLayer.layerId);
     dispatch(addUserLayer(newLayer));
   }
@@ -173,6 +185,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
+        <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />
       </>

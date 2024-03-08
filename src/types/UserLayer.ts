@@ -1,3 +1,5 @@
+import { FeatureStyle } from './FeatureStyle';
+
 export type drawType =
   | 'Circle'
   | 'Box'
@@ -15,4 +17,6 @@ export type UserLayer = {
   isCompleted: boolean;
   layerColor: string;
   featureType: drawType | 'GeometryCollection';
+  editable: boolean;
+  style: FeatureStyle;
 };

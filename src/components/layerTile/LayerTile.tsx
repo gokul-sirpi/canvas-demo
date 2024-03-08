@@ -11,7 +11,7 @@ import {
   updateUserLayerColor,
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
-import { GsixLayer } from '../../types/gsixLayers';
+import { UgixLayer } from '../../types/UgixLayers';
 import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
@@ -23,7 +23,7 @@ function LayerTile({
   layer,
   index,
 }: {
-  layer: UserLayer | GsixLayer;
+  layer: UserLayer | UgixLayer;
   index: number;
 }) {
   const layerNameRef = useRef<HTMLInputElement>(null);
@@ -64,16 +64,24 @@ function LayerTile({
   }
 
   function handleColorChange(text: string) {
-    openLayerMap.changeLayerColor(layer.layerId, selectedColor);
-    if (layer.layerType === 'GsixLayer') {
+    const changedStyle = openLayerMap.changeLayerColor(
+      layer.layerId,
+      selectedColor
+    );
+    if (layer.layerType === 'UgixLayer') {
       dispatch(
-        updateGsixLayerColor({ layerId: layer.layerId, newColor: text })
+        updateGsixLayerColor({
+          layerId: layer.layerId,
+          newColor: text,
+          style: changedStyle,
+        })
       );
     } else {
       dispatch(
         updateUserLayerColor({
           layerId: layer.layerId,
           newColor: text,
+          style: changedStyle,
         })
       );
     }
@@ -127,7 +135,7 @@ function LayerTile({
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
             {layer.layerType === 'UserLayer' &&
-            layer.featureType === 'Marker' ? null : (
+            (layer.featureType === 'Marker' || !layer.editable) ? null : (
               <>
                 <input
                   type="color"

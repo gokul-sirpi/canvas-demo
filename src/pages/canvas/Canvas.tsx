@@ -7,7 +7,7 @@ import { UserProfile } from '../../types/UserProfile.ts';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice.ts';
 import { axiosAuthClient } from '../../lib/axiosConfig.ts';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { Resource } from '../../types/resource.ts';
@@ -15,6 +15,7 @@ import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
+import Intro from '../../layouts/Intro/Intro.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -73,6 +74,9 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       }
     } catch (error) {
       console.log(error);
+      if (error instanceof AxiosError) {
+        emitToast('error', error.message);
+      }
       cleanUpSideEffects();
     }
   }
@@ -185,6 +189,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
+        <Intro />
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />

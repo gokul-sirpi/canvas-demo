@@ -14,6 +14,7 @@ import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { emitToast } from '../../lib/toastEmitter';
+import { MdDownloadForOffline } from 'react-icons/md';
 
 function GsixFeatureTile({
   resource,
@@ -68,6 +69,8 @@ function GsixFeatureTile({
             'Access denied. Please request access to the data.'
           );
           setNoAccess(true);
+        } else {
+          emitToast('error', error.message);
         }
       }
     }
@@ -145,6 +148,13 @@ function GsixFeatureTile({
           >
             <div className={styles.add_icon}>
               <AiFillPlusCircle />
+            </div>
+          </button>
+        </TooltipWrapper>
+        <TooltipWrapper content="download">
+          <button>
+            <div className={styles.add_icon}>
+              <MdDownloadForOffline />
             </div>
           </button>
         </TooltipWrapper>

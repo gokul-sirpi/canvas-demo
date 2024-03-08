@@ -13,14 +13,18 @@ import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import { basicBaseLayerStyle } from '../../lib/layerStyle';
+import { useDispatch } from 'react-redux';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
+  const dispatch = useDispatch();
   const ogcLayer = useRef<VectorImageLayer<VectorSource> | undefined>();
   useEffect(() => {
     getDistrictBoundaries();
   }, []);
   function getDistrictBoundaries() {
+    dispatch(updateLoadingState(true));
     fetch('https://iudx.s3.ap-south-1.amazonaws.com/state-boundaries.geojson')
       .then((res) => res.json())
       .then((response) => {
@@ -34,8 +38,12 @@ function BaseMaps() {
           declutter: true,
         });
         ogcLayer.current = newOgcLayer;
+        toggleBaseMap('ogc-layer');
+        dispatch(updateLoadingState(false));
       })
       .catch((error) => {
+        dispatch(updateLoadingState(false));
+        toggleBaseMap('standard');
         console.log(error);
       });
   }

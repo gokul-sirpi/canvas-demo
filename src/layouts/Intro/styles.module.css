@@ -1,0 +1,13 @@
+.container {
+  position: absolute;
+  z-index: 100;
+  bottom: 5rem;
+  right: 0;
+  background-color: var(--color-primary);
+  border-radius: 10rem 0rem 0rem 10rem;
+}
+.intro_btn {
+  color: white;
+  font-size: var(--font-md);
+  padding: 0.5rem;
+}

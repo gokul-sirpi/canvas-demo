@@ -29,9 +29,9 @@ function Header({
     <>
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
-        <div className={styles.tools_container}>
+        <div data-intro="header" className={styles.tools_container}>
           <TooltipWrapper content="Browse Data">
-            <span>
+            <span data-intro="browse">
               <BrowseDataDialog resourceList={resourceList} />
             </span>
           </TooltipWrapper>

@@ -32,9 +32,6 @@ import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
 
-const standardLayer = new TileLayer({
-  source: new OSM({}),
-});
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
@@ -63,11 +60,11 @@ const openLayerMap = {
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      zoom: 5,
-      minZoom: 5,
+      zoom: 4.9,
+      minZoom: 4.9,
     }),
     controls: [scaleControl, attribution],
-    layers: [standardLayer],
+    layers: [],
   }),
   replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
     this.map.getLayers().removeAt(0);

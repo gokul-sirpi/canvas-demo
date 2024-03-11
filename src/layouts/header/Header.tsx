@@ -35,13 +35,17 @@ function Header({
               <BrowseDataDialog resourceList={resourceList} />
             </span>
           </TooltipWrapper>
-          <DrawingTool toolType="Cursor" />
+          <TooltipWrapper content="Select">
+            <span>
+              <DrawingTool toolType="Cursor" />
+            </span>
+          </TooltipWrapper>
           <TooltipWrapper content="Circle">
             <span>
               <DrawingTool toolType="Circle" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="Box ">
+          <TooltipWrapper content="Rectangle">
             <span>
               <DrawingTool toolType="Box" />
             </span>

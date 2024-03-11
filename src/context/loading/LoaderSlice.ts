@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState = {
   loading: false,
+  loadingArr: [] as boolean[],
 };
 
 export const loaderSlice = createSlice({
@@ -9,7 +10,16 @@ export const loaderSlice = createSlice({
   name: 'loading',
   reducers: {
     updateLoadingState(state, action: PayloadAction<boolean>) {
-      state.loading = action.payload;
+      if (action.payload) {
+        state.loadingArr.push(true);
+        state.loading = true;
+      } else {
+        state.loadingArr.pop();
+      }
+      console.log(state.loading);
+      if (state.loadingArr.length === 0) {
+        state.loading = false;
+      }
     },
   },
 });

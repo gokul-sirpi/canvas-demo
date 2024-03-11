@@ -52,14 +52,19 @@ function ImportDataInput() {
     );
     newLayer.isCompleted = true;
     newLayer.editable = false;
-    openLayerMap.addImportedGeojsonData(
-      data,
-      newLayer.layerId,
-      newLayer.layerColor,
-      newLayer.style
-    );
-    openLayerMap.zoomToFit(newLayer.layerId);
-    dispatch(addUserLayer(newLayer));
+    try {
+      openLayerMap.addImportedGeojsonData(
+        data,
+        newLayer.layerId,
+        newLayer.layerColor,
+        newLayer.style
+      );
+      openLayerMap.zoomToFit(newLayer.layerId);
+      dispatch(addUserLayer(newLayer));
+    } catch (error) {
+      emitToast('error', 'Invalid file format');
+      dispatch(updateLoadingState(false));
+    }
   }
   return (
     <>

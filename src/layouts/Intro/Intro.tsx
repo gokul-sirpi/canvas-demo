@@ -32,7 +32,7 @@ function Intro() {
   return (
     <div className={styles.container}>
       <button onClick={handleIntroStart} className={styles.intro_btn}>
-        Intro
+        Demo
       </button>
     </div>
   );

@@ -25,3 +25,9 @@ export type Resource = {
   itemCreatedAt: string;
   ownerUserId: string;
 };
+
+export type QueryParams = {
+  limit: number;
+  offset: number;
+  [x: string]: string | number;
+};

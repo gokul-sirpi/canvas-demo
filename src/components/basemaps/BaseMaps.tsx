@@ -18,9 +18,12 @@ import { updateLoadingState } from '../../context/loading/LoaderSlice';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
+  const singleRender = useRef(false);
   const dispatch = useDispatch();
   const ogcLayer = useRef<VectorImageLayer<VectorSource> | undefined>();
   useEffect(() => {
+    if (singleRender.current) return;
+    singleRender.current = true;
     getDistrictBoundaries();
   }, []);
   function getDistrictBoundaries() {
@@ -37,8 +40,10 @@ function BaseMaps() {
           style: basicBaseLayerStyle('#99aabb'),
           declutter: true,
         });
+        newOgcLayer.set('baseLayer', true);
         ogcLayer.current = newOgcLayer;
-        toggleBaseMap('ogc-layer');
+        openLayerMap.insertBaseMap(newOgcLayer);
+        setMapType('ogc-layer');
         dispatch(updateLoadingState(false));
       })
       .catch((error) => {
@@ -61,10 +66,12 @@ function BaseMaps() {
   function toggleBaseMap(baseMapType: string) {
     switch (baseMapType) {
       case 'standard':
+        standardLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(standardLayer);
         setMapType(baseMapType);
         break;
       case 'humanitarian':
+        humanitarianLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(humanitarianLayer);
         setMapType(baseMapType);
         break;

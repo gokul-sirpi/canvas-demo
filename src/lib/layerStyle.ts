@@ -3,7 +3,7 @@ import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import { FeatureStyle } from '../types/FeatureStyle';
 
-const opacity = '9'; //hex value for opacity
+const opacity = '99'; //hex value for opacity
 
 const image = new CircleStyle({
   radius: 5,

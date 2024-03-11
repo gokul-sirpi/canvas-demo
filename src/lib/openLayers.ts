@@ -13,7 +13,7 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorImage';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
+import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
@@ -61,14 +61,21 @@ const openLayerMap = {
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
       zoom: 4.9,
-      minZoom: 4.9,
+      // minZoom: 4,
     }),
     controls: [scaleControl, attribution],
     layers: [],
   }),
   replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
-    this.map.getLayers().removeAt(0);
+    this.map.getAllLayers().forEach((layer) => {
+      if (layer.get('baseLayer')) {
+        this.map.removeLayer(layer);
+      }
+    });
     this.map.getLayers().insertAt(0, newLayers);
+  },
+  insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+    this.map.getLayers().insertAt(0, baseLayer);
   },
 
   setOlTarget(target: string) {
@@ -157,6 +164,13 @@ const openLayerMap = {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
+    const vectorSource = new VectorSource({});
+    const vectorLayer = new VectorImageLayer({
+      source: vectorSource,
+      style: (feature) => styleFunction(feature, layerColor),
+    });
+    vectorLayer.set('layer-id', layerId);
+    this.addLayer(vectorLayer);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       layerName: layerName,
@@ -318,32 +332,31 @@ const openLayerMap = {
   },
 
   addGeoJsonFeature(
-    geojsonData: GeoJsonObj,
+    geojsonData: GeoJsonObj | undefined,
     layerId: string,
-    layerColor: string,
     style: FeatureStyle
   ) {
+    if (!geojsonData) return;
     geojsonData.crs = {
       type: 'name',
       properties: {
         name: 'EPSG:4326',
       },
     };
-    const features = new GeoJson().readFeatures(geojsonData);
-    const vectorSource = new VectorSource({
-      features: features,
-      format: new GeoJson(),
-    }) as VectorSource;
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: (feature) => styleFunction(feature, layerColor),
-      declutter: true,
+    const featureLikes = new GeoJson().readFeatures(geojsonData);
+    const features = featureLikes.map((featureLike) => {
+      return new Feature({
+        geometry: featureLike.getGeometry() as Geometry,
+        ...featureLike.getProperties(),
+      });
     });
-    vectorLayer.set('layer-id', layerId);
-    vectorSource.getFeatures().forEach((feature) => {
-      feature.setProperties(style);
-    });
-    this.addLayer(vectorLayer);
+    const vectorSource = this.getLayer(layerId)?.getSource();
+    if (vectorSource) {
+      vectorSource.addFeatures(features);
+      vectorSource.getFeatures().forEach((feature) => {
+        feature.setProperties(style);
+      });
+    }
   },
   addImportedGeojsonData(
     geojsonData: GeoJsonObj,

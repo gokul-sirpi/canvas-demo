@@ -29,19 +29,23 @@ function Header({
     <>
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
-        <div className={styles.tools_container}>
+        <div data-intro="header" className={styles.tools_container}>
           <TooltipWrapper content="Browse Data">
-            <span>
+            <span data-intro="browse">
               <BrowseDataDialog resourceList={resourceList} />
             </span>
           </TooltipWrapper>
-          <DrawingTool toolType="Cursor" />
+          <TooltipWrapper content="Select">
+            <span>
+              <DrawingTool toolType="Cursor" />
+            </span>
+          </TooltipWrapper>
           <TooltipWrapper content="Circle">
             <span>
               <DrawingTool toolType="Circle" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="Box ">
+          <TooltipWrapper content="Rectangle">
             <span>
               <DrawingTool toolType="Box" />
             </span>

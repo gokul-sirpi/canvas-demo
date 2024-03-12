@@ -51,9 +51,20 @@ function ImportDataInput() {
       'GeometryCollection'
     );
     newLayer.isCompleted = true;
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
-    openLayerMap.zoomToFit(newLayer.layerId);
-    dispatch(addUserLayer(newLayer));
+    newLayer.editable = false;
+    try {
+      openLayerMap.addImportedGeojsonData(
+        data,
+        newLayer.layerId,
+        newLayer.layerColor,
+        newLayer.style
+      );
+      openLayerMap.zoomToFit(newLayer.layerId);
+      dispatch(addUserLayer(newLayer));
+    } catch (error) {
+      emitToast('error', 'Invalid file format');
+      dispatch(updateLoadingState(false));
+    }
   }
   return (
     <>

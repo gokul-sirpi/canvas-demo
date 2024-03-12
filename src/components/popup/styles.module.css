@@ -1,0 +1,46 @@
+.ol_popup {
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  padding: 14px 12px 10px;
+  border-radius: 10px;
+  border: 1px solid #cccccc;
+  bottom: 12px;
+  left: -50px;
+  min-width: max-content;
+}
+.ol_popup:after,
+.ol_popup:before {
+  top: 100%;
+  border: solid transparent;
+  content: ' ';
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.ol_popup:after {
+  border-top-color: white;
+  border-width: 10px;
+  left: 48px;
+  margin-left: -10px;
+}
+.ol_popup:before {
+  border-top-color: #cccccc;
+  border-width: 11px;
+  left: 48px;
+  margin-left: -11px;
+}
+.ol_popup_closer {
+  text-decoration: none;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+.ol_popup_closer:after {
+  content: '✖';
+}
+.popup_table {
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+}

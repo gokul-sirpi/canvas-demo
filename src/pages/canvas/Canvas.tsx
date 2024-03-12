@@ -6,14 +6,16 @@ import LayerCard from '../../layouts/layerCard/LayerCard';
 import { UserProfile } from '../../types/UserProfile.ts';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice.ts';
-import { axiosAuthClient } from '../../lib/axiosConfig.ts';
 import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
-import { Resource } from '../../types/resource.ts';
+import { QueryParams, Resource } from '../../types/resource.ts';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
+import Popup from '../../components/popup/Popup.tsx';
+import Intro from '../../layouts/Intro/Intro.tsx';
+import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -54,57 +56,30 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   async function handleUgixLayerAddition(resource: Resource) {
     dispatch(updateLoadingState(true));
-    try {
-      const body = {
-        itemId: resource.id,
-        itemType: 'resource',
-        role: 'consumer',
-      };
-      if (resource.accessPolicy === 'OPEN') {
-        body.itemId = 'rs.iudx.io';
-        body.itemType = 'resource_server';
-      }
-      const response = await axiosAuthClient.post('v1/token', body);
-      if (response.status === 200) {
-        if (response.data.title === 'Token created') {
-          getUgixLayerData(response.data.results.accessToken, resource);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      cleanUpSideEffects();
-    }
-  }
-  async function getUgixLayerData(accessToken: string, resource: Resource) {
-    try {
-      const url =
-        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
-      const queryParams = {
-        offset: 1,
-        limit: limit,
-      };
-      const response = await axios.get(url, {
-        headers: { Token: accessToken },
-        params: queryParams,
-      });
-      if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data;
-        plotUgixLayerData(geoJsonData, resource);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      cleanUpSideEffects();
-    }
-  }
-  function plotUgixLayerData(data: GeoJsonObj, resource: Resource) {
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id
     );
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
-    openLayerMap.zoomToFit(newLayer.layerId);
-    dispatch(addGsixLayer(newLayer));
+    const queryParams: QueryParams = {
+      limit: limit,
+      offset: 1,
+    };
+    getAllUgixFeatures(
+      resource,
+      newLayer,
+      queryParams,
+      () => {
+        dispatch(addGsixLayer(newLayer));
+      },
+      (message) => {
+        emitToast('error', message);
+        cleanUpSideEffects();
+      },
+      () => {
+        openLayerMap.zoomToFit(newLayer.layerId);
+        cleanUpSideEffects();
+      }
+    );
   }
   function cleanUpSideEffects() {
     dispatch(updateLoadingState(false));
@@ -158,9 +133,20 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       'GeometryCollection'
     );
     newLayer.isCompleted = true;
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
-    openLayerMap.zoomToFit(newLayer.layerId);
-    dispatch(addUserLayer(newLayer));
+    newLayer.editable = false;
+    try {
+      openLayerMap.addImportedGeojsonData(
+        data,
+        newLayer.layerId,
+        newLayer.layerColor,
+        newLayer.style
+      );
+      openLayerMap.zoomToFit(newLayer.layerId);
+      dispatch(addUserLayer(newLayer));
+    } catch (error) {
+      emitToast('error', 'Invalid file format');
+      dispatch(updateLoadingState(false));
+    }
   }
   function handleDragOver(event: React.DragEvent) {
     event.preventDefault();
@@ -173,6 +159,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
+        <Intro />
+        <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />
       </>

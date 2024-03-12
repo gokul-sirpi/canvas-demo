@@ -12,15 +12,22 @@ import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
-import { ogcLayerStyle } from '../../lib/layerStyle';
+import { basicBaseLayerStyle } from '../../lib/layerStyle';
+import { useDispatch } from 'react-redux';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
 
 function BaseMaps() {
   const [mapType, setMapType] = useState('standard');
+  const singleRender = useRef(false);
+  const dispatch = useDispatch();
   const ogcLayer = useRef<VectorImageLayer<VectorSource> | undefined>();
   useEffect(() => {
+    if (singleRender.current) return;
+    singleRender.current = true;
     getDistrictBoundaries();
   }, []);
   function getDistrictBoundaries() {
+    dispatch(updateLoadingState(true));
     fetch('https://iudx.s3.ap-south-1.amazonaws.com/state-boundaries.geojson')
       .then((res) => res.json())
       .then((response) => {
@@ -30,12 +37,18 @@ function BaseMaps() {
         }) as VectorSource;
         const newOgcLayer = new VectorImageLayer({
           source: vectorSource,
-          style: ogcLayerStyle('#99aabb'),
+          style: basicBaseLayerStyle('#99aabb'),
           declutter: true,
         });
+        newOgcLayer.set('baseLayer', true);
         ogcLayer.current = newOgcLayer;
+        openLayerMap.insertBaseMap(newOgcLayer);
+        setMapType('ogc-layer');
+        dispatch(updateLoadingState(false));
       })
       .catch((error) => {
+        dispatch(updateLoadingState(false));
+        toggleBaseMap('standard');
         console.log(error);
       });
   }
@@ -53,10 +66,12 @@ function BaseMaps() {
   function toggleBaseMap(baseMapType: string) {
     switch (baseMapType) {
       case 'standard':
+        standardLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(standardLayer);
         setMapType(baseMapType);
         break;
       case 'humanitarian':
+        humanitarianLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(humanitarianLayer);
         setMapType(baseMapType);
         break;

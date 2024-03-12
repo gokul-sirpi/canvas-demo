@@ -1,6 +1,7 @@
 import { FeatureLike } from 'ol/Feature';
 import { Fill, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
+import { FeatureStyle } from '../types/FeatureStyle';
 
 const opacity = '99'; //hex value for opacity
 
@@ -9,16 +10,17 @@ const image = new CircleStyle({
   fill: undefined,
   stroke: new Stroke({ color: 'red', width: 1 }),
 });
-const whiteFill = '#ffffff55';
+const whiteFill = '#ffffff';
+const whiteFillOpacity = '66';
 
 //returns different style for different types of feature eg-polygon,point
-export function styleFunction(feature: FeatureLike, color: string) {
+export function styleFunction(feature: FeatureLike, stroke: string) {
   const type = feature.getGeometry()?.getType();
   let style: Style;
   if (type === 'LineString' || type === 'MultiLineString') {
     style = new Style({
       stroke: new Stroke({
-        color: color,
+        color: stroke,
         width: 2,
       }),
     });
@@ -29,10 +31,10 @@ export function styleFunction(feature: FeatureLike, color: string) {
   ) {
     style = new Style({
       fill: new Fill({
-        color: whiteFill,
+        color: whiteFill + whiteFillOpacity,
       }),
       stroke: new Stroke({
-        color: color,
+        color: stroke,
         width: 2,
       }),
     });
@@ -41,18 +43,18 @@ export function styleFunction(feature: FeatureLike, color: string) {
       image: new CircleStyle({
         radius: 4,
         fill: new Fill({
-          color: color + opacity,
+          color: stroke + opacity,
         }),
-        stroke: new Stroke({ color: color, width: 1 }),
+        stroke: new Stroke({ color: stroke, width: 1 }),
       }),
     });
   } else {
     style = new Style({
       fill: new Fill({
-        color: color + opacity,
+        color: whiteFill + whiteFillOpacity,
       }),
       stroke: new Stroke({
-        color: color,
+        color: stroke,
       }),
       image: image,
     });
@@ -79,7 +81,7 @@ export function measurementStyle() {
   return style;
 }
 
-export function ogcLayerStyle(color: string) {
+export function basicBaseLayerStyle(color: string) {
   const style = new Style({
     stroke: new Stroke({
       width: 2,
@@ -90,4 +92,45 @@ export function ogcLayerStyle(color: string) {
     }),
   });
   return style;
+}
+
+export function featureUniqueStyle(
+  stroke: string,
+  fill: string,
+  strokeOpacity: number,
+  strokeWidth: number,
+  fillOpacity: number
+) {
+  const fillOpStr = Math.floor(fillOpacity * 15).toString(16);
+  const strokeOpStr = Math.floor(strokeOpacity * 15).toString(16);
+  return new Style({
+    fill: new Fill({
+      color: fill + fillOpStr + fillOpStr,
+    }),
+    stroke: new Stroke({
+      color: stroke + strokeOpStr + strokeOpStr,
+      width: strokeWidth,
+    }),
+    image: new CircleStyle({
+      radius: 4,
+      fill: new Fill({
+        color: fill + fillOpStr + fillOpStr,
+      }),
+      stroke: new Stroke({
+        color: stroke + strokeOpStr + strokeOpStr,
+        width: strokeWidth,
+      }),
+    }),
+  });
+}
+
+export function createFeatureStyle(color: string) {
+  const styleObj: FeatureStyle = {
+    fill: whiteFill,
+    'fill-opacity': 0.5,
+    stroke: color,
+    'stroke-width': 2,
+    'stroke-opacity': 1,
+  };
+  return styleObj;
 }

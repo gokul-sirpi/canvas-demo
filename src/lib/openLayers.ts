@@ -1,4 +1,5 @@
 import { Feature, Map, Overlay, View } from 'ol';
+import { Pixel } from 'ol/pixel';
 import { drawType } from '../types/UserLayer';
 import { Attribution, ScaleLine } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
@@ -12,21 +13,25 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorImage';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
-import { LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
+import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
-import { styleFunction, measurementStyle } from './layerStyle';
-import { GsixLayer } from '../types/gsixLayers';
+import {
+  styleFunction,
+  measurementStyle,
+  createFeatureStyle,
+  featureUniqueStyle,
+} from './layerStyle';
+import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
 import { circular } from 'ol/geom/Polygon';
 import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
+import { FeatureStyle } from '../types/FeatureStyle';
+import { FeatureLike } from 'ol/Feature';
 
-const standardLayer = new TileLayer({
-  source: new OSM({}),
-});
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
@@ -50,20 +55,27 @@ const openLayerMap = {
   latestLayer: null as UserLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
+  popupOverLay: new Overlay({}),
   map: new Map({
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      zoom: 5,
-      minZoom: 5,
+      zoom: 4.9,
+      // minZoom: 4,
     }),
     controls: [scaleControl, attribution],
-    layers: [standardLayer],
+    layers: [],
   }),
-
   replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
-    this.map.getLayers().removeAt(0);
+    this.map.getAllLayers().forEach((layer) => {
+      if (layer.get('baseLayer')) {
+        this.map.removeLayer(layer);
+      }
+    });
     this.map.getLayers().insertAt(0, newLayers);
+  },
+  insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+    this.map.getLayers().insertAt(0, baseLayer);
   },
 
   setOlTarget(target: string) {
@@ -107,6 +119,7 @@ const openLayerMap = {
       source: source,
       style: (feature) => styleFunction(feature, featureColor),
     });
+    const featureStyle = createFeatureStyle(featureColor);
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
     const newLayer = {
@@ -119,6 +132,8 @@ const openLayerMap = {
       isCompleted: false,
       layerColor: featureColor,
       featureType: featureType,
+      style: featureStyle,
+      editable: true,
     };
     this.map.addLayer(layer);
     this.latestLayer = newLayer;
@@ -129,6 +144,7 @@ const openLayerMap = {
     featureType: drawType | 'GeometryCollection'
   ) {
     const layerColor = getRandomColor();
+    const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const newLayer: UserLayer = {
       layerType: 'UserLayer',
@@ -139,14 +155,24 @@ const openLayerMap = {
       isCompleted: false,
       layerColor,
       featureType: featureType,
+      style: featureStyle,
+      editable: true,
     };
     return newLayer;
   },
   createNewUgixLayer(layerName: string, ugixId: string) {
     const layerColor = getRandomColor();
+    const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
-    const newLayer: GsixLayer = {
-      layerType: 'GsixLayer',
+    const vectorSource = new VectorSource({});
+    const vectorLayer = new VectorImageLayer({
+      source: vectorSource,
+      style: (feature) => styleFunction(feature, layerColor),
+    });
+    vectorLayer.set('layer-id', layerId);
+    this.addLayer(vectorLayer);
+    const newLayer: UgixLayer = {
+      layerType: 'UgixLayer',
       layerName: layerName,
       layerId,
       gsixLayerId: ugixId,
@@ -154,6 +180,7 @@ const openLayerMap = {
       visible: true,
       isCompleted: true,
       layerColor,
+      style: featureStyle,
     };
     return newLayer;
   },
@@ -163,11 +190,20 @@ const openLayerMap = {
     if (layer) {
       layer.setStyle((feature) => styleFunction(feature, color));
     }
+    const featureStyle = createFeatureStyle(color);
+    const source = layer?.getSource();
+    if (source) {
+      source.getFeatures().forEach((feature) => {
+        feature.setProperties(featureStyle);
+      });
+    }
+    return featureStyle;
   },
 
   addDrawFeature(
     type: 'Circle' | 'Box' | 'Polygon' | 'Measure' | 'Line',
     source: VectorSource,
+    featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
@@ -214,6 +250,7 @@ const openLayerMap = {
     if (this.measureTooltip) {
       this.map.addOverlay(this.measureTooltip);
     }
+    const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
       const { measureTooltip, tooltipElement } = createMeasureTooltip();
@@ -229,9 +266,11 @@ const openLayerMap = {
           let tooltipPosition;
           if (geom instanceof LineString) {
             output = formatLength(geom);
+            featureProprties.length = output;
             tooltipPosition = geom.getLastCoordinate();
           } else if (geom instanceof Polygon) {
             output = formatArea(geom);
+            featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
           if (output[0] !== '0') {
@@ -241,6 +280,7 @@ const openLayerMap = {
         });
     });
     this.draw.on('drawend', (event) => {
+      event.feature.setProperties({ ...featureStyle, ...featureProprties });
       if (this.tooltipElement) {
         this.tooltipElement.remove();
         this.tooltipElement = null;
@@ -292,9 +332,37 @@ const openLayerMap = {
   },
 
   addGeoJsonFeature(
+    geojsonData: GeoJsonObj | undefined,
+    layerId: string,
+    style: FeatureStyle
+  ) {
+    if (!geojsonData) return;
+    geojsonData.crs = {
+      type: 'name',
+      properties: {
+        name: 'EPSG:4326',
+      },
+    };
+    const featureLikes = new GeoJson().readFeatures(geojsonData);
+    const features = featureLikes.map((featureLike) => {
+      return new Feature({
+        geometry: featureLike.getGeometry() as Geometry,
+        ...featureLike.getProperties(),
+      });
+    });
+    const vectorSource = this.getLayer(layerId)?.getSource();
+    if (vectorSource) {
+      vectorSource.addFeatures(features);
+      vectorSource.getFeatures().forEach((feature) => {
+        feature.setProperties(style);
+      });
+    }
+  },
+  addImportedGeojsonData(
     geojsonData: GeoJsonObj,
     layerId: string,
-    layerColor: string
+    layerColor: string,
+    style: FeatureStyle
   ) {
     geojsonData.crs = {
       type: 'name',
@@ -302,11 +370,22 @@ const openLayerMap = {
         name: 'EPSG:4326',
       },
     };
-    // for (const feature of geojsonData.features) {
-    //   feature.type = 'Feature';
-    // }
+    const features = new GeoJson().readFeatures(geojsonData);
+    const newStyleArr: FeatureStyle[] = [];
+    features.forEach((feature) => {
+      const properties = feature.getProperties();
+      const newStyle = {
+        fill: properties.fill || style.fill,
+        'fill-opacity': properties['fill-opacity'] || style['fill-opacity'],
+        stroke: properties.stroke || style.stroke,
+        'stroke-opacity':
+          properties['stroke-opacity'] || style['stroke-opacity'],
+        'stroke-width': properties['stroke-width'] || style['stroke-width'],
+      };
+      newStyleArr.push(newStyle);
+    });
     const vectorSource = new VectorSource({
-      features: new GeoJson().readFeatures(geojsonData),
+      features: features,
       format: new GeoJson(),
     }) as VectorSource;
     const vectorLayer = new VectorLayer({
@@ -315,6 +394,18 @@ const openLayerMap = {
       declutter: true,
     });
     vectorLayer.set('layer-id', layerId);
+    vectorSource.getFeatures().forEach((feature, index) => {
+      const newStyle = newStyleArr[index];
+      const newStyleobj = featureUniqueStyle(
+        newStyle.stroke,
+        newStyle.fill,
+        newStyle['stroke-opacity'],
+        newStyle['stroke-width'],
+        newStyle['fill-opacity']
+      );
+      feature.setStyle(newStyleobj);
+      feature.setProperties(newStyle);
+    });
     this.addLayer(vectorLayer);
   },
 
@@ -407,7 +498,9 @@ const openLayerMap = {
           features
         );
         geojsonData.features.forEach((feature) => {
-          feature.properties = {};
+          if (!feature.properties) {
+            feature.properties = {};
+          }
         });
         if (!allGeoData) {
           allGeoData = geojsonData;
@@ -424,6 +517,39 @@ const openLayerMap = {
     anchor.href = URL.createObjectURL(file);
     anchor.download = `${exportName}.geojson`;
     anchor.click();
+  },
+  initialiseMapClickEvent(
+    container: HTMLDivElement,
+    callback: (feature: FeatureLike) => void
+  ) {
+    this.popupOverLay.setElement(container);
+    this.map.addOverlay(this.popupOverLay);
+    this.map.on('click', (evt) => {
+      if (this.drawing) return;
+      const selectedFeature = this.getFeatureAtPixel(evt.pixel);
+      if (selectedFeature) {
+        this.popupOverLay.setPosition(evt.coordinate);
+        callback(selectedFeature);
+      } else {
+        this.closePopupOverLay();
+      }
+    });
+  },
+  closePopupOverLay() {
+    this.popupOverLay.setPosition(undefined);
+  },
+  getFeatureAtPixel(pixel: Pixel) {
+    let feature: FeatureLike | undefined;
+    this.map.forEachFeatureAtPixel(
+      pixel,
+      (selected) => {
+        if (!feature) {
+          feature = selected;
+        }
+      },
+      { hitTolerance: 3 }
+    );
+    return feature;
   },
 };
 // basic map interactions

@@ -1,5 +1,7 @@
-export type GsixLayer = {
-  layerType: 'GsixLayer'
+import { FeatureStyle } from './FeatureStyle';
+
+export type UgixLayer = {
+  layerType: 'UgixLayer';
   layerName: string;
   layerId: string;
   gsixLayerId: string;
@@ -7,4 +9,5 @@ export type GsixLayer = {
   selected: boolean;
   isCompleted: boolean;
   layerColor: string;
+  style: FeatureStyle;
 };

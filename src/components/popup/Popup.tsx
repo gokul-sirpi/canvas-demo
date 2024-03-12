@@ -1,0 +1,60 @@
+//
+import { useEffect, useRef, useState } from 'react';
+import styles from './styles.module.css';
+import openLayerMap from '../../lib/openLayers';
+
+function Popup() {
+  const singleRender = useRef<boolean>(false);
+  const popupContainer = useRef<HTMLDivElement>(null);
+  const [properties, setProperties] = useState<{
+    [x: string]: string | number | null;
+  }>();
+  useEffect(() => {
+    if (!popupContainer.current) return;
+    if (singleRender.current) return;
+    singleRender.current = true;
+    openLayerMap.initialiseMapClickEvent(popupContainer.current, (feature) => {
+      const properties = feature.getProperties();
+      delete properties.geometry;
+      delete properties.fill;
+      delete properties.stroke;
+      delete properties['fill-opacity'];
+      delete properties['stroke-width'];
+      delete properties['stroke-opacity'];
+      setProperties(properties);
+      if (Object.keys(properties).length === 0) {
+        openLayerMap.closePopupOverLay();
+      }
+    });
+  }, [popupContainer.current]);
+  function handlePopupClosing() {
+    openLayerMap.closePopupOverLay();
+  }
+  return (
+    <div>
+      <div id="popup" ref={popupContainer} className={styles.ol_popup}>
+        <button
+          onClick={handlePopupClosing}
+          className={styles.ol_popup_closer}
+        ></button>
+        <div id="popup-content">
+          <table className={styles.popup_table}>
+            <tbody>
+              {properties &&
+                Object.keys(properties).map((property) => {
+                  return (
+                    <tr key={property}>
+                      <td>{property}</td>
+                      <td>: {properties[property]}</td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Popup;

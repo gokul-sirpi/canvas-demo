@@ -2,18 +2,17 @@ import { FaLock, FaUnlock } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
 import { AiFillPlusCircle } from 'react-icons/ai';
-import { Resource } from '../../types/resource';
-import axios, { AxiosError } from 'axios';
+import { QueryParams, Resource } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
-import { GeoJsonObj } from '../../types/GeojsonType';
 import { SetStateAction, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
-import { axiosAuthClient } from '../../lib/axiosConfig';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { emitToast } from '../../lib/toastEmitter';
+import { MdDownloadForOffline } from 'react-icons/md';
+import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures';
 
 function GsixFeatureTile({
   resource,
@@ -42,68 +41,33 @@ function GsixFeatureTile({
   async function handleGsixLayerAddition() {
     setAdding(true);
     dispatch(updateLoadingState(true));
-    try {
-      const body = {
-        itemId: resource.id,
-        itemType: 'resource',
-        role: 'consumer',
-      };
-      if (resource.accessPolicy === 'OPEN') {
-        body.itemId = 'rs.iudx.io';
-        body.itemType = 'resource_server';
-      }
-      const response = await axiosAuthClient.post('v1/token', body);
-      if (response.status === 200) {
-        if (response.data.title === 'Token created') {
-          getGsixLayerData(response.data.results.accessToken);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      cleanUpSideEffects();
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 403 || error.response?.status === 401) {
-          emitToast(
-            'error',
-            'Access denied. Please request access to the data.'
-          );
-          setNoAccess(true);
-        }
-      }
-    }
-  }
-  async function getGsixLayerData(accessToken: string) {
-    try {
-      const url =
-        envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
-      const queryParams = {
-        offset: 1,
-        limit: limit,
-      };
-      const response = await axios.get(url, {
-        headers: { Token: accessToken },
-        params: queryParams,
-      });
-      if (response.status === 200) {
-        const geoJsonData: GeoJsonObj = response.data;
-        const layerName = resource.label;
-        plotGsixLayerData(geoJsonData, layerName);
+    const newLayer = openLayerMap.createNewUgixLayer(
+      resource.label,
+      resource.id
+    );
+    const queryParams: QueryParams = {
+      limit: limit,
+      offset: 1,
+    };
+    getAllUgixFeatures(
+      resource,
+      newLayer,
+      queryParams,
+      () => {
+        dispatch(addGsixLayer(newLayer));
+        // cleanUpSideEffects();
+      },
+      (message) => {
+        emitToast('error', message);
+        cleanUpSideEffects();
+        setNoAccess(true);
+      },
+      () => {
+        cleanUpSideEffects();
         dialogCloseTrigger(false);
+        openLayerMap.zoomToFit(newLayer.layerId);
       }
-    } catch (error) {
-      console.log(error);
-      if (error instanceof AxiosError) {
-        emitToast('error', 'Unable to access the data. Please try again');
-      }
-    } finally {
-      cleanUpSideEffects();
-    }
-  }
-  function plotGsixLayerData(data: GeoJsonObj, layerName: string) {
-    const newLayer = openLayerMap.createNewUgixLayer(layerName, resource.id);
-    openLayerMap.addGeoJsonFeature(data, newLayer.layerId, newLayer.layerColor);
-    openLayerMap.zoomToFit(newLayer.layerId);
-    dispatch(addGsixLayer(newLayer));
+    );
   }
   function cleanUpSideEffects() {
     setAdding(false);
@@ -140,6 +104,13 @@ function GsixFeatureTile({
           >
             <div className={styles.add_icon}>
               <AiFillPlusCircle />
+            </div>
+          </button>
+        </TooltipWrapper>
+        <TooltipWrapper content="download">
+          <button>
+            <div className={styles.add_icon}>
+              <MdDownloadForOffline />
             </div>
           </button>
         </TooltipWrapper>

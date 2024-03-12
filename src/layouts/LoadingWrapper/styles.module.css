@@ -1,13 +1,18 @@
+.loader_modal {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
 .loader {
-  position: absolute;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 300px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #414f7ab6;
-  z-index: 999;
+  margin: auto;
+}
+.loader_modal::backdrop {
+  background-color: #0d6da866;
 }
 .loading_text {
   position: absolute;

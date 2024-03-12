@@ -27,11 +27,11 @@ function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
         firstLayer = false;
       });
     } else if (type === 'Measure') {
-      openLayerMap.addDrawFeature(type, source, () => {
+      openLayerMap.addDrawFeature(type, source, newLayer.style, () => {
         openLayerMap.removeLayer(newLayer.layerId);
       });
     } else {
-      openLayerMap.addDrawFeature(type, source, () => {
+      openLayerMap.addDrawFeature(type, source, newLayer.style, () => {
         if (firstLayer) {
           dispatch(addUserLayer(newLayer));
         }

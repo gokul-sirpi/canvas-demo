@@ -14,9 +14,9 @@ import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
-// import Intro from '../../layouts/Intro/Intro.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
 import { getCookieValue } from '../../lib/cookieManger.ts';
+import Intro from '../../layouts/Intro/Intro.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -147,7 +147,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
-        {/* <Intro /> */}
+        <Intro />
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />

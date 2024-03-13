@@ -14,7 +14,7 @@ import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
-import Intro from '../../layouts/Intro/Intro.tsx';
+// import Intro from '../../layouts/Intro/Intro.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
@@ -159,7 +159,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
-        <Intro />
+        {/* <Intro /> */}
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />

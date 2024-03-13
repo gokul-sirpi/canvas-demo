@@ -3,7 +3,7 @@
   background-color: rgba(237, 237, 237, 0.7);
   border-bottom: 0.5px solid var(--color-accent);
   display: flex;
-  padding: 0.2rem 1rem;
+  padding: 0.3rem 1rem;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -65,14 +65,54 @@
   align-items: center;
 }
 
-.profile_container > h3 {
-  font-size: var(--font-md);
-}
-
 .profile_icon {
   border-radius: 100rem;
-  padding: 0.5rem 0.5rem;
-  background-color: var(--color-secondary);
+  padding: 0.6rem 0.45rem;
+  background-color: var(--color-primary);
   color: white;
   line-height: 1.3rem;
+  font-size: var(--font-md);
+  transition: 300ms linear;
+}
+.profile_icon[data-state='open'] {
+  transition: 0ms;
+  border-radius: 100rem 100rem 0rem 0rem;
+}
+.popover_content {
+  background-color: white;
+  border-radius: var(--radius-sm);
+  border-top-right-radius: 0rem;
+  border: 2px solid var(--color-primary);
+  overflow: hidden;
+  translate: -1rem;
+  min-width: 13rem;
+}
+.user_info {
+  padding: 1rem;
+}
+.user_info > div {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.user_info > div:first-child {
+  margin-bottom: 0.2rem;
+}
+.profile_name {
+  font-weight: bold;
+}
+.email {
+  font-size: var(--font-sm);
+}
+.signout_btn {
+  background-color: var(--color-primary);
+  padding: 1rem;
+  width: 100%;
+  text-align: start;
+  color: white;
+  font-size: var(--font-md);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }

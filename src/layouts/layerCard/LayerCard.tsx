@@ -16,8 +16,8 @@ function LayerCard() {
   const userLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });
-  const gsixLayers = useSelector((state: RootState) => {
-    return state.gsixLayer.layers;
+  const ugixLayers = useSelector((state: RootState) => {
+    return state.ugixLayer.layers;
   });
 
   return (
@@ -43,11 +43,11 @@ function LayerCard() {
                   <Accordion.AccordionContent
                     className={styles.accordion_content}
                   >
-                    {gsixLayers.length === 0 ? (
+                    {ugixLayers.length === 0 ? (
                       <div className={styles.noData}>No layers avalaible</div>
                     ) : (
                       <div className={styles.layer_container}>
-                        {gsixLayers.map((layer, index) => {
+                        {ugixLayers.map((layer, index) => {
                           return (
                             <LayerTile
                               key={layer.layerId}

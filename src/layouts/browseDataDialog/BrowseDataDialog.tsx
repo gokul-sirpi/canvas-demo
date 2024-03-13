@@ -4,7 +4,7 @@ import styles from './styles.module.css';
 import { BsArrowRight } from 'react-icons/bs';
 import { IoMdClose } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
-import GsixFeatureTile from '../../components/gsixFeatureTile/GsixFeatureTile';
+import UgixFeatureTile from '../../components/ugixFeatureTile/UgixFeatureTile';
 import { Resource } from '../../types/resource';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
@@ -19,7 +19,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const plottedLayers = useSelector((state: RootState) => {
-    return state.gsixLayer.layers;
+    return state.ugixLayer.layers;
   });
 
   useEffect(() => {
@@ -169,11 +169,11 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
             {resources.length > 0 ? (
               resources.map((resource) => {
                 const matched = plottedLayers.filter(
-                  (layer) => layer.gsixLayerId === resource.id
+                  (layer) => layer.ugixLayerId === resource.id
                 );
                 const plotted = matched.length > 0;
                 return (
-                  <GsixFeatureTile
+                  <UgixFeatureTile
                     plotted={plotted}
                     key={resource.id}
                     resource={resource}

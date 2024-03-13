@@ -1,6 +1,6 @@
 //
 import DrawingTool from '../../components/drawingTool/DrawingTool';
-import ugix_logo from '../../assets/images/gsix-logo.svg';
+import ugix_logo from '../../assets/images/ugix-logo.svg';
 import styles from './styles.module.css';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import BaseMaps from '../../components/basemaps/BaseMaps';
@@ -10,6 +10,11 @@ import { UserProfile } from '../../types/UserProfile';
 import { Resource } from '../../types/resource';
 import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 import DrawingTools from '../drawingTools/DrawingTools';
+import * as Popover from '@radix-ui/react-popover';
+import { IoMdMail } from 'react-icons/io';
+import { HiUser } from 'react-icons/hi2';
+import { LuLogOut } from 'react-icons/lu';
+import keycloak from '../../lib/keycloak';
 
 function Header({
   profileData,
@@ -26,6 +31,9 @@ function Header({
     }
     return 'user';
   };
+  function handleLogout() {
+    keycloak.logout();
+  }
   return (
     <>
       <header className={styles.container}>
@@ -57,7 +65,35 @@ function Header({
           <ImportDataInput />
         </div>
         <div className={styles.profile_container}>
-          <div className={styles.profile_icon}>{userIconName()}</div>
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <button className={styles.profile_icon}>{userIconName()}</button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                sideOffset={-2}
+                className={styles.popover_content}
+              >
+                <div className={styles.user_info}>
+                  <div>
+                    <HiUser />
+                    <p className={styles.profile_name}>
+                      {profileData?.name.firstName} {profileData?.name.lastName}
+                    </p>
+                  </div>
+                  <div>
+                    <IoMdMail />
+                    <p className={styles.email}>{profileData?.email}</p>
+                  </div>
+                </div>
+                <div>
+                  <button onClick={handleLogout} className={styles.signout_btn}>
+                    <LuLogOut size={25} /> <p>Sign Out</p>
+                  </button>
+                </div>
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
       </header>
     </>

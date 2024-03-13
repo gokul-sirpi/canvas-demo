@@ -2,30 +2,30 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UgixLayer } from '../../types/UgixLayers';
 import { FeatureStyle } from '../../types/FeatureStyle';
 
-type GsixLayerState = {
+type UgixLayerState = {
   layers: UgixLayer[];
 };
 
-const initialState: GsixLayerState = {
+const initialState: UgixLayerState = {
   layers: [],
 };
 
-export const gsixLayerSlice = createSlice({
-  name: 'gsixLayers',
+export const ugixLayerSlice = createSlice({
+  name: 'ugixLayers',
   initialState,
   reducers: {
-    addGsixLayer(state, action) {
+    addUgixLayer(state, action) {
       state.layers.push(action.payload);
     },
-    updateGsixLayer(state, action) {
+    updateUgixLayer(state, action) {
       state.layers[action.payload.index] = action.payload.modifiedLayer;
     },
-    deleteGsixLayer(state, { payload }) {
+    deleteUgixLayer(state, { payload }) {
       state.layers = state.layers.filter((layer) => {
         return layer.layerId !== payload;
       });
     },
-    updateGsixLayerColor(
+    updateUgixLayerColor(
       state,
       action: PayloadAction<{
         layerId: string;
@@ -46,9 +46,9 @@ export const gsixLayerSlice = createSlice({
 });
 
 export const {
-  addGsixLayer,
-  deleteGsixLayer,
-  updateGsixLayer,
-  updateGsixLayerColor,
-} = gsixLayerSlice.actions;
-export default gsixLayerSlice.reducer;
+  addUgixLayer,
+  deleteUgixLayer,
+  updateUgixLayer,
+  updateUgixLayerColor,
+} = ugixLayerSlice.actions;
+export default ugixLayerSlice.reducer;

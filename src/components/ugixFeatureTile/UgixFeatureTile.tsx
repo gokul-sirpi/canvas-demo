@@ -6,7 +6,7 @@ import { QueryParams, Resource } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice';
+import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
@@ -14,7 +14,7 @@ import { emitToast } from '../../lib/toastEmitter';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures';
 
-function GsixFeatureTile({
+function UgixFeatureTile({
   resource,
   dialogCloseTrigger,
   plotted,
@@ -38,7 +38,7 @@ function GsixFeatureTile({
     window.open(path, '_blank');
   }
 
-  async function handleGsixLayerAddition() {
+  async function handleUgixLayerAddition() {
     setAdding(true);
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
@@ -54,7 +54,7 @@ function GsixFeatureTile({
       newLayer,
       queryParams,
       () => {
-        dispatch(addGsixLayer(newLayer));
+        dispatch(addUgixLayer(newLayer));
         // cleanUpSideEffects();
       },
       (message) => {
@@ -100,7 +100,7 @@ function GsixFeatureTile({
         <TooltipWrapper content="add">
           <button
             disabled={plotted || adding}
-            onClick={handleGsixLayerAddition}
+            onClick={handleUgixLayerAddition}
           >
             <div className={styles.add_icon}>
               <AiFillPlusCircle />
@@ -135,4 +135,4 @@ function GsixFeatureTile({
   );
 }
 
-export default GsixFeatureTile;
+export default UgixFeatureTile;

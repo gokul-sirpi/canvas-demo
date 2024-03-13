@@ -157,7 +157,9 @@ function LayerTile({
               <>
                 {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
-                {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+                {layer.featureType === 'Rectangle' && (
+                  <IoSquareOutline size={13} />
+                )}
                 {layer.featureType === 'Polygon' && <PiPolygon size={13} />}
                 {layer.featureType === 'Line' && <PiLineSegments size={13} />}
                 {layer.featureType === 'GeometryCollection' && (

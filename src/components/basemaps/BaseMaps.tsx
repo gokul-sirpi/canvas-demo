@@ -89,7 +89,7 @@ function BaseMaps() {
   return (
     <>
       <Popover.Root>
-        <TooltipWrapper content="Base Maps">
+        <TooltipWrapper content="Toggle base layer">
           <Popover.Trigger className={styles.popover_trigger}>
             <div className={styles.btn_icon_container}>
               <IoLayersOutline size={25} />

@@ -40,7 +40,7 @@ function ExportDataDialog() {
   return (
     <>
       <Dialog.Root open={dialogOpenStatus}>
-        <TooltipWrapper content="Export as">
+        <TooltipWrapper content="Export features">
           <Dialog.Trigger asChild>
             <button onClick={() => setDialogOpenStatus(true)}>
               <div className={styles.btn_icon_container}>

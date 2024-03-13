@@ -5,9 +5,11 @@ import styles from './styles.module.css';
 function TooltipWrapper({
   children,
   content,
+  side,
 }: {
   children: ReactElement;
   content: string;
+  side?: 'top' | 'right' | 'bottom' | 'left';
 }) {
   return (
     <>
@@ -15,7 +17,11 @@ function TooltipWrapper({
         <Tooltip.Root>
           <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
           <Tooltip.Portal>
-            <Tooltip.Content className={styles.tooltip_content} sideOffset={5}>
+            <Tooltip.Content
+              side={side || 'top'}
+              className={styles.tooltip_content}
+              sideOffset={5}
+            >
               {content}
               <Tooltip.Arrow className={styles.tooltip_arrow} />
             </Tooltip.Content>

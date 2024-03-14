@@ -9,6 +9,7 @@ import { UserProfile } from './types/UserProfile';
 import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
 import { AxiosError } from 'axios';
 import { emitToast } from './lib/toastEmitter';
+import { getCookieValue, setCookie } from './lib/cookieManger';
 
 function App() {
   const isRun = useRef(false);
@@ -41,29 +42,11 @@ function App() {
       });
   }
 
-  function setCookie(key: string, val: string) {
-    document.cookie = `${key}=${val};domain=ugix.org.in`;
-  }
-
   function handleLogin() {
     windowref.current = window.open(envurls.authReduirectUrl, '_blank');
     intervalId.current = setInterval(() => {
       checkLoginStatus();
     }, 500);
-  }
-
-  function getCookieValue(cname: string) {
-    const cookies = document.cookie.split(';');
-    let returnVal;
-    for (const cookie of cookies) {
-      if (!cookie) continue;
-      const cookieKey = cookie.split('=')[0].trim();
-      const cookieValue = cookie.split('=')[1].trim();
-      if (cookieKey === cname) {
-        returnVal = cookieValue;
-      }
-    }
-    return returnVal;
   }
 
   function checkLoginStatus() {

@@ -175,7 +175,7 @@ const openLayerMap = {
       layerType: 'UgixLayer',
       layerName: layerName,
       layerId,
-      gsixLayerId: ugixId,
+      ugixLayerId: ugixId,
       selected: true,
       visible: true,
       isCompleted: true,

@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userLayerSlice from './userLayers/userLayerSlice';
-import gsixLayerSlice from './gsixLayers/gsixLayerSlice';
+import ugixLayerSlice from './ugixLayers/ugixLayerSlice';
 import LoaderSlice from './loading/LoaderSlice';
 
 export const store = configureStore({
   reducer: {
     userLayer: userLayerSlice,
-    gsixLayer: gsixLayerSlice,
+    ugixLayer: ugixLayerSlice,
     loading: LoaderSlice,
   },
 });

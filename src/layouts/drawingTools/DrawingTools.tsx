@@ -20,7 +20,7 @@ function DrawingTools() {
   }
   return (
     <Popover.Root open={isPopoverOpen}>
-      <div className={styles.popover_root}>
+      <div className={styles.popover_root} data-intro="drawing_tools">
         <Popover.Anchor>
           <TooltipWrapper content={selectedTool}>
             <span>

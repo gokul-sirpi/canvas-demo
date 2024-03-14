@@ -32,7 +32,11 @@ function LayerCard() {
               defaultValue={['ugix', 'user']}
               type="multiple"
             >
-              <Accordion.Item className={styles.accordion_item} value="ugix">
+              <Accordion.Item
+                data-intro="ugix_layers"
+                className={styles.accordion_item}
+                value="ugix"
+              >
                 <div className={styles.user_layer_container}>
                   <Accordion.Trigger className={styles.accordion_trigger}>
                     <h3>UGIX Layers</h3>
@@ -61,7 +65,11 @@ function LayerCard() {
                   </Accordion.AccordionContent>
                 </div>
               </Accordion.Item>
-              <Accordion.Item className={styles.accordion_item} value="user">
+              <Accordion.Item
+                data-intro="user_layers"
+                className={styles.accordion_item}
+                value="user"
+              >
                 <div className={styles.user_layer_container}>
                   <Accordion.Trigger className={styles.accordion_trigger}>
                     <h3>User Layers</h3>

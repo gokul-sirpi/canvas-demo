@@ -45,18 +45,18 @@ function Header({
             </span>
           </TooltipWrapper>
           <TooltipWrapper content="Select">
-            <span>
+            <span data-intro="select">
               <DrawingTool toolType="Cursor" />
             </span>
           </TooltipWrapper>
           <DrawingTools />
           <TooltipWrapper content="Add marker">
-            <span>
+            <span data-intro="add_marker">
               <DrawingTool toolType="Marker" />
             </span>
           </TooltipWrapper>
           <TooltipWrapper content="Measure distance">
-            <span>
+            <span data-intro="measure">
               <DrawingTool toolType="Measure" />
             </span>
           </TooltipWrapper>
@@ -67,7 +67,9 @@ function Header({
         <div className={styles.profile_container}>
           <Popover.Root>
             <Popover.Trigger asChild>
-              <button className={styles.profile_icon}>{userIconName()}</button>
+              <button data-intro="sign_out" className={styles.profile_icon}>
+                {userIconName()}
+              </button>
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Content

@@ -69,10 +69,10 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
     setIsDialogOpen(false);
     const bboxLayer = openLayerMap.createDrawableUserLayer(
       'bbox-drawer',
-      'Box'
+      'Rectangle'
     );
     openLayerMap.addDrawFeature(
-      'Box',
+      'Rectangle',
       bboxLayer.source,
       bboxLayer.style,
       (event) => {

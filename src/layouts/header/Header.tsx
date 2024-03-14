@@ -9,6 +9,7 @@ import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
 import { Resource } from '../../types/resource';
 import ImportDataInput from '../../components/importDataInput/ImportDataInput';
+import DrawingTools from '../drawingTools/DrawingTools';
 
 function Header({
   profileData,
@@ -30,7 +31,7 @@ function Header({
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
         <div data-intro="header" className={styles.tools_container}>
-          <TooltipWrapper content="Browse Data">
+          <TooltipWrapper content="Browse Ugix  resources">
             <span data-intro="browse">
               <BrowseDataDialog resourceList={resourceList} />
             </span>
@@ -40,32 +41,13 @@ function Header({
               <DrawingTool toolType="Cursor" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="Circle">
-            <span>
-              <DrawingTool toolType="Circle" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Rectangle">
-            <span>
-              <DrawingTool toolType="Box" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Polygon">
-            <span>
-              <DrawingTool toolType="Polygon" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Line">
-            <span>
-              <DrawingTool toolType="Line" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Marker">
+          <DrawingTools />
+          <TooltipWrapper content="Add marker">
             <span>
               <DrawingTool toolType="Marker" />
             </span>
           </TooltipWrapper>
-          <TooltipWrapper content="Measure">
+          <TooltipWrapper content="Measure distance">
             <span>
               <DrawingTool toolType="Measure" />
             </span>

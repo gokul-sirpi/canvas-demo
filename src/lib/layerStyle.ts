@@ -11,7 +11,7 @@ const image = new CircleStyle({
   stroke: new Stroke({ color: 'red', width: 1 }),
 });
 const whiteFill = '#ffffff';
-const whiteFillOpacity = '66';
+const whiteFillOpacity = '55';
 
 //returns different style for different types of feature eg-polygon,point
 export function styleFunction(feature: FeatureLike, stroke: string) {

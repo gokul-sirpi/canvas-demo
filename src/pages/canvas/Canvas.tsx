@@ -10,12 +10,13 @@ import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { QueryParams, Resource } from '../../types/resource.ts';
-import { addGsixLayer } from '../../context/gsixLayers/gsixLayerSlice.ts';
+import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice.ts';
 import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
-// import Intro from '../../layouts/Intro/Intro.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
+import { getCookieValue } from '../../lib/cookieManger.ts';
+import Intro from '../../layouts/Intro/Intro.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -40,7 +41,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
 
   function renderWishListItems(resourceList: Resource[]) {
-    const wishList = getCookieValue('resWishlist');
+    const wishList = getCookieValue(envurls.catalogueCookie);
     console.log(wishList);
     if (wishList) {
       const parsedList = wishList.split(',');
@@ -69,7 +70,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       newLayer,
       queryParams,
       () => {
-        dispatch(addGsixLayer(newLayer));
+        dispatch(addUgixLayer(newLayer));
       },
       (message) => {
         emitToast('error', message);
@@ -83,19 +84,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   function cleanUpSideEffects() {
     dispatch(updateLoadingState(false));
-  }
-  function getCookieValue(cname: string) {
-    const cookies = document.cookie.split(';');
-    let returnVal;
-    for (const cookie of cookies) {
-      if (!cookie) continue;
-      const cookieKey = cookie.split('=')[0].trim();
-      const cookieValue = cookie.split('=')[1].trim();
-      if (cookieKey === cname) {
-        returnVal = cookieValue;
-      }
-    }
-    return returnVal;
   }
   function handleFileDrop(event: React.DragEvent) {
     event.preventDefault();
@@ -159,7 +147,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
-        {/* <Intro /> */}
+        <Intro />
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />

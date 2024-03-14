@@ -2,7 +2,7 @@ import { FeatureStyle } from './FeatureStyle';
 
 export type drawType =
   | 'Circle'
-  | 'Box'
+  | 'Rectangle'
   | 'Marker'
   | 'Polygon'
   | 'Measure'

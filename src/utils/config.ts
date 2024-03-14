@@ -6,6 +6,7 @@ const ugixOgcServer = envs.VITE_UGIX_OGC_SERVER;
 const ugixCatalogue = envs.VITE_UGIX_CATALOGUE;
 const authReduirectUrl = envs.VITE_AUTH_REDIRECT_URI;
 const authCookie = envs.VITE_AUTH_COOKIE;
+const catalogueCookie = envs.VITE_CATALOGUE_COOKIE;
 //keycloak
 const keycloakUrl = envs.VITE_KEYCLOAK_URL;
 const realm = envs.VITE_REALM;
@@ -24,6 +25,7 @@ const envurls = {
   ugixCatalogue,
   authReduirectUrl,
   authCookie,
+  catalogueCookie,
 };
 
 export default envurls;

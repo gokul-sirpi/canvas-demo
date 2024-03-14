@@ -16,8 +16,8 @@ function LayerCard() {
   const userLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });
-  const gsixLayers = useSelector((state: RootState) => {
-    return state.gsixLayer.layers;
+  const ugixLayers = useSelector((state: RootState) => {
+    return state.ugixLayer.layers;
   });
 
   return (
@@ -32,7 +32,11 @@ function LayerCard() {
               defaultValue={['ugix', 'user']}
               type="multiple"
             >
-              <Accordion.Item className={styles.accordion_item} value="ugix">
+              <Accordion.Item
+                data-intro="ugix_layers"
+                className={styles.accordion_item}
+                value="ugix"
+              >
                 <div className={styles.user_layer_container}>
                   <Accordion.Trigger className={styles.accordion_trigger}>
                     <h3>UGIX Layers</h3>
@@ -43,11 +47,11 @@ function LayerCard() {
                   <Accordion.AccordionContent
                     className={styles.accordion_content}
                   >
-                    {gsixLayers.length === 0 ? (
+                    {ugixLayers.length === 0 ? (
                       <div className={styles.noData}>No layers avalaible</div>
                     ) : (
                       <div className={styles.layer_container}>
-                        {gsixLayers.map((layer, index) => {
+                        {ugixLayers.map((layer, index) => {
                           return (
                             <LayerTile
                               key={layer.layerId}
@@ -61,7 +65,11 @@ function LayerCard() {
                   </Accordion.AccordionContent>
                 </div>
               </Accordion.Item>
-              <Accordion.Item className={styles.accordion_item} value="user">
+              <Accordion.Item
+                data-intro="user_layers"
+                className={styles.accordion_item}
+                value="user"
+              >
                 <div className={styles.user_layer_container}>
                   <Accordion.Trigger className={styles.accordion_trigger}>
                     <h3>User Layers</h3>

@@ -175,7 +175,7 @@ const openLayerMap = {
       layerType: 'UgixLayer',
       layerName: layerName,
       layerId,
-      gsixLayerId: ugixId,
+      ugixLayerId: ugixId,
       selected: true,
       visible: true,
       isCompleted: true,
@@ -201,14 +201,14 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: 'Circle' | 'Box' | 'Polygon' | 'Measure' | 'Line',
+    type: drawType,
     source: VectorSource,
     featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
     switch (type) {
-      case 'Box':
+      case 'Rectangle':
         this.draw = new Draw({
           type: 'Circle',
           source: source,

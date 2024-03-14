@@ -12,7 +12,7 @@ import {
   updateUserLayer,
 } from '../../context/userLayers/userLayerSlice';
 import { UgixLayer } from '../../types/UgixLayers';
-import { updateGsixLayerColor } from '../../context/gsixLayers/gsixLayerSlice';
+import { updateUgixLayerColor } from '../../context/ugixLayers/ugixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
@@ -70,7 +70,7 @@ function LayerTile({
     );
     if (layer.layerType === 'UgixLayer') {
       dispatch(
-        updateGsixLayerColor({
+        updateUgixLayerColor({
           layerId: layer.layerId,
           newColor: text,
           style: changedStyle,
@@ -157,7 +157,9 @@ function LayerTile({
               <>
                 {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
-                {layer.featureType === 'Box' && <IoSquareOutline size={13} />}
+                {layer.featureType === 'Rectangle' && (
+                  <IoSquareOutline size={13} />
+                )}
                 {layer.featureType === 'Polygon' && <PiPolygon size={13} />}
                 {layer.featureType === 'Line' && <PiLineSegments size={13} />}
                 {layer.featureType === 'GeometryCollection' && (
@@ -165,13 +167,7 @@ function LayerTile({
                 )}
               </>
             )}
-
             <LayerMorePopover layer={layer} />
-            {/* <button>
-              <div className={styles.btn_icon_container}>
-                <IoSettingsOutline size={20} />
-              </div>
-            </button> */}
           </div>
         ) : (
           <>

@@ -11,13 +11,22 @@ import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import { RxRulerHorizontal } from 'react-icons/rx';
 import { LuMousePointer2 } from 'react-icons/lu';
 
-function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
+function DrawingTool({
+  toolType,
+  changeSelectedTool,
+}: {
+  toolType: drawType | 'Cursor';
+  changeSelectedTool?: (tool: drawType) => void;
+}) {
   const dispatch = useDispatch();
   function drawFeature(type: drawType) {
     const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
       '',
       type
     );
+    if (changeSelectedTool) {
+      changeSelectedTool(type);
+    }
     let firstLayer = true;
     if (type === 'Marker') {
       openLayerMap.addMarkerFeature(source, () => {
@@ -57,8 +66,8 @@ function DrawingTool({ toolType }: { toolType: drawType | 'Cursor' }) {
           </div>
         </button>
       )}
-      {toolType === 'Box' && (
-        <button onClick={() => drawFeature('Box')}>
+      {toolType === 'Rectangle' && (
+        <button onClick={() => drawFeature('Rectangle')}>
           <div className={styles.btn_icon_container}>
             <IoSquareOutline size={25} />
           </div>

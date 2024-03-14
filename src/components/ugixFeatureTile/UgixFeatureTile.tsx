@@ -126,7 +126,7 @@ function UgixFeatureTile({
         <div className={styles.warn_text}>
           You do not have access to view this data, please visit{' '}
           <a href={getinfoLink()} target="_blank">
-            gsx page
+            UGIX page
           </a>{' '}
           to request access
         </div>

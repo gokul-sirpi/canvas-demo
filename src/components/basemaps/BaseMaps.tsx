@@ -103,6 +103,19 @@ function BaseMaps() {
           <Popover.Content className={styles.popover_content}>
             <div>
               <button
+                onClick={() => toggleBaseMap('ogc-layer')}
+                className={
+                  mapType === 'ogc-layer' ? styles.selected : styles.unselected
+                }
+              >
+                <span>
+                  <span>
+                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
+                  </span>
+                </span>
+                Basic Map
+              </button>
+              <button
                 onClick={() => {
                   toggleBaseMap('standard');
                 }}
@@ -132,19 +145,7 @@ function BaseMaps() {
                 </span>
                 Humanitarian
               </button>
-              <button
-                onClick={() => toggleBaseMap('ogc-layer')}
-                className={
-                  mapType === 'ogc-layer' ? styles.selected : styles.unselected
-                }
-              >
-                <span>
-                  <span>
-                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
-                  </span>
-                </span>
-                Basic Map
-              </button>
+              
             </div>
             {/* <button>Bharat Map</button> */}
             <Popover.Arrow className={styles.popover_arrow} />

@@ -55,6 +55,11 @@ function LayerTile({
     modifiedLayer.layerName = layerName;
     modifiedLayer.isCompleted = true;
     dispatch(updateUserLayer({ index, modifiedLayer }));
+    openLayerMap.updateFeatureProperties(
+      modifiedLayer.layerId,
+      'name',
+      layerName
+    );
   }
 
   function cancelLayerCreation() {

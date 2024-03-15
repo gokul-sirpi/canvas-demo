@@ -1,7 +1,7 @@
 import { FaLock, FaUnlock } from 'react-icons/fa';
+import { FaMinus, FaPlus } from 'react-icons/fa6';
 import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
-import { AiFillPlusCircle } from 'react-icons/ai';
 import { QueryParams, Resource } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useState } from 'react';
@@ -13,20 +13,20 @@ import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { emitToast } from '../../lib/toastEmitter';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures';
+import { Extent } from 'ol/extent';
 
 function UgixFeatureTile({
   resource,
   dialogCloseTrigger,
-  plotted,
 }: {
   resource: Resource;
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
-  plotted: boolean;
 }) {
   const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
 
   function getinfoLink() {
     const groupId = resource.resourceGroup;
@@ -60,7 +60,58 @@ function UgixFeatureTile({
       (message) => {
         emitToast('error', message);
         cleanUpSideEffects();
-        setNoAccess(true);
+        showNoAccessText();
+      },
+      () => {
+        cleanUpSideEffects();
+        dialogCloseTrigger(false);
+        openLayerMap.zoomToFit(newLayer.layerId);
+      }
+    );
+  }
+  function handleBboxSearch() {
+    dialogCloseTrigger(false);
+    const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
+      '',
+      'Rectangle'
+    );
+    openLayerMap.addDrawFeature(
+      'Rectangle',
+      source,
+      newLayer.style,
+      (event) => {
+        openLayerMap.removeDrawInteraction();
+        openLayerMap.removeLayer(newLayer.layerId);
+        const extent = event.feature.getGeometry()?.getExtent();
+        if (extent) {
+          getFeaturesInBbox(extent);
+        }
+      }
+    );
+  }
+  function getFeaturesInBbox(bbox: Extent) {
+    setAdding(true);
+    dispatch(updateLoadingState(true));
+    const newLayer = openLayerMap.createNewUgixLayer(
+      resource.label,
+      resource.id
+    );
+    const queryParams: QueryParams = {
+      limit: limit,
+      offset: 1,
+      bbox: bbox.join(),
+    };
+    getAllUgixFeatures(
+      resource,
+      newLayer,
+      queryParams,
+      () => {
+        dispatch(addUgixLayer(newLayer));
+      },
+      (message) => {
+        emitToast('error', message);
+        cleanUpSideEffects();
+        showNoAccessText();
       },
       () => {
         cleanUpSideEffects();
@@ -73,50 +124,76 @@ function UgixFeatureTile({
     setAdding(false);
     dispatch(updateLoadingState(false));
   }
+  function showNoAccessText() {
+    setNoAccess(true);
+    setTimeout(() => {
+      setNoAccess(false);
+    }, 5000);
+  }
+  function toggleExtraButtonDrawer() {
+    setIsExtraBtnVisible(!isExtraBtnVisible);
+  }
   return (
     <div className={styles.tile_container}>
       {/* content */}
-      <div className={styles.tile_description_container}>
-        {/* <div className={styles.tile_img_container}>
-          <img src={soiImg} alt="Survey Of India" className={styles.soi_img} />
-        </div> */}
-        <TooltipWrapper content={resource.label}>
-          <div className={styles.title_container}>
+      <div className={styles.tile_content}>
+        <div className={styles.tile_description}>
+          <TooltipWrapper content={resource.label}>
             <h2 className={styles.tile_title}>{resource.label}</h2>
+          </TooltipWrapper>
+          {resource.accessPolicy === 'OPEN' ? (
+            <div className={styles.badge}>
+              <FaUnlock /> Public
+            </div>
+          ) : (
+            <div className={`${styles.badge} ${styles.badge_private}`}>
+              <FaLock /> Private
+            </div>
+          )}
+          <div
+            className={styles.extra_button_container}
+            data-visible={isExtraBtnVisible}
+          >
+            <button
+              className={styles.extra_button}
+              disabled={adding}
+              onClick={handleUgixLayerAddition}
+            >
+              Get all
+            </button>
+            <button
+              disabled={adding}
+              className={styles.extra_button}
+              onClick={handleBboxSearch}
+            >
+              BBOX search
+            </button>
           </div>
-        </TooltipWrapper>
-        {resource.accessPolicy === 'OPEN' ? (
-          <div className={styles.badge}>
-            <FaUnlock /> Public
-          </div>
-        ) : (
-          <div className={`${styles.badge} ${styles.badge_private}`}>
-            <FaLock /> Private
-          </div>
-        )}
-      </div>
-      {/* icon container */}
-      <div className={styles.icon_container}>
+        </div>
         <TooltipWrapper content="add">
           <button
-            disabled={plotted || adding}
-            onClick={handleUgixLayerAddition}
+            className={styles.add_button}
+            disabled={adding}
+            onClick={toggleExtraButtonDrawer}
           >
             <div className={styles.add_icon}>
-              <AiFillPlusCircle />
+              {isExtraBtnVisible ? <FaMinus size={23} /> : <FaPlus size={23} />}
             </div>
           </button>
         </TooltipWrapper>
-        <TooltipWrapper content="download">
+      </div>
+      {/* icon container */}
+      <div className={styles.icon_container}>
+        <TooltipWrapper content="Download complete resources">
           <button>
-            <div className={styles.add_icon}>
+            <div className={styles.icon_wrapper}>
               <MdDownloadForOffline />
             </div>
           </button>
         </TooltipWrapper>
-        <TooltipWrapper content="info">
+        <TooltipWrapper content="Resource info">
           <button onClick={handleInfoOpen}>
-            <div className={styles.add_icon}>
+            <div className={styles.icon_wrapper}>
               <RiInformationFill />
             </div>
           </button>

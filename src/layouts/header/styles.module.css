@@ -67,12 +67,15 @@
 
 .profile_icon {
   border-radius: 100rem;
-  padding: 0.6rem 0.45rem;
+  padding: 0.6rem 0.45rem 0.4rem;
   background-color: var(--color-primary);
   color: white;
-  line-height: 1.3rem;
   font-size: var(--font-md);
-  transition: 300ms linear;
+  transition: border-radius 300ms linear;
+}
+.profile_icon:focus {
+  outline-color: var(--color-primary);
+  outline-offset: 3px;
 }
 .profile_icon[data-state='open'] {
   transition: 0ms;
@@ -99,7 +102,7 @@
   margin-bottom: 0.2rem;
 }
 .profile_name {
-  font-weight: bold;
+  font-weight: 600;
 }
 .email {
   font-size: var(--font-sm);

@@ -6,6 +6,8 @@ import { IoMdClose } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
 import UgixFeatureTile from '../../components/ugixFeatureTile/UgixFeatureTile';
 import { Resource } from '../../types/resource';
+// import { useSelector } from 'react-redux';
+// import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
@@ -16,6 +18,9 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // const plottedLayers = useSelector((state: RootState) => {
+  //   return state.ugixLayer.layers;
+  // });
 
   useEffect(() => {
     if (isDialogOpen === true) {

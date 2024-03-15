@@ -6,8 +6,6 @@ import { IoMdClose } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
 import UgixFeatureTile from '../../components/ugixFeatureTile/UgixFeatureTile';
 import { Resource } from '../../types/resource';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../context/store';
 import { PiSelection } from 'react-icons/pi';
 import openLayerMap from '../../lib/openLayers';
 import { TbWorldSearch } from 'react-icons/tb';
@@ -18,9 +16,6 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const plottedLayers = useSelector((state: RootState) => {
-    return state.ugixLayer.layers;
-  });
 
   useEffect(() => {
     if (isDialogOpen === true) {
@@ -168,13 +163,8 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
           <div className={styles.feature_tile_container}>
             {resources.length > 0 ? (
               resources.map((resource) => {
-                const matched = plottedLayers.filter(
-                  (layer) => layer.ugixLayerId === resource.id
-                );
-                const plotted = matched.length > 0;
                 return (
                   <UgixFeatureTile
-                    plotted={plotted}
                     key={resource.id}
                     resource={resource}
                     dialogCloseTrigger={setIsDialogOpen}

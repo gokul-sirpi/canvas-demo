@@ -24,7 +24,7 @@ function Intro() {
     {
       element: getElementWithDataSelector('browse'),
       intro:
-        'browse through all the catalogue resources to plot on the playground',
+        'Browse through all the catalogue resources to plot on the playground',
     },
     {
       element: getElementWithDataSelector('ugix_layers'),

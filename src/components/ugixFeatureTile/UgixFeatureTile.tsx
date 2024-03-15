@@ -71,13 +71,10 @@ function UgixFeatureTile({
   }
   function handleBboxSearch() {
     dialogCloseTrigger(false);
-    const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
-      '',
-      'Rectangle'
-    );
+    const newLayer = openLayerMap.createNewUserLayer('', 'Rectangle');
     openLayerMap.addDrawFeature(
       'Rectangle',
-      source,
+      newLayer.layerId,
       newLayer.style,
       (event) => {
         openLayerMap.removeDrawInteraction();

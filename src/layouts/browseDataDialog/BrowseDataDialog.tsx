@@ -67,13 +67,13 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
 
   function handleBboxSelection() {
     setIsDialogOpen(false);
-    const bboxLayer = openLayerMap.createDrawableUserLayer(
+    const bboxLayer = openLayerMap.createNewUserLayer(
       'bbox-drawer',
       'Rectangle'
     );
     openLayerMap.addDrawFeature(
       'Rectangle',
-      bboxLayer.source,
+      bboxLayer.layerId,
       bboxLayer.style,
       (event) => {
         openLayerMap.removeDrawInteraction();

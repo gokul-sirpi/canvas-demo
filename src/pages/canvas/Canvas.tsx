@@ -127,7 +127,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       openLayerMap.addImportedGeojsonData(
         data,
         newLayer.layerId,
-        newLayer.layerColor,
         newLayer.style
       );
       openLayerMap.zoomToFit(newLayer.layerId);

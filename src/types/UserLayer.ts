@@ -6,7 +6,8 @@ export type drawType =
   | 'Marker'
   | 'Polygon'
   | 'Measure'
-  | 'Line';
+  | 'Line'
+  | 'GeometryCollection';
 
 export type UserLayer = {
   layerType: 'UserLayer';

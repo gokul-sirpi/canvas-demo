@@ -20,38 +20,50 @@ function DrawingTool({
 }) {
   const dispatch = useDispatch();
   function drawFeature(type: drawType) {
-    const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
-      '',
-      type
-    );
+    const newLayer = openLayerMap.createNewUserLayer('', type);
     if (changeSelectedTool) {
       changeSelectedTool(type);
     }
     let firstLayer = true;
     if (type === 'Marker') {
-      openLayerMap.addMarkerFeature(source, newLayer.layerName, () => {
-        if (firstLayer) {
-          dispatch(addUserLayer(newLayer));
+      openLayerMap.addMarkerFeature(
+        newLayer.layerId,
+        newLayer.layerName,
+        () => {
+          if (firstLayer) {
+            dispatch(addUserLayer(newLayer));
+          }
+          firstLayer = false;
         }
-        firstLayer = false;
-      });
+      );
     } else if (type === 'Measure') {
-      openLayerMap.addDrawFeature(type, source, newLayer.style, () => {
-        openLayerMap.removeLayer(newLayer.layerId);
-      });
-    } else {
-      openLayerMap.addDrawFeature(type, source, newLayer.style, () => {
-        if (firstLayer) {
-          dispatch(addUserLayer(newLayer));
+      openLayerMap.addDrawFeature(
+        type,
+        newLayer.layerId,
+        newLayer.style,
+        () => {
+          openLayerMap.removeLayer(newLayer.layerId);
         }
-        firstLayer = false;
-      });
+      );
+    } else {
+      openLayerMap.addDrawFeature(
+        type,
+        newLayer.layerId,
+        newLayer.style,
+        () => {
+          if (firstLayer) {
+            dispatch(addUserLayer(newLayer));
+          }
+          firstLayer = false;
+        }
+      );
     }
   }
   function clearAllEvents() {
     openLayerMap.removeDrawInteraction();
     if (
       openLayerMap.latestLayer &&
+      openLayerMap.latestLayer.layerType === 'UserLayer' &&
       openLayerMap.latestLayer.featureType === 'Measure'
     ) {
       openLayerMap.removeLayer(openLayerMap.latestLayer.layerId);

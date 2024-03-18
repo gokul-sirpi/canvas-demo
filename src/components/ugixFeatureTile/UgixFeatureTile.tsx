@@ -43,7 +43,8 @@ function UgixFeatureTile({
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
-      resource.id
+      resource.id,
+      resource.resourceGroup
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -71,13 +72,10 @@ function UgixFeatureTile({
   }
   function handleBboxSearch() {
     dialogCloseTrigger(false);
-    const { source, ...newLayer } = openLayerMap.createDrawableUserLayer(
-      '',
-      'Rectangle'
-    );
+    const newLayer = openLayerMap.createNewUserLayer('', 'Rectangle');
     openLayerMap.addDrawFeature(
       'Rectangle',
-      source,
+      newLayer.layerId,
       newLayer.style,
       (event) => {
         openLayerMap.removeDrawInteraction();
@@ -94,7 +92,8 @@ function UgixFeatureTile({
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
-      resource.id
+      resource.id,
+      resource.resourceGroup
     );
     const queryParams: QueryParams = {
       limit: limit,

@@ -280,7 +280,11 @@ const openLayerMap = {
         });
     });
     this.draw.on('drawend', (event) => {
-      event.feature.setProperties({ ...featureStyle, ...featureProprties });
+      event.feature.setProperties({
+        name: 'Null',
+        ...featureStyle,
+        ...featureProprties,
+      });
       if (this.tooltipElement) {
         this.tooltipElement.remove();
         this.tooltipElement = null;
@@ -311,7 +315,11 @@ const openLayerMap = {
     });
   },
 
-  addMarkerFeature(source: VectorSource, callback?: () => void) {
+  addMarkerFeature(
+    source: VectorSource,
+    layerName: string,
+    callback?: () => void
+  ) {
     this.removeDrawInteraction();
     this.draw = new Draw({
       type: 'Point',
@@ -319,9 +327,11 @@ const openLayerMap = {
     this.map.addInteraction(this.draw);
     this.drawing = true;
     this.draw.on('drawend', (drawEvent) => {
-      const marker = new Feature({
-        geometry: new Point(drawEvent.target.sketchCoords_),
-        name: 'marker',
+      const marker = drawEvent.feature as Feature<Point>;
+      marker.setProperties({
+        name: layerName || 'NULL',
+        lat: marker.getGeometry()?.getCoordinates()[1],
+        lng: marker.getGeometry()?.getCoordinates()[0],
       });
       marker.setStyle(markerStyle);
       source.addFeature(marker);
@@ -550,6 +560,18 @@ const openLayerMap = {
       { hitTolerance: 3 }
     );
     return feature;
+  },
+  updateFeatureProperties(
+    layerId: string,
+    key: string,
+    value: string | number
+  ) {
+    const source = this.getLayer(layerId)?.getSource();
+    if (source) {
+      source.getFeatures().forEach((feature) => {
+        feature.setProperties({ [key]: value });
+      });
+    }
   },
 };
 // basic map interactions

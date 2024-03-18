@@ -147,10 +147,10 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     >
       <div id="ol-map" className={styles.ol_map}></div>
       <>
-        <Intro />
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />
+        <Intro />
       </>
     </section>
   );

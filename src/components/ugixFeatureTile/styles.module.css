@@ -8,39 +8,57 @@
   width: 1.5rem;
   height: 1.5rem;
 }
-.tile_description_container {
+.tile_content {
+  flex: 1;
+  border: 1px solid #aaa;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+}
+.tile_description {
   flex: 1;
   display: grid;
   grid-template-columns: minmax(calc(100% - 10rem), 1fr) min-content;
   gap: 0.5rem;
+  row-gap: 0.4rem;
   align-items: center;
-  max-width: calc(100% - 8rem);
-  border: 1px solid #aaa;
-  border-radius: var(--radius-sm);
-  padding: 1rem;
-}
-.tile_img_container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-left: 0.3rem;
-  width: fit-content;
-}
-.soi_text {
-  font-size: 12px;
-  color: #6c6c6c;
-}
-.title_container {
-  flex: 1;
+  max-width: calc(100% - 1rem);
+  padding: 0.8rem;
 }
 .tile_title {
+  max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: normal;
   font-size: var(--font-md);
 }
-
+@keyframes expand {
+  0% {
+    scale: 1 0;
+  }
+  100% {
+    scale: 1 1;
+  }
+}
+.extra_button_container {
+  grid-column: span 2;
+  gap: 1rem;
+  border-top: 1px solid var(--color-accent);
+  padding-top: 0.4rem;
+  display: none;
+  transform-origin: top;
+  animation: expand 100ms forwards;
+}
+.extra_button_container[data-visible='true'] {
+  display: flex;
+}
+.extra_button {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+}
 .badge {
   background-color: #009e5e;
   color: #fff;
@@ -53,23 +71,26 @@
 .badge_private {
   background-color: #c77d00;
 }
-.add_icon {
-  color: #038d07;
+.add_button {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.3rem;
+}
+
+.icon_wrapper {
+  color: var(--color-primary);
   font-size: 2.5rem;
   display: flex;
   align-items: center;
 }
-button:disabled > .add_icon {
-  color: var(--color-accent);
-  cursor: auto;
-}
+
 .icon_container {
   display: flex;
 }
 .warn_text {
   position: absolute;
   bottom: 0.1rem;
-  left: 3.4rem;
+  left: 1rem;
   font-size: var(--font-xsm);
   color: red;
   width: calc(100% - 12rem);

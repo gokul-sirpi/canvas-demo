@@ -29,7 +29,7 @@ function DrawingTool({
     }
     let firstLayer = true;
     if (type === 'Marker') {
-      openLayerMap.addMarkerFeature(source, () => {
+      openLayerMap.addMarkerFeature(source, newLayer.layerName, () => {
         if (firstLayer) {
           dispatch(addUserLayer(newLayer));
         }

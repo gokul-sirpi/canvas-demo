@@ -11,10 +11,15 @@
   width: 15rem;
   padding-bottom: 1rem;
 }
+.heading {
+  font-weight: 500;
+}
 .description {
-  width: min(40rem, 100%);
+  width: min(45rem, 100%);
   padding-block: 1rem;
   text-align: center;
+  color: gray;
+  line-height: 1.5rem;
 }
 
 .login_button {

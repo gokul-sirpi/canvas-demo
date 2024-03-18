@@ -8,7 +8,7 @@ function Home() {
       <div>
         <img src={ugixLogo} className={styles.logo_img} alt="ugix-logo" />
       </div>
-      <h2>Login to IUDX Account</h2>
+      <h2 className={styles.heading}>Login to UGIX Account</h2>
       <p className={styles.description}>
         Please complete your login in the opened tab/popup to get access to the
         canvas. In case, a new tab has not opened, please enable the browser to

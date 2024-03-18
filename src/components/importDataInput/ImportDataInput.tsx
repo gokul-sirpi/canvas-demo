@@ -56,7 +56,6 @@ function ImportDataInput() {
       openLayerMap.addImportedGeojsonData(
         data,
         newLayer.layerId,
-        newLayer.layerColor,
         newLayer.style
       );
       openLayerMap.zoomToFit(newLayer.layerId);

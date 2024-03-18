@@ -348,7 +348,6 @@ const openLayerMap = {
   addImportedGeojsonData(
     geojsonData: GeoJsonObj,
     layerId: string,
-    layerColor: string,
     style: FeatureStyle
   ) {
     geojsonData.crs = {

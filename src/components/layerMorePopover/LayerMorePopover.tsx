@@ -36,7 +36,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   }
   function handleInfoOpen() {
     if (layer.layerType === 'UgixLayer') {
-      const groupId = layer.ugixLayerId.split('/').slice(0, -1).join('-');
+      const groupId = layer.ugixGroupId;
       const path = envurls.ugixCatalogue + 'dataset/' + groupId;
       window.open(path, '_blank');
     }

@@ -5,6 +5,7 @@ export type UgixLayer = {
   layerName: string;
   layerId: string;
   ugixLayerId: string;
+  ugixGroupId: string;
   visible: boolean;
   selected: boolean;
   isCompleted: boolean;

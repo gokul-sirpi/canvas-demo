@@ -52,7 +52,7 @@ const markerStyle = new Style({
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
-  latestLayer: null as UserLayer | null,
+  latestLayer: null as UserLayer | UgixLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
@@ -109,10 +109,7 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createDrawableUserLayer(
-    layerName: string,
-    featureType: drawType
-  ): UserLayer & { source: VectorSource } {
+  createNewUserLayer(layerName: string, featureType: drawType): UserLayer {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
     const layer = new VectorLayer({
@@ -122,11 +119,10 @@ const openLayerMap = {
     const featureStyle = createFeatureStyle(featureColor);
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
-    const newLayer = {
+    const newLayer: UserLayer = {
       layerType: 'UserLayer' as const,
       layerName: layerName,
       layerId,
-      source,
       selected: true,
       visible: true,
       isCompleted: false,
@@ -139,28 +135,7 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  createNewUserLayer(
-    layerName: string,
-    featureType: drawType | 'GeometryCollection'
-  ) {
-    const layerColor = getRandomColor();
-    const featureStyle = createFeatureStyle(layerColor);
-    const layerId = createUniqueId();
-    const newLayer: UserLayer = {
-      layerType: 'UserLayer',
-      layerName: layerName,
-      layerId,
-      selected: true,
-      visible: true,
-      isCompleted: false,
-      layerColor,
-      featureType: featureType,
-      style: featureStyle,
-      editable: true,
-    };
-    return newLayer;
-  },
-  createNewUgixLayer(layerName: string, ugixId: string) {
+  createNewUgixLayer(layerName: string, ugixId: string, ugixGroupId: string) {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
@@ -176,12 +151,14 @@ const openLayerMap = {
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
+      ugixGroupId: ugixGroupId,
       selected: true,
       visible: true,
       isCompleted: true,
       layerColor,
       style: featureStyle,
     };
+    this.latestLayer = newLayer;
     return newLayer;
   },
 
@@ -202,11 +179,13 @@ const openLayerMap = {
 
   addDrawFeature(
     type: drawType,
-    source: VectorSource,
+    layerId: string,
     featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
     this.removeDrawInteraction();
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
     switch (type) {
       case 'Rectangle':
         this.draw = new Draw({
@@ -247,9 +226,9 @@ const openLayerMap = {
     }
     this.map.addInteraction(this.draw);
     this.drawing = true;
-    if (this.measureTooltip) {
-      this.map.addOverlay(this.measureTooltip);
-    }
+    // if (this.measureTooltip) {
+    //   this.map.addOverlay(this.measureTooltip);
+    // }
     const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
@@ -315,12 +294,10 @@ const openLayerMap = {
     });
   },
 
-  addMarkerFeature(
-    source: VectorSource,
-    layerName: string,
-    callback?: () => void
-  ) {
+  addMarkerFeature(layerId: string, layerName: string, callback?: () => void) {
     this.removeDrawInteraction();
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
     this.draw = new Draw({
       type: 'Point',
     });
@@ -380,9 +357,10 @@ const openLayerMap = {
         name: 'EPSG:4326',
       },
     };
-    const features = new GeoJson().readFeatures(geojsonData);
-    const newStyleArr: FeatureStyle[] = [];
-    features.forEach((feature) => {
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
+    const featureLikes = new GeoJson().readFeatures(geojsonData);
+    const features = featureLikes.map((feature) => {
       const properties = feature.getProperties();
       const newStyle = {
         fill: properties.fill || style.fill,
@@ -392,20 +370,11 @@ const openLayerMap = {
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
       };
-      newStyleArr.push(newStyle);
-    });
-    const vectorSource = new VectorSource({
-      features: features,
-      format: new GeoJson(),
-    }) as VectorSource;
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: (feature) => styleFunction(feature, layerColor),
-      declutter: true,
-    });
-    vectorLayer.set('layer-id', layerId);
-    vectorSource.getFeatures().forEach((feature, index) => {
-      const newStyle = newStyleArr[index];
+      const newFeature = new Feature({
+        geometry: feature.getGeometry() as Geometry,
+        ...properties,
+        ...newStyle,
+      });
       const newStyleobj = featureUniqueStyle(
         newStyle.stroke,
         newStyle.fill,
@@ -413,10 +382,10 @@ const openLayerMap = {
         newStyle['stroke-width'],
         newStyle['fill-opacity']
       );
-      feature.setStyle(newStyleobj);
-      feature.setProperties(newStyle);
+      newFeature.setStyle(newStyleobj);
+      return newFeature;
     });
-    this.addLayer(vectorLayer);
+    source.addFeatures(features);
   },
 
   toggleLayerVisibility(layerId: string, visible: boolean) {
@@ -598,7 +567,7 @@ function formatLength(line: LineString) {
   const length = getLength(line, { projection: 'EPSG:4326' });
   let output;
   if (length > 1000) {
-    output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
+    output = Math.round(length / 10) / 100 + ' ' + 'km';
   } else {
     output = Math.round(length * 100) / 100 + ' ' + 'm';
   }
@@ -609,9 +578,9 @@ function formatArea(polygon: Polygon) {
   const area = getArea(polygon, { projection: 'EPSG:4326' });
   let output;
   if (area > 10000) {
-    output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+    output = Math.round(area / 10000) / 100 + ' ' + 'km2';
   } else {
-    output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+    output = Math.round(area * 100) / 100 + ' ' + 'm2';
   }
   return output;
 }

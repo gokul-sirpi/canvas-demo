@@ -135,7 +135,7 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  createNewUgixLayer(layerName: string, ugixId: string) {
+  createNewUgixLayer(layerName: string, ugixId: string, ugixGroupId: string) {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
@@ -151,6 +151,7 @@ const openLayerMap = {
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
+      ugixGroupId: ugixGroupId,
       selected: true,
       visible: true,
       isCompleted: true,

@@ -59,7 +59,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
-      resource.id
+      resource.id,
+      resource.resourceGroup
     );
     const queryParams: QueryParams = {
       limit: limit,

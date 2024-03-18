@@ -43,7 +43,8 @@ function UgixFeatureTile({
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
-      resource.id
+      resource.id,
+      resource.resourceGroup
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -91,7 +92,8 @@ function UgixFeatureTile({
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
-      resource.id
+      resource.id,
+      resource.resourceGroup
     );
     const queryParams: QueryParams = {
       limit: limit,

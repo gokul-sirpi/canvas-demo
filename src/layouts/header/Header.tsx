@@ -52,7 +52,7 @@ function Header({
           <DrawingTools />
           <TooltipWrapper content="Add marker">
             <span data-intro="add_marker">
-              <DrawingTool toolType="Marker" />
+              <DrawingTool toolType="Point" />
             </span>
           </TooltipWrapper>
           <TooltipWrapper content="Measure distance">

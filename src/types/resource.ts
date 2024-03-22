@@ -1,3 +1,4 @@
+import { Type } from 'ol/geom/Geometry';
 import { GeoJsonObj, JsonFeature } from './GeojsonType';
 
 export type Resource = {
@@ -17,7 +18,7 @@ export type Resource = {
   datum: string;
   ogcResourceInfo: {
     ogcResourceType: string;
-    geometryType: string;
+    geometryType: Type;
   };
   location: JsonFeature;
   dataSample: GeoJsonObj;
@@ -31,3 +32,35 @@ export type QueryParams = {
   offset: number;
   [x: string]: string | number;
 };
+
+export type ResourceDownload = {
+  id: string;
+title:string;
+    description:string;
+    license:string;
+    assets: {
+       [x:string]: {
+            title:string;
+            href:string;
+            type:string;
+            role: string[]
+            "file:size": 69644288
+        }
+    },
+    type:string;
+    links: 
+        {
+            rel:string;
+            href:string;
+            type:string;
+        }[]
+    stac_version:string;
+    extent: {
+        spatial: {
+            bbox:number[][]
+        },
+        temporal: {
+            interval: []
+        }
+    }
+}

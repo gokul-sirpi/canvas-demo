@@ -42,7 +42,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
 
   function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue(envurls.catalogueCookie);
-    console.log(wishList);
     if (wishList) {
       const parsedList = wishList.split(',');
       if (Array.isArray(parsedList)) {
@@ -60,7 +59,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id,
-      resource.resourceGroup
+      resource.resourceGroup,
+      resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -88,7 +88,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   function handleFileDrop(event: React.DragEvent) {
     event.preventDefault();
-    if (event.dataTransfer.files) {
+    if (event.dataTransfer.files.length > 0) {
       const files = event.dataTransfer.files;
       dispatch(updateLoadingState(true));
       for (const file of files) {

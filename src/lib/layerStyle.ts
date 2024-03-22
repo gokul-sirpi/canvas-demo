@@ -1,7 +1,8 @@
 import { FeatureLike } from 'ol/Feature';
-import { Fill, Stroke, Style } from 'ol/style';
+import { Fill, Icon, Stroke, Style } from 'ol/style';
 import CircleStyle from 'ol/style/Circle';
 import { FeatureStyle } from '../types/FeatureStyle';
+import { Type } from 'ol/geom/Geometry';
 
 const opacity = '99'; //hex value for opacity
 
@@ -39,15 +40,7 @@ export function styleFunction(feature: FeatureLike, stroke: string) {
       }),
     });
   } else if (type === 'Point' || type === 'MultiPoint') {
-    style = new Style({
-      image: new CircleStyle({
-        radius: 4,
-        fill: new Fill({
-          color: stroke + opacity,
-        }),
-        stroke: new Stroke({ color: stroke, width: 1 }),
-      }),
-    });
+    style = markerStyleFunction(0);
   } else {
     style = new Style({
       fill: new Fill({
@@ -81,20 +74,21 @@ export function measurementStyle() {
   return style;
 }
 
-export function basicBaseLayerStyle(color: string) {
+export function basicBaseLayerStyle(strokeColor: string, fillColor: string) {
   const style = new Style({
     stroke: new Stroke({
-      width: 2,
-      color: color,
+      width: 0.3,
+      color: strokeColor,
     }),
     fill: new Fill({
-      color: color + '33',
+      color: fillColor,
     }),
   });
   return style;
 }
 
 export function featureUniqueStyle(
+  type: Type,
   stroke: string,
   fill: string,
   strokeOpacity: number,
@@ -103,6 +97,9 @@ export function featureUniqueStyle(
 ) {
   const fillOpStr = Math.floor(fillOpacity * 15).toString(16);
   const strokeOpStr = Math.floor(strokeOpacity * 15).toString(16);
+  if (type === 'MultiPoint' || type === 'Point') {
+    // return markerStyleFunction(0)
+  }
   return new Style({
     fill: new Fill({
       color: fill + fillOpStr + fillOpStr,
@@ -133,4 +130,26 @@ export function createFeatureStyle(color: string) {
     'stroke-opacity': 1,
   };
   return styleObj;
+}
+
+export const markerIcons = [
+  'generic_marker.png',
+  'plane.png',
+  'college.png',
+  'hospital.png',
+  'round_green.png',
+  'round_blue.png',
+  'round_yellow.png',
+  'train.png',
+  'fire.png',
+];
+
+export function markerStyleFunction(iconInd: number) {
+  return new Style({
+    image: new Icon({
+      anchor: [0.5, 0.5],
+      src: `icons/${markerIcons[iconInd]}`,
+      width: 20,
+    }),
+  });
 }

@@ -25,7 +25,7 @@ function DrawingTool({
       changeSelectedTool(type);
     }
     let firstLayer = true;
-    if (type === 'Marker') {
+    if (type === 'Point') {
       openLayerMap.addMarkerFeature(
         newLayer.layerId,
         newLayer.layerName,
@@ -85,8 +85,8 @@ function DrawingTool({
           </div>
         </button>
       )}
-      {toolType === 'Marker' && (
-        <button onClick={() => drawFeature('Marker')}>
+      {toolType === 'Point' && (
+        <button onClick={() => drawFeature('Point')}>
           <div className={styles.btn_icon_container}>
             <SlLocationPin size={25} />
           </div>

@@ -10,18 +10,18 @@ import Draw, {
   createBox,
 } from 'ol/interaction/Draw';
 import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/VectorImage';
+import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
-import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
 import {
   styleFunction,
   measurementStyle,
   createFeatureStyle,
   featureUniqueStyle,
+  markerStyleFunction,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -31,20 +31,20 @@ import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
+import { Type as GeometryType } from 'ol/geom/Geometry';
 
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
 });
 const attribution = new Attribution({ collapsible: false });
-
 const markerStyle = new Style({
   image: new Icon({
-    anchor: [0.5, 1],
+    anchor: [0.5, 0.85],
     anchorXUnits: 'fraction',
     anchorYUnits: 'fraction',
-    height: 35,
-    src: marker,
+    height: 25,
+    src: 'icons/generic_marker.png',
   }),
 });
 
@@ -60,13 +60,18 @@ const openLayerMap = {
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      zoom: 4.9,
+      zoom: 4.5,
       // minZoom: 4,
     }),
     controls: [scaleControl, attribution],
     layers: [],
   }),
-  replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  replaceBasemap(
+    newLayers:
+      | VectorLayer<VectorSource>
+      | TileLayer<OSM>
+      | VectorImageLayer<VectorSource>
+  ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get('baseLayer')) {
         this.map.removeLayer(layer);
@@ -88,7 +93,7 @@ const openLayerMap = {
     }
   },
 
-  addLayer(layer: VectorLayer<VectorSource>) {
+  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
     this.map.addLayer(layer);
   },
 
@@ -135,17 +140,22 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  createNewUgixLayer(layerName: string, ugixId: string, ugixGroupId: string) {
+  createNewUgixLayer(
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string,
+    type: GeometryType
+  ) {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const vectorSource = new VectorSource({});
-    const vectorLayer = new VectorImageLayer({
+    const newVectorLayer = new VectorImageLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
-    vectorLayer.set('layer-id', layerId);
-    this.addLayer(vectorLayer);
+    newVectorLayer.set('layer-id', layerId);
+    this.addLayer(newVectorLayer);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       layerName: layerName,
@@ -157,6 +167,7 @@ const openLayerMap = {
       isCompleted: true,
       layerColor,
       style: featureStyle,
+      featureType: type,
     };
     this.latestLayer = newLayer;
     return newLayer;
@@ -175,6 +186,18 @@ const openLayerMap = {
       });
     }
     return featureStyle;
+  },
+  changeMarkerIcon(layerId: string, iconInd: number) {
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
+    source.getFeatures().forEach((feature) => {
+      if (iconInd === 0) {
+        feature.setStyle(markerStyle);
+      } else {
+        feature.setStyle(markerStyleFunction(iconInd));
+      }
+      // feature.setProperties()
+    });
   },
 
   addDrawFeature(
@@ -369,12 +392,15 @@ const openLayerMap = {
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
       };
+      const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
-        geometry: feature.getGeometry() as Geometry,
+        geometry: featureGeometry,
         ...properties,
         ...newStyle,
       });
+      const type = featureGeometry.getType();
       const newStyleobj = featureUniqueStyle(
+        type,
         newStyle.stroke,
         newStyle.fill,
         newStyle['stroke-opacity'],

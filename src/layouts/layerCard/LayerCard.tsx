@@ -19,7 +19,13 @@ function LayerCard() {
   const ugixLayers = useSelector((state: RootState) => {
     return state.ugixLayer.layers;
   });
-
+  function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+  }
+  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    console.log('here');
+  }
   return (
     <section>
       {isCardOpen ? (
@@ -83,7 +89,11 @@ function LayerCard() {
                     {userLayers.length === 0 ? (
                       <div className={styles.noData}>No layers avalaible</div>
                     ) : (
-                      <div className={styles.layer_container}>
+                      <div
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        className={styles.layer_container}
+                      >
                         {userLayers.map((layer, index) => {
                           return (
                             <LayerTile

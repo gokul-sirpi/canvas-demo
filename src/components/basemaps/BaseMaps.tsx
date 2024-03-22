@@ -15,12 +15,19 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { basicBaseLayerStyle } from '../../lib/layerStyle';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
+import VectorLayer from 'ol/layer/Vector';
 
+type baseLayerTypes =
+  | 'standard'
+  | 'humanitarian'
+  | 'ogc_layer_light'
+  | 'ogc_layer_dark';
 function BaseMaps() {
-  const [mapType, setMapType] = useState('standard');
+  const [mapType, setMapType] = useState<baseLayerTypes>('standard');
   const singleRender = useRef(false);
   const dispatch = useDispatch();
-  const ogcLayer = useRef<VectorImageLayer<VectorSource> | undefined>();
+  const ogcLayerLight = useRef<VectorImageLayer<VectorSource> | undefined>();
+  const ogcLayerDark = useRef<VectorLayer<VectorSource> | undefined>();
   useEffect(() => {
     if (singleRender.current) return;
     singleRender.current = true;
@@ -35,15 +42,23 @@ function BaseMaps() {
           features: new GeoJSON().readFeatures(response),
           format: new GeoJSON(),
         }) as VectorSource;
-        const newOgcLayer = new VectorImageLayer({
+        const newOgcLayerLight = new VectorImageLayer({
           source: vectorSource,
-          style: basicBaseLayerStyle('#99aabb'),
+          style: basicBaseLayerStyle('#778899', '#77889922'),
           declutter: true,
         });
-        newOgcLayer.set('baseLayer', true);
-        ogcLayer.current = newOgcLayer;
-        openLayerMap.insertBaseMap(newOgcLayer);
-        setMapType('ogc-layer');
+        const newOgcLayerDark = new VectorLayer({
+          source: vectorSource,
+          style: basicBaseLayerStyle('#ffffff', '#222222'),
+          declutter: true,
+          background: '#d1d1d1',
+        });
+        newOgcLayerLight.set('baseLayer', true);
+        newOgcLayerDark.set('baseLayer', true);
+        ogcLayerLight.current = newOgcLayerLight;
+        ogcLayerDark.current = newOgcLayerDark;
+        openLayerMap.insertBaseMap(newOgcLayerLight);
+        setMapType('ogc_layer_light');
         dispatch(updateLoadingState(false));
       })
       .catch((error) => {
@@ -63,7 +78,7 @@ function BaseMaps() {
     }),
     visible: true,
   });
-  function toggleBaseMap(baseMapType: string) {
+  function toggleBaseMap(baseMapType: baseLayerTypes) {
     switch (baseMapType) {
       case 'standard':
         standardLayer.set('baseLayer', true);
@@ -75,9 +90,15 @@ function BaseMaps() {
         openLayerMap.replaceBasemap(humanitarianLayer);
         setMapType(baseMapType);
         break;
-      case 'ogc-layer':
-        if (ogcLayer.current) {
-          openLayerMap.replaceBasemap(ogcLayer.current);
+      case 'ogc_layer_light':
+        if (ogcLayerLight.current) {
+          openLayerMap.replaceBasemap(ogcLayerLight.current);
+          setMapType(baseMapType);
+        }
+        break;
+      case 'ogc_layer_dark':
+        if (ogcLayerDark.current) {
+          openLayerMap.replaceBasemap(ogcLayerDark.current);
           setMapType(baseMapType);
         }
         break;
@@ -103,9 +124,11 @@ function BaseMaps() {
           <Popover.Content className={styles.popover_content}>
             <div>
               <button
-                onClick={() => toggleBaseMap('ogc-layer')}
+                onClick={() => toggleBaseMap('ogc_layer_light')}
                 className={
-                  mapType === 'ogc-layer' ? styles.selected : styles.unselected
+                  mapType === 'ogc_layer_light'
+                    ? styles.selected
+                    : styles.unselected
                 }
               >
                 <span>
@@ -113,7 +136,22 @@ function BaseMaps() {
                     <img src={ogcImg} alt="osmpreview" height={26} width={26} />
                   </span>
                 </span>
-                Basic Map
+                Basic Light
+              </button>
+              <button
+                onClick={() => toggleBaseMap('ogc_layer_dark')}
+                className={
+                  mapType === 'ogc_layer_dark'
+                    ? styles.selected
+                    : styles.unselected
+                }
+              >
+                <span>
+                  <span>
+                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
+                  </span>
+                </span>
+                Basic Dark
               </button>
               <button
                 onClick={() => {
@@ -145,7 +183,6 @@ function BaseMaps() {
                 </span>
                 Humanitarian
               </button>
-              
             </div>
             {/* <button>Bharat Map</button> */}
             <Popover.Arrow className={styles.popover_arrow} />

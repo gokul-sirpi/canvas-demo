@@ -16,7 +16,6 @@ export const loaderSlice = createSlice({
       } else {
         state.loadingArr.pop();
       }
-      console.log(state.loading);
       if (state.loadingArr.length === 0) {
         state.loading = false;
       }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaMapMarkerAlt, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
 //
@@ -101,16 +101,8 @@ function LayerTile({
       setIsTextOverflowing(isOverflowing);
     }
   }, [layer.layerName]);
-  function dragStartHandler(event: React.DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }
   return (
-    <div
-      draggable={true}
-      onDragOver={dragStartHandler}
-      className={styles.container}
-    >
+    <div className={styles.container}>
       <div className={styles.input_container}>
         <button onClick={toggleLayerVisibility}>
           <div className={styles.btn_icon_container}>

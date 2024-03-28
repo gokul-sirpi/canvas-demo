@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import osmImg from '../../assets/images/osm.png';
 import humImg from '../../assets/images/humanitarian.png';
 import ogcImg from '../../assets/images/india-OGC.png';
+import ogcDark from '../../assets/images/india_ogc_dark.png';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
@@ -49,9 +50,9 @@ function BaseMaps() {
         });
         const newOgcLayerDark = new VectorLayer({
           source: vectorSource,
-          style: basicBaseLayerStyle('#ffffff', '#222222'),
+          style: basicBaseLayerStyle('#ffffff', '#333333'),
           declutter: true,
-          background: '#d1d1d1',
+          background: '#111111',
         });
         newOgcLayerLight.set('baseLayer', true);
         newOgcLayerDark.set('baseLayer', true);
@@ -148,7 +149,12 @@ function BaseMaps() {
               >
                 <span>
                   <span>
-                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
+                    <img
+                      src={ogcDark}
+                      alt="osmpreview"
+                      height={26}
+                      width={26}
+                    />
                   </span>
                 </span>
                 Basic Dark

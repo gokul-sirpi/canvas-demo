@@ -10,6 +10,10 @@
 dialog {
   margin: auto;
 }
+ul{
+  list-style: none;
+  padding: 0;
+}
 body {
   --color-primary: #058d05;
   --color-secondary: #f86925;

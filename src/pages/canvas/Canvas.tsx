@@ -137,15 +137,18 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
   }
   function handleDragOver(event: React.DragEvent) {
+    console.log('canvas');
+
     event.preventDefault();
   }
   return (
-    <section
-      onDrop={handleFileDrop}
-      onDragOver={handleDragOver}
-      className={styles.container}
-    >
-      <div id="ol-map" className={styles.ol_map}></div>
+    <section className={styles.container}>
+      <div
+        onDrop={handleFileDrop}
+        onDragOver={handleDragOver}
+        id="ol-map"
+        className={styles.ol_map}
+      ></div>
       <>
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />

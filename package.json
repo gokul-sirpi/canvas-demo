@@ -23,6 +23,7 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@reduxjs/toolkit": "^2.1.0",
     "axios": "^1.6.7",
+    "framer-motion": "^11.0.20",
     "intro.js": "^7.2.0",
     "keycloak-js": "^23.0.4",
     "ol": "^8.2.0",

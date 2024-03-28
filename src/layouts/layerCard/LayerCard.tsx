@@ -1,6 +1,6 @@
 import styles from './styles.module.css';
 import LayerTile from '../../components/layerTile/LayerTile';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 //
 import * as Accordion from '@radix-ui/react-accordion';
@@ -10,21 +10,22 @@ import {
   FaAngleDown,
 } from 'react-icons/fa';
 import { useState } from 'react';
+import { Reorder } from 'framer-motion';
+import { changeUserLayer } from '../../context/userLayers/userLayerSlice';
+import { UserLayer } from '../../types/UserLayer';
 
 function LayerCard() {
   const [isCardOpen, setIsCardOpen] = useState<boolean>(true);
+  const dispatch = useDispatch();
   const userLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });
   const ugixLayers = useSelector((state: RootState) => {
     return state.ugixLayer.layers;
   });
-  function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-  }
-  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    console.log('here');
+  function handleReorder(e: UserLayer[]) {
+    dispatch(changeUserLayer(e));
+    console.log(e);
   }
   return (
     <section>
@@ -89,20 +90,25 @@ function LayerCard() {
                     {userLayers.length === 0 ? (
                       <div className={styles.noData}>No layers avalaible</div>
                     ) : (
-                      <div
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        className={styles.layer_container}
-                      >
-                        {userLayers.map((layer, index) => {
-                          return (
-                            <LayerTile
-                              key={layer.layerId}
-                              layer={layer}
-                              index={index}
-                            />
-                          );
-                        })}
+                      <div className={styles.layer_container}>
+                        <Reorder.Group
+                          axis="y"
+                          values={userLayers}
+                          onReorder={handleReorder}
+                          className={styles.layer_group}
+                        >
+                          {userLayers.map((layer, index) => {
+                            return (
+                              <Reorder.Item value={layer} key={layer.layerId}>
+                                <LayerTile
+                                  // key={layer.layerId}
+                                  layer={layer}
+                                  index={index}
+                                />
+                              </Reorder.Item>
+                            );
+                          })}
+                        </Reorder.Group>
                       </div>
                     )}
                   </Accordion.AccordionContent>

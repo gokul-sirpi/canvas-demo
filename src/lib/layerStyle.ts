@@ -55,6 +55,29 @@ export function styleFunction(feature: FeatureLike, stroke: string) {
   return style;
 }
 
+export function drawingStyle() {
+  const style = new Style({
+    stroke: new Stroke({
+      width: 1,
+      color: '#f86925',
+      lineDash: [4, 4],
+    }),
+    fill: new Fill({
+      color: '#f8692522',
+    }),
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({
+        color: '#f86925',
+      }),
+      stroke: new Stroke({
+        width: 2,
+        color: 'white',
+      }),
+    }),
+  });
+  return style;
+}
 export function measurementStyle() {
   const style = new Style({
     stroke: new Stroke({
@@ -133,23 +156,25 @@ export function createFeatureStyle(color: string) {
 }
 
 export const markerIcons = [
-  'generic_marker.png',
+  'marker_red.png',
+  'marker_green.png',
+  'marker_blue.png',
+  'marker_orange.png',
+  'marker_purple.png',
   'plane.png',
   'college.png',
+  'train_2.png',
   'hospital.png',
-  'round_green.png',
-  'round_blue.png',
-  'round_yellow.png',
-  'train.png',
+  'train_1.png',
   'fire.png',
 ];
 
 export function markerStyleFunction(iconInd: number) {
   return new Style({
     image: new Icon({
-      anchor: [0.5, 0.5],
+      anchor: [0.5, 0.85],
       src: `icons/${markerIcons[iconInd]}`,
-      width: 20,
+      width: 25,
     }),
   });
 }

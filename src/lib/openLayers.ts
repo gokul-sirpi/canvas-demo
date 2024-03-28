@@ -9,6 +9,7 @@ import Draw, {
   SketchCoordType,
   createBox,
 } from 'ol/interaction/Draw';
+import { Snap } from 'ol/interaction';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
@@ -22,6 +23,8 @@ import {
   createFeatureStyle,
   featureUniqueStyle,
   markerStyleFunction,
+  drawingStyle,
+  markerIcons,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -43,8 +46,8 @@ const markerStyle = new Style({
     anchor: [0.5, 0.85],
     anchorXUnits: 'fraction',
     anchorYUnits: 'fraction',
-    height: 25,
-    src: 'icons/generic_marker.png',
+    width: 25,
+    src: `icons/${markerIcons[0]}`,
   }),
 });
 
@@ -214,6 +217,7 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
+          style: drawingStyle,
           geometryFunction: createBox(),
         });
         break;
@@ -221,37 +225,39 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
-          geometryFunction: circleGeomatryFunction,
+          style: drawingStyle,
+          geometryFunction: circleGeometryFunction,
         });
         break;
       case 'Polygon':
         this.draw = new Draw({
           type: 'Polygon',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Line':
         this.draw = new Draw({
           type: 'LineString',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Measure':
         this.draw = new Draw({
           type: 'LineString',
-          source: source,
           style: () => measurementStyle(),
         });
+        this.removeLayer(layerId);
         break;
       default:
         this.removeDrawInteraction();
         return;
     }
     this.map.addInteraction(this.draw);
+    const snap = new Snap({ source: source });
+    this.map.addInteraction(snap);
     this.drawing = true;
-    // if (this.measureTooltip) {
-    //   this.map.addOverlay(this.measureTooltip);
-    // }
     const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
@@ -271,7 +277,14 @@ const openLayerMap = {
             featureProprties.length = output;
             tooltipPosition = geom.getLastCoordinate();
           } else if (geom instanceof Polygon) {
-            output = formatArea(geom);
+            if (type === 'Circle') {
+              const center = geom.getInteriorPoint().getCoordinates();
+              const edge = geom.getFirstCoordinate();
+              const line = new LineString([center, edge]);
+              output = formatLength(line);
+            } else {
+              output = formatArea(geom);
+            }
             featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
@@ -571,7 +584,7 @@ const openLayerMap = {
 // basic map interactions
 
 // Utility functions
-function circleGeomatryFunction(
+function circleGeometryFunction(
   coordinates: SketchCoordType,
   geometry: SimpleGeometry
 ) {

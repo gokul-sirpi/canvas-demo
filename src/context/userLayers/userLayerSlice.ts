@@ -41,6 +41,9 @@ export const userLayerSlice = createSlice({
       });
       state.layers = updatedLayers;
     },
+    changeUserLayer(state, action: PayloadAction<UserLayer[]>) {
+      state.layers = action.payload;
+    },
   },
 });
 
@@ -49,5 +52,6 @@ export const {
   updateUserLayer,
   deleteUserLayer,
   updateUserLayerColor,
+  changeUserLayer,
 } = userLayerSlice.actions;
 export default userLayerSlice.reducer;

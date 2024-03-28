@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaMapMarkerAlt, FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
 //
@@ -18,6 +18,7 @@ import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
 import { IoShapesOutline, IoSquareOutline } from 'react-icons/io5';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
+import MarkerPicker from '../markerPicker/MarkerPicker';
 
 function LayerTile({
   layer,
@@ -100,7 +101,6 @@ function LayerTile({
       setIsTextOverflowing(isOverflowing);
     }
   }, [layer.layerName]);
-
   return (
     <div className={styles.container}>
       <div className={styles.input_container}>
@@ -139,8 +139,9 @@ function LayerTile({
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
-            {layer.layerType === 'UserLayer' &&
-            (layer.featureType === 'Marker' || !layer.editable) ? null : (
+            {(layer.layerType === 'UserLayer' && !layer.editable) ||
+            layer.featureType === 'Point' ||
+            layer.featureType === 'MultiPoint' ? null : (
               <>
                 <input
                   type="color"
@@ -158,9 +159,12 @@ function LayerTile({
                 ></label>
               </>
             )}
+            {(layer.featureType === 'Point' ||
+              layer.featureType === 'MultiPoint') && (
+              <MarkerPicker layerId={layer.layerId} />
+            )}
             {layer.layerType === 'UserLayer' && (
               <>
-                {layer.featureType === 'Marker' && <FaMapMarkerAlt size={13} />}
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
                 {layer.featureType === 'Rectangle' && (
                   <IoSquareOutline size={13} />

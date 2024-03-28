@@ -9,19 +9,22 @@ import Draw, {
   SketchCoordType,
   createBox,
 } from 'ol/interaction/Draw';
+import { Snap } from 'ol/interaction';
 import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/VectorImage';
+import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
-import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
 import {
   styleFunction,
   measurementStyle,
   createFeatureStyle,
   featureUniqueStyle,
+  markerStyleFunction,
+  drawingStyle,
+  markerIcons,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -31,20 +34,20 @@ import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
+import { Type as GeometryType } from 'ol/geom/Geometry';
 
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
 });
 const attribution = new Attribution({ collapsible: false });
-
 const markerStyle = new Style({
   image: new Icon({
-    anchor: [0.5, 1],
+    anchor: [0.5, 0.85],
     anchorXUnits: 'fraction',
     anchorYUnits: 'fraction',
-    height: 35,
-    src: marker,
+    width: 25,
+    src: `icons/${markerIcons[0]}`,
   }),
 });
 
@@ -60,13 +63,18 @@ const openLayerMap = {
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      zoom: 4.9,
+      zoom: 4.5,
       // minZoom: 4,
     }),
     controls: [scaleControl, attribution],
     layers: [],
   }),
-  replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  replaceBasemap(
+    newLayers:
+      | VectorLayer<VectorSource>
+      | TileLayer<OSM>
+      | VectorImageLayer<VectorSource>
+  ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get('baseLayer')) {
         this.map.removeLayer(layer);
@@ -88,7 +96,7 @@ const openLayerMap = {
     }
   },
 
-  addLayer(layer: VectorLayer<VectorSource>) {
+  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
     this.map.addLayer(layer);
   },
 
@@ -135,17 +143,22 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  createNewUgixLayer(layerName: string, ugixId: string, ugixGroupId: string) {
+  createNewUgixLayer(
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string,
+    type: GeometryType
+  ) {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const vectorSource = new VectorSource({});
-    const vectorLayer = new VectorImageLayer({
+    const newVectorLayer = new VectorImageLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
-    vectorLayer.set('layer-id', layerId);
-    this.addLayer(vectorLayer);
+    newVectorLayer.set('layer-id', layerId);
+    this.addLayer(newVectorLayer);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       layerName: layerName,
@@ -157,6 +170,7 @@ const openLayerMap = {
       isCompleted: true,
       layerColor,
       style: featureStyle,
+      featureType: type,
     };
     this.latestLayer = newLayer;
     return newLayer;
@@ -176,6 +190,18 @@ const openLayerMap = {
     }
     return featureStyle;
   },
+  changeMarkerIcon(layerId: string, iconInd: number) {
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
+    source.getFeatures().forEach((feature) => {
+      if (iconInd === 0) {
+        feature.setStyle(markerStyle);
+      } else {
+        feature.setStyle(markerStyleFunction(iconInd));
+      }
+      // feature.setProperties()
+    });
+  },
 
   addDrawFeature(
     type: drawType,
@@ -191,6 +217,7 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
+          style: drawingStyle,
           geometryFunction: createBox(),
         });
         break;
@@ -198,37 +225,39 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
-          geometryFunction: circleGeomatryFunction,
+          style: drawingStyle,
+          geometryFunction: circleGeometryFunction,
         });
         break;
       case 'Polygon':
         this.draw = new Draw({
           type: 'Polygon',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Line':
         this.draw = new Draw({
           type: 'LineString',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Measure':
         this.draw = new Draw({
           type: 'LineString',
-          source: source,
           style: () => measurementStyle(),
         });
+        this.removeLayer(layerId);
         break;
       default:
         this.removeDrawInteraction();
         return;
     }
     this.map.addInteraction(this.draw);
+    const snap = new Snap({ source: source });
+    this.map.addInteraction(snap);
     this.drawing = true;
-    // if (this.measureTooltip) {
-    //   this.map.addOverlay(this.measureTooltip);
-    // }
     const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
@@ -248,7 +277,14 @@ const openLayerMap = {
             featureProprties.length = output;
             tooltipPosition = geom.getLastCoordinate();
           } else if (geom instanceof Polygon) {
-            output = formatArea(geom);
+            if (type === 'Circle') {
+              const center = geom.getInteriorPoint().getCoordinates();
+              const edge = geom.getFirstCoordinate();
+              const line = new LineString([center, edge]);
+              output = formatLength(line);
+            } else {
+              output = formatArea(geom);
+            }
             featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
@@ -369,12 +405,15 @@ const openLayerMap = {
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
       };
+      const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
-        geometry: feature.getGeometry() as Geometry,
+        geometry: featureGeometry,
         ...properties,
         ...newStyle,
       });
+      const type = featureGeometry.getType();
       const newStyleobj = featureUniqueStyle(
+        type,
         newStyle.stroke,
         newStyle.fill,
         newStyle['stroke-opacity'],
@@ -545,7 +584,7 @@ const openLayerMap = {
 // basic map interactions
 
 // Utility functions
-function circleGeomatryFunction(
+function circleGeometryFunction(
   coordinates: SketchCoordType,
   geometry: SimpleGeometry
 ) {

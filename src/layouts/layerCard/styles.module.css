@@ -42,10 +42,12 @@
 
 .layer_container {
   padding: 0.3rem 0.3rem;
+  overflow: auto;
+}
+.layer_group{
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  overflow: auto;
 }
 
 .user_layer_container > h2 {

@@ -67,7 +67,7 @@ export async function getAllUgixFeatures(
   }
 }
 
-async function getAccessToken(resource: Resource) {
+export async function getAccessToken(resource: Resource) {
   try {
     const body = {
       itemId: resource.id,

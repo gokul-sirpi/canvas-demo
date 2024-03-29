@@ -35,6 +35,7 @@ import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
+import JSZip from 'jszip';
 
 const scaleControl = new ScaleLine({
   units: 'metric',
@@ -441,23 +442,10 @@ const openLayerMap = {
     const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
     if (extent) {
-      view.fit(extent, { padding: [100, 100, 100, 100] });
+      view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     }
   },
 
-  distanceBetweenPoints(point1: number[], point2: number[]) {
-    const lat1 = point1[0] / 57.295;
-    const lat2 = point2[0] / 57.295;
-    const lng1 = point1[1] / 57.295;
-    const lng2 = point2[1] / 57.295;
-    const distance =
-      6371 *
-      Math.acos(
-        Math.sin(lat1) * Math.sin(lat2) +
-          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
-      );
-    return distance;
-  },
   exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
     const mapCanvas = document.createElement('canvas');
     const allCanvas = this.map
@@ -504,36 +492,42 @@ const openLayerMap = {
     return null;
   },
   exportAsGeoJson(anchor: HTMLAnchorElement, exportName: string) {
-    let allGeoData: undefined | GeoJsonObj;
+    const zip = new JSZip();
     this.map.getLayers().forEach((layer) => {
       const layerId = layer.get('layer-id');
       if (layerId && layer instanceof VectorLayer) {
         if (!layer.getVisible()) return;
-        const source = layer.getSource() as VectorSource;
-        const features = source.getFeatures();
-        const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(
-          features
-        );
-        geojsonData.features.forEach((feature) => {
-          if (!feature.properties) {
-            feature.properties = {};
-          }
-        });
-        if (!allGeoData) {
-          allGeoData = geojsonData;
-        } else {
-          allGeoData.features = allGeoData.features.concat(
-            geojsonData.features
-          );
-        }
+        const geojsonData = openLayerMap.createGeojsonFromLayer(
+          layerId,
+          layer
+        ) as GeoJsonObj;
+        console.log(geojsonData.features[0].properties);
+
+        const layerName =
+          geojsonData.features[0].properties.name || `layer_${layerId}`;
+        zip.file(`${layerName}.geojson`, JSON.stringify(geojsonData));
       }
     });
-    const file = new Blob([JSON.stringify(allGeoData)], {
-      type: 'text/json;charset=utf-8',
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+      anchor.href = URL.createObjectURL(content);
+      anchor.download = `${exportName}.zip`;
+      anchor.click();
     });
-    anchor.href = URL.createObjectURL(file);
-    anchor.download = `${exportName}.geojson`;
-    anchor.click();
+  },
+  createGeojsonFromLayer(layerId: string, layer?: VectorLayer<VectorSource>) {
+    if (!layer) {
+      layer = this.getLayer(layerId);
+      if (!layer) return;
+    }
+    const source = layer.getSource() as VectorSource;
+    const features = source.getFeatures();
+    const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(features);
+    geojsonData.features.forEach((feature) => {
+      if (!feature.properties) {
+        feature.properties = {};
+      }
+    });
+    return geojsonData;
   },
   initialiseMapClickEvent(
     container: HTMLDivElement,

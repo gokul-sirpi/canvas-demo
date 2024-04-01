@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import userLayerSlice from './userLayers/userLayerSlice';
+import userLayerSlice from './canvasLayers/canvasLayerSlice';
 import ugixLayerSlice from './ugixLayers/ugixLayerSlice';
 import LoaderSlice from './loading/LoaderSlice';
 

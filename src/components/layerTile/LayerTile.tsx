@@ -7,12 +7,11 @@ import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import {
-  deleteUserLayer,
-  updateUserLayerColor,
-  updateUserLayer,
-} from '../../context/userLayers/userLayerSlice';
+  deleteCanvasLayer,
+  updateCanvasLayerColor,
+  updateCanvasLayer,
+} from '../../context/canvasLayers/canvasLayerSlice';
 import { UgixLayer } from '../../types/UgixLayers';
-import { updateUgixLayerColor } from '../../context/ugixLayers/ugixLayerSlice';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
@@ -55,7 +54,7 @@ function LayerTile({
     const modifiedLayer = { ...layer };
     modifiedLayer.layerName = layerName;
     modifiedLayer.isCompleted = true;
-    dispatch(updateUserLayer({ index, modifiedLayer }));
+    dispatch(updateCanvasLayer({ index, modifiedLayer }));
     openLayerMap.updateFeatureProperties(
       modifiedLayer.layerId,
       'name',
@@ -66,7 +65,7 @@ function LayerTile({
   function cancelLayerCreation() {
     openLayerMap.removeLayer(layer.layerId);
     openLayerMap.removeDrawInteraction();
-    dispatch(deleteUserLayer(layer.layerId));
+    dispatch(deleteCanvasLayer(layer.layerId));
   }
 
   function handleColorChange(text: string) {
@@ -74,23 +73,13 @@ function LayerTile({
       layer.layerId,
       selectedColor
     );
-    if (layer.layerType === 'UgixLayer') {
-      dispatch(
-        updateUgixLayerColor({
-          layerId: layer.layerId,
-          newColor: text,
-          style: changedStyle,
-        })
-      );
-    } else {
-      dispatch(
-        updateUserLayerColor({
-          layerId: layer.layerId,
-          newColor: text,
-          style: changedStyle,
-        })
-      );
-    }
+    dispatch(
+      updateCanvasLayerColor({
+        layerId: layer.layerId,
+        newColor: text,
+        style: changedStyle,
+      })
+    );
     setSelectedColor(text);
   }
 
@@ -102,7 +91,12 @@ function LayerTile({
     }
   }, [layer.layerName]);
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-layer={layer.layerType}>
+      <div
+        className={`${styles.layer_badge} ${layer.layerType === 'UserLayer' ? styles.userTile : null}`}
+      >
+        {/* {layer.layerType == 'UgixLayer' ? 'UGIX' : 'User'} */}
+      </div>
       <div className={styles.input_container}>
         <button onClick={toggleLayerVisibility}>
           <div className={styles.btn_icon_container}>

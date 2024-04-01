@@ -2,19 +2,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.5rem;
   min-width: 15rem;
   transition: 100ms;
-  box-shadow: 0px 2px 2px 1px var(--color-accent);
+  /* box-shadow: 0px 2px 2px 1px var(--color-accent); */
+  position: relative;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
 }
 .container:hover {
-  box-shadow: 0 1px 1px var(--color-accent);
-  background-color: #f1f1f1;
+  box-shadow: 0 2px 2px var(--color-accent);
+  /* background-color: #f1f1f1; */
+  /* border: 1px solid var(--color-primary); */
+}
+
+.layer_badge{
+  font-size: var(--font-xsm);
+  padding: 0.1rem 0.3rem;
+  background-color: var(--color-primary);
+  /* background-color: black; */
+  position: absolute;
+  height: 104%;
+  border-radius: var(--radius-sm) 0rem 0rem var(--radius-sm);
+  color: white;
+  display: flex;
+  align-items: center;
+  left: 0rem;
+}
+.userTile{
+  background-color: var(--color-secondary);
+ /* background-color: black; */
 }
 
 .layer_title_container {
   white-space: noWrap;
-  width: 9rem;
+  width: 7rem;
 }
 .layer_title {
   overflow: hidden;
@@ -25,7 +47,7 @@
 .input_container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0rem;
 }
 .input_container > input {
   padding: 0.3rem 0.5rem;

@@ -10,9 +10,9 @@ export type drawType =
   | 'GeometryCollection';
 
 export type UserLayer = {
-  layerType: 'UserLayer';
+  readonly layerType: 'UserLayer';
+  readonly layerId: string;
   layerName: string;
-  layerId: string;
   selected: boolean;
   visible: boolean;
   isCompleted: boolean;

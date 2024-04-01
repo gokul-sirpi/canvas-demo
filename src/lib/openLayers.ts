@@ -95,6 +95,16 @@ const openLayerMap = {
       this.map.removeInteraction(this.draw);
       this.drawing = false;
     }
+    if (this.latestLayer) {
+      const layerId = this.latestLayer.layerId;
+      const source = this.getLayer(layerId)?.getSource();
+      if (source) {
+        const featureLength = source.getFeatures().length;
+        if (featureLength === 0) {
+          this.removeLayer(layerId);
+        }
+      }
+    }
   },
 
   addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
@@ -141,6 +151,7 @@ const openLayerMap = {
       editable: true,
     };
     this.map.addLayer(layer);
+    this.removeDrawInteraction();
     this.latestLayer = newLayer;
     return newLayer;
   },
@@ -210,7 +221,6 @@ const openLayerMap = {
     featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     switch (type) {
@@ -332,7 +342,6 @@ const openLayerMap = {
   },
 
   addMarkerFeature(layerId: string, layerName: string, callback?: () => void) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     this.draw = new Draw({
@@ -433,9 +442,17 @@ const openLayerMap = {
       layer.setVisible(visible);
     }
   },
-
   getLayerVisibility(layerId: string): boolean | undefined {
     return this.getLayer(layerId)?.isVisible();
+  },
+
+  swapLayerPosition(layers: string[]) {
+    const mapLayers = this.map.getLayers();
+    mapLayers.forEach((l) => {
+      const id = l.get('layer-id');
+      const index = layers.indexOf(id);
+      l.setZIndex(index);
+    });
   },
 
   zoomToFit(layerId: string) {

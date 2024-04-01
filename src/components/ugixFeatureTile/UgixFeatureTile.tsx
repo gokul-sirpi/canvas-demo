@@ -6,7 +6,7 @@ import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
@@ -61,7 +61,7 @@ function UgixFeatureTile({
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
         // cleanUpSideEffects();
       },
       (message) => {
@@ -112,7 +112,7 @@ function UgixFeatureTile({
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
       },
       (message) => {
         emitToast('error', message);

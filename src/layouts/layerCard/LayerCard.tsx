@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 //
 import { FaAngleDoubleLeft } from 'react-icons/fa';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { changeCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import { UserLayer } from '../../types/UserLayer';
@@ -17,6 +17,9 @@ function LayerCard() {
   const canvasLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });
+  useEffect(() => {
+    handleReorder(canvasLayers);
+  }, [canvasLayers]);
   function handleReorder(e: (UserLayer | UgixLayer)[]) {
     dispatch(changeCanvasLayer(e));
     const layerIdArr = e.map((layer) => {

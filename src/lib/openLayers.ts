@@ -36,7 +36,12 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
-
+type baseLayerTypes =
+  | 'terrain'
+  | 'standard'
+  | 'humanitarian'
+  | 'ogc_layer_light'
+  | 'ogc_layer_dark';
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
@@ -57,6 +62,7 @@ const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
   latestLayer: null as UserLayer | UgixLayer | null,
+  indianOutline: null as VectorImageLayer<VectorSource> | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
@@ -71,6 +77,7 @@ const openLayerMap = {
     layers: [],
   }),
   replaceBasemap(
+    baseMapType: baseLayerTypes,
     newLayers:
       | VectorLayer<VectorSource>
       | TileLayer<OSM>
@@ -81,10 +88,21 @@ const openLayerMap = {
         this.map.removeLayer(layer);
       }
     });
-    this.map.getLayers().insertAt(0, newLayers);
+    const layers = this.map.getLayers();
+    layers.insertAt(0, newLayers);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        if (layers.getLength() === 1) {
+          this.map.addLayer(this.indianOutline);
+        } else {
+          layers.insertAt(1, this.indianOutline);
+        }
+      }
+    }
   },
   insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
     this.map.getLayers().insertAt(0, baseLayer);
+    // this.map.getLayers().insertAt(1, baseLayer);
   },
 
   setOlTarget(target: string) {

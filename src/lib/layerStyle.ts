@@ -12,7 +12,7 @@ const image = new CircleStyle({
   stroke: new Stroke({ color: 'red', width: 1 }),
 });
 const whiteFill = '#ffffff';
-const whiteFillOpacity = '55';
+const whiteFillOpacity = '44';
 
 //returns different style for different types of feature eg-polygon,point
 export function styleFunction(feature: FeatureLike, stroke: string) {
@@ -32,7 +32,7 @@ export function styleFunction(feature: FeatureLike, stroke: string) {
   ) {
     style = new Style({
       fill: new Fill({
-        color: whiteFill + whiteFillOpacity,
+        color: stroke + whiteFillOpacity,
       }),
       stroke: new Stroke({
         color: stroke,
@@ -105,6 +105,18 @@ export function basicBaseLayerStyle(strokeColor: string, fillColor: string) {
     }),
     fill: new Fill({
       color: fillColor,
+    }),
+  });
+  return style;
+}
+export function baseOutlineStyle(strokeColor: string) {
+  const style = new Style({
+    stroke: new Stroke({
+      width: 1,
+      color: strokeColor,
+    }),
+    fill: new Fill({
+      color: 'transparent',
     }),
   });
   return style;

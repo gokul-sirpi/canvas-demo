@@ -13,7 +13,7 @@ import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
-import { basicBaseLayerStyle } from '../../lib/layerStyle';
+import { baseOutlineStyle, basicBaseLayerStyle } from '../../lib/layerStyle';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import VectorLayer from 'ol/layer/Vector';
@@ -49,6 +49,11 @@ function BaseMaps() {
           style: basicBaseLayerStyle('#778899', '#77889922'),
           declutter: true,
         });
+        const ogcOutline = new VectorImageLayer({
+          source: vectorSource,
+          style: baseOutlineStyle('black'),
+          declutter: true,
+        });
         const newOgcLayerDark = new VectorLayer({
           source: vectorSource,
           style: basicBaseLayerStyle('#ffffff', '#333333'),
@@ -57,6 +62,8 @@ function BaseMaps() {
         });
         newOgcLayerLight.set('baseLayer', true);
         newOgcLayerDark.set('baseLayer', true);
+        ogcOutline.set('baseLayer', true);
+        openLayerMap.indianOutline = ogcOutline;
         ogcLayerLight.current = newOgcLayerLight;
         ogcLayerDark.current = newOgcLayerDark;
         openLayerMap.insertBaseMap(newOgcLayerLight);
@@ -90,28 +97,28 @@ function BaseMaps() {
     switch (baseMapType) {
       case 'standard':
         standardLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(standardLayer);
+        openLayerMap.replaceBasemap(baseMapType, standardLayer);
         setMapType(baseMapType);
         break;
       case 'terrain':
         terrainLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(terrainLayer);
+        openLayerMap.replaceBasemap(baseMapType, terrainLayer);
         setMapType(baseMapType);
         break;
       case 'humanitarian':
         humanitarianLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(humanitarianLayer);
+        openLayerMap.replaceBasemap(baseMapType, humanitarianLayer);
         setMapType(baseMapType);
         break;
       case 'ogc_layer_light':
         if (ogcLayerLight.current) {
-          openLayerMap.replaceBasemap(ogcLayerLight.current);
+          openLayerMap.replaceBasemap(baseMapType, ogcLayerLight.current);
           setMapType(baseMapType);
         }
         break;
       case 'ogc_layer_dark':
         if (ogcLayerDark.current) {
-          openLayerMap.replaceBasemap(ogcLayerDark.current);
+          openLayerMap.replaceBasemap(baseMapType, ogcLayerDark.current);
           setMapType(baseMapType);
         }
         break;

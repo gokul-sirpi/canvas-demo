@@ -19,6 +19,7 @@ import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import VectorLayer from 'ol/layer/Vector';
 
 type baseLayerTypes =
+  | 'terrain'
   | 'standard'
   | 'humanitarian'
   | 'ogc_layer_light'
@@ -79,11 +80,22 @@ function BaseMaps() {
     }),
     visible: true,
   });
+  const terrainLayer = new TileLayer({
+    source: new OSM({
+      url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    }),
+    visible: true,
+  });
   function toggleBaseMap(baseMapType: baseLayerTypes) {
     switch (baseMapType) {
       case 'standard':
         standardLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(standardLayer);
+        setMapType(baseMapType);
+        break;
+      case 'terrain':
+        terrainLayer.set('baseLayer', true);
+        openLayerMap.replaceBasemap(terrainLayer);
         setMapType(baseMapType);
         break;
       case 'humanitarian':
@@ -124,6 +136,19 @@ function BaseMaps() {
         <Popover.Portal>
           <Popover.Content className={styles.popover_content}>
             <div>
+              <button
+                onClick={() => {
+                  toggleBaseMap('terrain');
+                }}
+                className={
+                  mapType === 'terrain' ? styles.selected : styles.unselected
+                }
+              >
+                <span>
+                  <img src={osmImg} alt="osmpreview" height={26} width={26} />
+                </span>
+                Terrain
+              </button>
               <button
                 onClick={() => toggleBaseMap('ogc_layer_light')}
                 className={

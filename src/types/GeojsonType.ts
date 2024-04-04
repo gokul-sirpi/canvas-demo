@@ -13,7 +13,7 @@ export type JsonFeature = {
     };
     coordinates: number[][][];
   };
-  properties: object;
+  properties: { [x: string]: string | number };
 };
 
 export type GeoJsonObj = {

@@ -11,8 +11,10 @@ import { UgixLayer } from '../../types/UgixLayers';
 import { deleteUserLayer } from '../../context/userLayers/userLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
+import { useRef } from 'react';
 
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
+  const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
   function deleteLayer() {
     if (layer.layerType === 'UserLayer') {
@@ -41,6 +43,17 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       window.open(path, '_blank');
     }
   }
+  function handleLayerExport() {
+    const geojsonData = openLayerMap.createGeojsonFromLayer(layer.layerId);
+    const file = new Blob([JSON.stringify(geojsonData)], {
+      type: 'text/json;charset=utf-8',
+    });
+    if (anchorRef.current) {
+      anchorRef.current.href = URL.createObjectURL(file);
+      anchorRef.current.download = `${layer.layerName}.geojson`;
+      anchorRef.current.click();
+    }
+  }
   return (
     <>
       <Popover.Root>
@@ -60,6 +73,14 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 Delete
               </button>
             </div>
+            <div>
+              <button
+                onClick={handleLayerExport}
+                className={styles.popover_btn}
+              >
+                Export
+              </button>
+            </div>
             {layer.layerType === 'UgixLayer' && (
               <div>
                 <button onClick={handleInfoOpen} className={styles.popover_btn}>
@@ -67,6 +88,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 </button>
               </div>
             )}
+            <a ref={anchorRef} href=""></a>
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

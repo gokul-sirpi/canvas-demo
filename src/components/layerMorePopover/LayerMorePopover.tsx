@@ -67,7 +67,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
           <Popover.Content className={styles.popover_content}>
             <div>
               <button onClick={deleteLayer} className={styles.popover_btn}>
-                Delete
+                Delete Layer
               </button>
             </div>
             <div>
@@ -75,7 +75,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 onClick={handleLayerExport}
                 className={styles.popover_btn}
               >
-                Export
+                Export layer
               </button>
             </div>
             {layer.layerType === 'UgixLayer' && (

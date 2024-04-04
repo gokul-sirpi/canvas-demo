@@ -40,7 +40,7 @@ function ExportDataDialog() {
   return (
     <>
       <Dialog.Root open={dialogOpenStatus}>
-        <TooltipWrapper content="Export features">
+        <TooltipWrapper content="Export all features">
           <Dialog.Trigger asChild>
             <button
               data-intro="export_as"

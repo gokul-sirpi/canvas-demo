@@ -13,7 +13,6 @@ import { Snap } from 'ol/interaction';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
-import { Style, Icon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import { GeoJsonObj } from '../types/GeojsonType';
@@ -24,7 +23,6 @@ import {
   featureUniqueStyle,
   markerStyleFunction,
   drawingStyle,
-  markerIcons,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -47,15 +45,6 @@ const scaleControl = new ScaleLine({
   minWidth: 100,
 });
 const attribution = new Attribution({ collapsible: false });
-const markerStyle = new Style({
-  image: new Icon({
-    anchor: [0.5, 0.85],
-    anchorXUnits: 'fraction',
-    anchorYUnits: 'fraction',
-    width: 25,
-    src: `icons/${markerIcons[0]}`,
-  }),
-});
 
 // Map properties and methods
 const openLayerMap = {
@@ -157,7 +146,7 @@ const openLayerMap = {
   createNewUserLayer(layerName: string, featureType: drawType): UserLayer {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
-    const layer = new VectorLayer({
+    const layer = new VectorImageLayer({
       source: source,
       style: (feature) => styleFunction(feature, featureColor),
     });
@@ -232,11 +221,8 @@ const openLayerMap = {
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     source.getFeatures().forEach((feature) => {
-      if (iconInd === 0) {
-        feature.setStyle(markerStyle);
-      } else {
-        feature.setStyle(markerStyleFunction(iconInd));
-      }
+      feature.setStyle(markerStyleFunction(iconInd));
+      feature.setProperties({ 'marker-id': iconInd });
       // feature.setProperties()
     });
   },
@@ -333,7 +319,7 @@ const openLayerMap = {
     });
     this.draw.on('drawend', (event) => {
       event.feature.setProperties({
-        name: 'Null',
+        layer: 'Null',
         ...featureStyle,
         ...featureProprties,
       });
@@ -378,11 +364,11 @@ const openLayerMap = {
     this.draw.on('drawend', (drawEvent) => {
       const marker = drawEvent.feature as Feature<Point>;
       marker.setProperties({
-        name: layerName || 'NULL',
+        layer: layerName || 'NULL',
         lat: marker.getGeometry()?.getCoordinates()[1],
         lng: marker.getGeometry()?.getCoordinates()[0],
       });
-      marker.setStyle(markerStyle);
+      marker.setStyle(markerStyleFunction(0));
       source.addFeature(marker);
       if (callback) {
         callback();
@@ -393,7 +379,8 @@ const openLayerMap = {
   addGeoJsonFeature(
     geojsonData: GeoJsonObj | undefined,
     layerId: string,
-    style: FeatureStyle
+    style: FeatureStyle,
+    layerName: string
   ) {
     if (!geojsonData) return;
     geojsonData.crs = {
@@ -407,6 +394,7 @@ const openLayerMap = {
       return new Feature({
         geometry: featureLike.getGeometry() as Geometry,
         ...featureLike.getProperties(),
+        layer: layerName,
       });
     });
     const vectorSource = this.getLayer(layerId)?.getSource();
@@ -440,6 +428,7 @@ const openLayerMap = {
         'stroke-opacity':
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
+        'marker-id': properties['marker-id'] || style['marker-id'],
       };
       const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
@@ -454,7 +443,8 @@ const openLayerMap = {
         newStyle.fill,
         newStyle['stroke-opacity'],
         newStyle['stroke-width'],
-        newStyle['fill-opacity']
+        newStyle['fill-opacity'],
+        newStyle['marker-id']
       );
       newFeature.setStyle(newStyleobj);
       return newFeature;
@@ -540,16 +530,17 @@ const openLayerMap = {
     const zip = new JSZip();
     this.map.getLayers().forEach((layer) => {
       const layerId = layer.get('layer-id');
-      if (layerId && layer instanceof VectorLayer) {
+      if (layerId) {
         if (!layer.getVisible()) return;
         const geojsonData = openLayerMap.createGeojsonFromLayer(
           layerId,
+          //@ts-expect-error this case will not happen
           layer
         ) as GeoJsonObj;
         console.log(geojsonData.features[0].properties);
 
         const layerName =
-          geojsonData.features[0].properties.name || `layer_${layerId}`;
+          geojsonData.features[0].properties.layer || `layer_${layerId}`;
         zip.file(`${layerName}.geojson`, JSON.stringify(geojsonData));
       }
     });

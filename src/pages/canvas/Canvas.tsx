@@ -10,8 +10,7 @@ import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { QueryParams, Resource } from '../../types/resource.ts';
-import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice.ts';
-import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
@@ -71,7 +70,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
       },
       (message) => {
         emitToast('error', message);
@@ -130,7 +129,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         newLayer.style
       );
       openLayerMap.zoomToFit(newLayer.layerId);
-      dispatch(addUserLayer(newLayer));
+      dispatch(addCanvasLayer(newLayer));
     } catch (error) {
       emitToast('error', 'Invalid file format');
       dispatch(updateLoadingState(false));

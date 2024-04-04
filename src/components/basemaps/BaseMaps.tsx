@@ -5,15 +5,11 @@ import openLayerMap from '../../lib/openLayers';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
 import { useEffect, useRef, useState } from 'react';
-import osmImg from '../../assets/images/osm.png';
-import humImg from '../../assets/images/humanitarian.png';
-import ogcImg from '../../assets/images/india-OGC.png';
-import ogcDark from '../../assets/images/india_ogc_dark.png';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
-import { basicBaseLayerStyle } from '../../lib/layerStyle';
+import { baseOutlineStyle, basicBaseLayerStyle } from '../../lib/layerStyle';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import VectorLayer from 'ol/layer/Vector';
@@ -24,12 +20,45 @@ type baseLayerTypes =
   | 'humanitarian'
   | 'ogc_layer_light'
   | 'ogc_layer_dark';
+
+const baseLayers = [
+  { type: 'standard', imgSrc: 'assets/osm.png', name: 'OSM' },
+  {
+    type: 'humanitarian',
+    imgSrc: 'assets/humanitarian.png',
+    name: 'Humanitarian',
+  },
+  { type: 'terrain', imgSrc: 'assets/terrain.png', name: 'Terrain' },
+  {
+    type: 'ogc_layer_light',
+    imgSrc: 'assets/ogc_light.png',
+    name: 'Basic light',
+  },
+  { type: 'ogc_layer_dark', imgSrc: 'assets/ogc_dark.png', name: 'Basic dark' },
+] as const;
 function BaseMaps() {
   const [mapType, setMapType] = useState<baseLayerTypes>('standard');
   const singleRender = useRef(false);
   const dispatch = useDispatch();
   const ogcLayerLight = useRef<VectorImageLayer<VectorSource> | undefined>();
   const ogcLayerDark = useRef<VectorLayer<VectorSource> | undefined>();
+
+  const standardLayer = new TileLayer({
+    source: new OSM({}),
+  });
+
+  const humanitarianLayer = new TileLayer({
+    source: new OSM({
+      url: 'https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+    }),
+    visible: true,
+  });
+  const terrainLayer = new TileLayer({
+    source: new OSM({
+      url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    }),
+    visible: true,
+  });
   useEffect(() => {
     if (singleRender.current) return;
     singleRender.current = true;
@@ -49,6 +78,11 @@ function BaseMaps() {
           style: basicBaseLayerStyle('#778899', '#77889922'),
           declutter: true,
         });
+        const ogcOutline = new VectorImageLayer({
+          source: vectorSource,
+          style: baseOutlineStyle('#a480a2'),
+          declutter: false,
+        });
         const newOgcLayerDark = new VectorLayer({
           source: vectorSource,
           style: basicBaseLayerStyle('#ffffff', '#333333'),
@@ -57,10 +91,13 @@ function BaseMaps() {
         });
         newOgcLayerLight.set('baseLayer', true);
         newOgcLayerDark.set('baseLayer', true);
+        ogcOutline.set('baseLayer', true);
+        openLayerMap.indianOutline = ogcOutline;
         ogcLayerLight.current = newOgcLayerLight;
         ogcLayerDark.current = newOgcLayerDark;
-        openLayerMap.insertBaseMap(newOgcLayerLight);
-        setMapType('ogc_layer_light');
+        standardLayer.set('baseLayer', true);
+        openLayerMap.insertBaseMap('standard', standardLayer);
+        setMapType('standard');
         dispatch(updateLoadingState(false));
       })
       .catch((error) => {
@@ -70,48 +107,32 @@ function BaseMaps() {
       });
   }
 
-  const standardLayer = new TileLayer({
-    source: new OSM({}),
-  });
-
-  const humanitarianLayer = new TileLayer({
-    source: new OSM({
-      url: 'https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-    }),
-    visible: true,
-  });
-  const terrainLayer = new TileLayer({
-    source: new OSM({
-      url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    }),
-    visible: true,
-  });
   function toggleBaseMap(baseMapType: baseLayerTypes) {
     switch (baseMapType) {
       case 'standard':
         standardLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(standardLayer);
+        openLayerMap.replaceBasemap(baseMapType, standardLayer);
         setMapType(baseMapType);
         break;
       case 'terrain':
         terrainLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(terrainLayer);
+        openLayerMap.replaceBasemap(baseMapType, terrainLayer);
         setMapType(baseMapType);
         break;
       case 'humanitarian':
         humanitarianLayer.set('baseLayer', true);
-        openLayerMap.replaceBasemap(humanitarianLayer);
+        openLayerMap.replaceBasemap(baseMapType, humanitarianLayer);
         setMapType(baseMapType);
         break;
       case 'ogc_layer_light':
         if (ogcLayerLight.current) {
-          openLayerMap.replaceBasemap(ogcLayerLight.current);
+          openLayerMap.replaceBasemap(baseMapType, ogcLayerLight.current);
           setMapType(baseMapType);
         }
         break;
       case 'ogc_layer_dark':
         if (ogcLayerDark.current) {
-          openLayerMap.replaceBasemap(ogcLayerDark.current);
+          openLayerMap.replaceBasemap(baseMapType, ogcLayerDark.current);
           setMapType(baseMapType);
         }
         break;
@@ -136,84 +157,31 @@ function BaseMaps() {
         <Popover.Portal>
           <Popover.Content className={styles.popover_content}>
             <div>
-              <button
-                onClick={() => {
-                  toggleBaseMap('terrain');
-                }}
-                className={
-                  mapType === 'terrain' ? styles.selected : styles.unselected
-                }
-              >
-                <span>
-                  <img src={osmImg} alt="osmpreview" height={26} width={26} />
-                </span>
-                Terrain
-              </button>
-              <button
-                onClick={() => toggleBaseMap('ogc_layer_light')}
-                className={
-                  mapType === 'ogc_layer_light'
-                    ? styles.selected
-                    : styles.unselected
-                }
-              >
-                <span>
-                  <span>
-                    <img src={ogcImg} alt="osmpreview" height={26} width={26} />
-                  </span>
-                </span>
-                Basic Light
-              </button>
-              <button
-                onClick={() => toggleBaseMap('ogc_layer_dark')}
-                className={
-                  mapType === 'ogc_layer_dark'
-                    ? styles.selected
-                    : styles.unselected
-                }
-              >
-                <span>
-                  <span>
-                    <img
-                      src={ogcDark}
-                      alt="osmpreview"
-                      height={26}
-                      width={26}
-                    />
-                  </span>
-                </span>
-                Basic Dark
-              </button>
-              <button
-                onClick={() => {
-                  toggleBaseMap('standard');
-                }}
-                className={
-                  mapType === 'standard' ? styles.selected : styles.unselected
-                }
-              >
-                <span>
-                  <img src={osmImg} alt="osmpreview" height={26} width={26} />
-                </span>
-                OSM
-              </button>
-              <button
-                onClick={() => {
-                  toggleBaseMap('humanitarian');
-                }}
-                className={
-                  mapType === 'humanitarian'
-                    ? styles.selected
-                    : styles.unselected
-                }
-              >
-                <span>
-                  <span>
-                    <img src={humImg} alt="osmpreview" height={26} width={26} />
-                  </span>
-                </span>
-                Humanitarian
-              </button>
+              {baseLayers.map((baseLayer) => {
+                return (
+                  <button
+                    key={baseLayer.name}
+                    onClick={() => {
+                      toggleBaseMap(baseLayer.type);
+                    }}
+                    className={
+                      mapType === `${baseLayer.type}`
+                        ? styles.selected
+                        : styles.unselected
+                    }
+                  >
+                    <span>
+                      <img
+                        src={baseLayer.imgSrc}
+                        alt={baseLayer.type}
+                        height={26}
+                        width={26}
+                      />
+                    </span>
+                    {baseLayer.name}
+                  </button>
+                );
+              })}
             </div>
             {/* <button>Bharat Map</button> */}
             <Popover.Arrow className={styles.popover_arrow} />

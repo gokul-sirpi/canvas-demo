@@ -36,7 +36,12 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
-
+type baseLayerTypes =
+  | 'terrain'
+  | 'standard'
+  | 'humanitarian'
+  | 'ogc_layer_light'
+  | 'ogc_layer_dark';
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
@@ -57,6 +62,7 @@ const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
   latestLayer: null as UserLayer | UgixLayer | null,
+  indianOutline: null as VectorImageLayer<VectorSource> | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
@@ -71,6 +77,7 @@ const openLayerMap = {
     layers: [],
   }),
   replaceBasemap(
+    baseMapType: baseLayerTypes,
     newLayers:
       | VectorLayer<VectorSource>
       | TileLayer<OSM>
@@ -81,10 +88,29 @@ const openLayerMap = {
         this.map.removeLayer(layer);
       }
     });
-    this.map.getLayers().insertAt(0, newLayers);
+    const layers = this.map.getLayers();
+    layers.insertAt(0, newLayers);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        if (layers.getLength() === 1) {
+          this.map.addLayer(this.indianOutline);
+        } else {
+          layers.insertAt(1, this.indianOutline);
+        }
+      }
+    }
   },
-  insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  insertBaseMap(
+    baseMapType: baseLayerTypes,
+    baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>
+  ) {
     this.map.getLayers().insertAt(0, baseLayer);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        this.map.getLayers().insertAt(1, this.indianOutline);
+        // this.map.addLayer(this.indianOutline);
+      }
+    }
   },
 
   setOlTarget(target: string) {
@@ -94,6 +120,16 @@ const openLayerMap = {
     if (this.drawing) {
       this.map.removeInteraction(this.draw);
       this.drawing = false;
+    }
+    if (this.latestLayer) {
+      const layerId = this.latestLayer.layerId;
+      const source = this.getLayer(layerId)?.getSource();
+      if (source) {
+        const featureLength = source.getFeatures().length;
+        if (featureLength === 0) {
+          this.removeLayer(layerId);
+        }
+      }
     }
   },
 
@@ -141,6 +177,7 @@ const openLayerMap = {
       editable: true,
     };
     this.map.addLayer(layer);
+    this.removeDrawInteraction();
     this.latestLayer = newLayer;
     return newLayer;
   },
@@ -210,7 +247,6 @@ const openLayerMap = {
     featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     switch (type) {
@@ -332,7 +368,6 @@ const openLayerMap = {
   },
 
   addMarkerFeature(layerId: string, layerName: string, callback?: () => void) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     this.draw = new Draw({
@@ -433,9 +468,19 @@ const openLayerMap = {
       layer.setVisible(visible);
     }
   },
-
   getLayerVisibility(layerId: string): boolean | undefined {
     return this.getLayer(layerId)?.isVisible();
+  },
+
+  swapLayerPosition(layers: string[]) {
+    const mapLayers = this.map.getLayers();
+    mapLayers.forEach((l) => {
+      const base = l.get('baseLayer');
+      if (base) return;
+      const id = l.get('layer-id');
+      const index = layers.indexOf(id);
+      l.setZIndex(index);
+    });
   },
 
   zoomToFit(layerId: string) {

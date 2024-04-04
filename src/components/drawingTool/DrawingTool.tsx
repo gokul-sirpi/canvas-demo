@@ -5,7 +5,7 @@ import { SlLocationPin } from 'react-icons/sl';
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
-import { addUserLayer } from '../../context/userLayers/userLayerSlice';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import { drawType } from '../../types/UserLayer';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import { RxRulerHorizontal } from 'react-icons/rx';
@@ -20,6 +20,7 @@ function DrawingTool({
   changeSelectedTool?: (tool: drawType) => void;
 }) {
   const dispatch = useDispatch();
+
   function drawFeature(type: drawType) {
     const newLayer = openLayerMap.createNewUserLayer('', type);
     if (changeSelectedTool) {
@@ -32,7 +33,7 @@ function DrawingTool({
         newLayer.layerName,
         () => {
           if (firstLayer) {
-            dispatch(addUserLayer(newLayer));
+            dispatch(addCanvasLayer(newLayer));
           }
           firstLayer = false;
         }
@@ -46,7 +47,7 @@ function DrawingTool({
         newLayer.style,
         () => {
           if (firstLayer) {
-            dispatch(addUserLayer(newLayer));
+            dispatch(addCanvasLayer(newLayer));
           }
           firstLayer = false;
         }

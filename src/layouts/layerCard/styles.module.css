@@ -1,48 +1,27 @@
 .container {
   position: absolute;
-  top: 8rem;
+  top:5rem;
   left: 1rem;
-  display: none;
-}
-
-.visible {
-  display: flex;
-}
-
-.invisible {
-  display: none;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 0.2rem;
+  background-color: white;
 }
 
 .card_container {
   max-height: 80vh;
-  padding: 0.1rem;
+  min-width: 16.4rem;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: white;
-  border-radius: var(--radius-md);
-  border-top-right-radius: 0rem;
-  box-shadow: 0px 0px 2px 1px var(--color-accent);
 }
-
-.small_card_container {
-  display: flex;
-  position: absolute;
-  top: 8rem;
-  left: 1rem;
-}
-
-.small_card_container > div {
-  border-radius: var(--radius-sm);
-  border-top-right-radius: 0rem;
-  font-weight: 600;
-  background-color: white;
-  padding: 0.5rem 1rem;
-  box-shadow: 0px 0px 2px 1px var(--color-accent);
+.card_container[data-visible="false"]{
+  display: none;
 }
 
 .layer_container {
-  padding: 0.3rem 0.3rem;
-  overflow: auto;
+  overflow: hidden;
+  padding: 0.3rem;
 }
 .layer_group{
   display: flex;
@@ -50,124 +29,43 @@
   gap: 0.3rem;
 }
 
-.user_layer_container > h2 {
-  font-size: small;
+.layer_card_heading{
   font-weight: 400;
+  padding: 0.3rem 0.4rem;
+  padding-right: 1.2rem;
 }
 .noData {
   margin-left: 1.5rem;
   color: grey;
   padding-block: 0.5rem;
 }
-/* Accordion styles */
 
-.accordion_root {
-  border-radius: 6px;
-  width: 300px;
+.min_max_container {
+  --icon-height:1rem;
+  --icon-padd:0.3rem;
+  position:absolute;
+  right: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2));
+  /* left: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2)); */
+  top: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2));
+  border: 1px solid var(--color-accent);
+  border-radius: 100rem;
+  display: flex;
+  align-items: center;
+  padding: var(--icon-padd);
+  background-color: white;
 }
-
-.accordion_item {
-  overflow: hidden;
-  margin-top: 1px;
-}
-
-.accordion_item:first-child {
-  margin-top: 0;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.accordion_item:last-child {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.accordion_item:focus-within {
+.icon_container{
+  width: var(--icon-height);
+  height: var(--icon-height);
   position: relative;
-  z-index: 1;
-  box-shadow:
-    rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
-}
-
-.AccordionHeader {
-  display: flex;
-}
-
-.accordion_trigger {
-  background-color: transparent;
-  padding: 0 0.6rem;
-  height: 45px;
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  line-height: 1;
-  background-color: white;
-  width: 100%;
+  transition: 200ms;
 }
-.accordion_trigger h3 {
-  font-weight: normal;
-}
-
-.accordion_trigger:hover {
-  background-color: rgba(211, 211, 211, 0.205);
-}
-
-.accordion_content {
-  overflow: hidden;
-  font-size: 15px;
-}
-.accordion_content[data-state='open'] {
-  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
-}
-.accordion_content[data-state='closed'] {
-  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
-}
-
-.accordion_content_text {
-  padding: 15px 20px;
-}
-
-.FaAngleDown {
-  font-size: 1.3rem;
-  color: rgb(0 0 0 / 54%);
-  transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
-}
-.accordion_trigger[data-state='open'] > .FaAngleDown {
-  transform: rotate(180deg);
-}
-
-@keyframes slideDown {
-  from {
-    height: 0;
-  }
-  to {
-    height: var(--radix-accordion-content-height);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    height: var(--radix-accordion-content-height);
-  }
-  to {
-    height: 0;
-  }
-}
-
-.min_max_icons_container {
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  padding: 0;
-  border-top-right-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
-  background-color: white;
-  box-shadow: 2px 0px 2px 1px var(--color-accent);
+.icon_container[data-open="false"]{
+  rotate: 180deg;
 }
 
 .min_max_icon {
   font-size: var(--font-md);
-  color: var(--color-secondary);
 }

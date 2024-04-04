@@ -5,10 +5,9 @@ import { PiDotsThreeOutlineVerticalFill } from 'react-icons/pi';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
-import { deleteUgixLayer } from '../../context/ugixLayers/ugixLayerSlice';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
-import { deleteUserLayer } from '../../context/userLayers/userLayerSlice';
+import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
@@ -17,10 +16,8 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
   function deleteLayer() {
-    if (layer.layerType === 'UserLayer') {
-      dispatch(deleteUserLayer(layer.layerId));
-    } else if (layer.layerType === 'UgixLayer') {
-      dispatch(deleteUgixLayer(layer.layerId));
+    dispatch(deleteCanvasLayer(layer.layerId));
+    if (layer.layerType === 'UgixLayer') {
       removeCookieFromWishList(layer.ugixLayerId);
     }
     openLayerMap.removeLayer(layer.layerId);

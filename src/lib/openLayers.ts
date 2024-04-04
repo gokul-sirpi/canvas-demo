@@ -100,9 +100,17 @@ const openLayerMap = {
       }
     }
   },
-  insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  insertBaseMap(
+    baseMapType: baseLayerTypes,
+    baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>
+  ) {
     this.map.getLayers().insertAt(0, baseLayer);
-    // this.map.getLayers().insertAt(1, baseLayer);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        this.map.getLayers().insertAt(1, this.indianOutline);
+        // this.map.addLayer(this.indianOutline);
+      }
+    }
   },
 
   setOlTarget(target: string) {
@@ -467,6 +475,8 @@ const openLayerMap = {
   swapLayerPosition(layers: string[]) {
     const mapLayers = this.map.getLayers();
     mapLayers.forEach((l) => {
+      const base = l.get('baseLayer');
+      if (base) return;
       const id = l.get('layer-id');
       const index = layers.indexOf(id);
       l.setZIndex(index);

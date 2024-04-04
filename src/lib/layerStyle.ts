@@ -158,8 +158,8 @@ export function featureUniqueStyle(
 
 export function createFeatureStyle(color: string) {
   const styleObj: FeatureStyle = {
-    fill: whiteFill,
-    'fill-opacity': 0.4,
+    fill: color,
+    'fill-opacity': 0.3,
     stroke: color,
     'stroke-width': 2,
     'stroke-opacity': 1,

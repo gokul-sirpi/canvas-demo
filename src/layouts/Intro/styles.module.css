@@ -7,7 +7,7 @@
 .intro_btn {
   color: white;
   font-size: var(--font-md);
-  padding: 0.6rem 0.8rem 0.5rem;
+  padding: 0.6rem 0.5rem 0.5rem 0.8rem;
   border-radius: 10rem 0rem 0rem 10rem;
   background-color: var(--color-primary);
 }

@@ -50,8 +50,8 @@
   gap: 0rem;
 }
 .input_container > input {
-  padding: 0.3rem 0.5rem;
-  max-width: 10rem;
+  padding: 0.2rem 0.3rem;
+  max-width: 9rem;
 }
 .input_container > input,
 .input_container > label {
@@ -61,10 +61,11 @@
 .btn_container {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.2rem;
+  margin-left: 0.2rem;
 }
 .btn_container > button {
-  padding: 0.2rem;
+  padding: 0rem;
   border-radius: var(--radius-sm);
 }
 

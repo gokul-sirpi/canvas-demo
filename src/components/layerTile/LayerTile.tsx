@@ -57,7 +57,7 @@ function LayerTile({
     dispatch(updateCanvasLayer({ index, modifiedLayer }));
     openLayerMap.updateFeatureProperties(
       modifiedLayer.layerId,
-      'name',
+      'layer',
       layerName
     );
   }

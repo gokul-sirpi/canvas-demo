@@ -4,7 +4,7 @@ import CircleStyle from 'ol/style/Circle';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { Type } from 'ol/geom/Geometry';
 
-const opacity = '99'; //hex value for opacity
+//const opacity = '99'; //hex value for opacity
 
 const image = new CircleStyle({
   radius: 5,
@@ -128,12 +128,13 @@ export function featureUniqueStyle(
   fill: string,
   strokeOpacity: number,
   strokeWidth: number,
-  fillOpacity: number
+  fillOpacity: number,
+  iconId?: number
 ) {
   const fillOpStr = Math.floor(fillOpacity * 15).toString(16);
   const strokeOpStr = Math.floor(strokeOpacity * 15).toString(16);
   if (type === 'MultiPoint' || type === 'Point') {
-    // return markerStyleFunction(0)
+    return markerStyleFunction(iconId || 0);
   }
   return new Style({
     fill: new Fill({
@@ -143,15 +144,10 @@ export function featureUniqueStyle(
       color: stroke + strokeOpStr + strokeOpStr,
       width: strokeWidth,
     }),
-    image: new CircleStyle({
-      radius: 4,
-      fill: new Fill({
-        color: fill + fillOpStr + fillOpStr,
-      }),
-      stroke: new Stroke({
-        color: stroke + strokeOpStr + strokeOpStr,
-        width: strokeWidth,
-      }),
+    image: new Icon({
+      anchor: [0.5, 0.85],
+      src: `icons/${markerIcons[iconId || 0]}`,
+      width: 25,
     }),
   });
 }
@@ -163,6 +159,7 @@ export function createFeatureStyle(color: string) {
     stroke: color,
     'stroke-width': 2,
     'stroke-opacity': 1,
+    'marker-id': 0,
   };
   return styleObj;
 }

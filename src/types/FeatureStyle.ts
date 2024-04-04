@@ -4,4 +4,5 @@ export type FeatureStyle = {
   stroke: string;
   'stroke-width': number;
   'stroke-opacity': number;
+  'marker-id': number;
 };

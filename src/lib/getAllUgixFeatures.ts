@@ -40,7 +40,8 @@ export async function getAllUgixFeatures(
           openLayerMap.addGeoJsonFeature(
             geojsonData,
             ugixLayer.layerId,
-            ugixLayer.style
+            ugixLayer.style,
+            ugixLayer.layerName
           );
           if (totalFeaturesReturned === 0) {
             onSucess();

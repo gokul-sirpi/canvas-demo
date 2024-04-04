@@ -9,11 +9,9 @@ import { drawType } from '../../types/UserLayer';
 
 function DrawingTools() {
   const [selectedTool, setSelectedTool] = useState<drawType>('Circle');
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   function selectDrawingTool(tool: drawType) {
     setSelectedTool(tool);
-    setIsPopoverOpen(false);
   }
   return (
     <Popover.Root>

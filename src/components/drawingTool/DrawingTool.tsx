@@ -5,11 +5,12 @@ import { SlLocationPin } from 'react-icons/sl';
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
-import { addUserLayer } from '../../context/userLayers/userLayerSlice';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import { drawType } from '../../types/UserLayer';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import { RxRulerHorizontal } from 'react-icons/rx';
 import { LuMousePointer2 } from 'react-icons/lu';
+import * as Popover from '@radix-ui/react-popover';
 
 function DrawingTool({
   toolType,
@@ -19,32 +20,26 @@ function DrawingTool({
   changeSelectedTool?: (tool: drawType) => void;
 }) {
   const dispatch = useDispatch();
+
   function drawFeature(type: drawType) {
     const newLayer = openLayerMap.createNewUserLayer('', type);
     if (changeSelectedTool) {
       changeSelectedTool(type);
     }
     let firstLayer = true;
-    if (type === 'Marker') {
+    if (type === 'Point') {
       openLayerMap.addMarkerFeature(
         newLayer.layerId,
         newLayer.layerName,
         () => {
           if (firstLayer) {
-            dispatch(addUserLayer(newLayer));
+            dispatch(addCanvasLayer(newLayer));
           }
           firstLayer = false;
         }
       );
     } else if (type === 'Measure') {
-      openLayerMap.addDrawFeature(
-        type,
-        newLayer.layerId,
-        newLayer.style,
-        () => {
-          openLayerMap.removeLayer(newLayer.layerId);
-        }
-      );
+      openLayerMap.addDrawFeature(type, newLayer.layerId, newLayer.style);
     } else {
       openLayerMap.addDrawFeature(
         type,
@@ -52,7 +47,7 @@ function DrawingTool({
         newLayer.style,
         () => {
           if (firstLayer) {
-            dispatch(addUserLayer(newLayer));
+            dispatch(addCanvasLayer(newLayer));
           }
           firstLayer = false;
         }
@@ -72,32 +67,38 @@ function DrawingTool({
   return (
     <>
       {toolType === 'Circle' && (
-        <button onClick={() => drawFeature('Circle')}>
-          <div className={styles.btn_icon_container}>
-            <GoCircle size={25} />
-          </div>
-        </button>
+        <Popover.Close asChild>
+          <button onClick={() => drawFeature('Circle')}>
+            <div className={styles.btn_icon_container}>
+              <GoCircle size={25} />
+            </div>
+          </button>
+        </Popover.Close>
       )}
       {toolType === 'Rectangle' && (
-        <button onClick={() => drawFeature('Rectangle')}>
-          <div className={styles.btn_icon_container}>
-            <IoSquareOutline size={25} />
-          </div>
-        </button>
+        <Popover.Close asChild>
+          <button onClick={() => drawFeature('Rectangle')}>
+            <div className={styles.btn_icon_container}>
+              <IoSquareOutline size={25} />
+            </div>
+          </button>
+        </Popover.Close>
       )}
-      {toolType === 'Marker' && (
-        <button onClick={() => drawFeature('Marker')}>
+      {toolType === 'Point' && (
+        <button onClick={() => drawFeature('Point')}>
           <div className={styles.btn_icon_container}>
             <SlLocationPin size={25} />
           </div>
         </button>
       )}
       {toolType === 'Polygon' && (
-        <button onClick={() => drawFeature('Polygon')}>
-          <div className={styles.btn_icon_container}>
-            <PiPolygon size={25} />
-          </div>
-        </button>
+        <Popover.Close asChild>
+          <button onClick={() => drawFeature('Polygon')}>
+            <div className={styles.btn_icon_container}>
+              <PiPolygon size={25} />
+            </div>
+          </button>
+        </Popover.Close>
       )}
       {toolType === 'Measure' && (
         <button onClick={() => drawFeature('Measure')}>
@@ -114,11 +115,13 @@ function DrawingTool({
         </button>
       )}
       {toolType === 'Line' && (
-        <button onClick={() => drawFeature('Line')}>
-          <div className={styles.btn_icon_container}>
-            <PiLineSegments size={25} />
-          </div>
-        </button>
+        <Popover.Close asChild>
+          <button onClick={() => drawFeature('Line')}>
+            <div className={styles.btn_icon_container}>
+              <PiLineSegments size={25} />
+            </div>
+          </button>
+        </Popover.Close>
       )}
     </>
   );

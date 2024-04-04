@@ -9,19 +9,22 @@ import Draw, {
   SketchCoordType,
   createBox,
 } from 'ol/interaction/Draw';
+import { Snap } from 'ol/interaction';
 import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/VectorImage';
+import VectorLayer from 'ol/layer/Vector';
 import { UserLayer } from '../types/UserLayer';
 import { Style, Icon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
-import marker from '../assets/icons/generic_marker.png';
 import { GeoJsonObj } from '../types/GeojsonType';
 import {
   styleFunction,
   measurementStyle,
   createFeatureStyle,
   featureUniqueStyle,
+  markerStyleFunction,
+  drawingStyle,
+  markerIcons,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -31,20 +34,26 @@ import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
-
+import { Type as GeometryType } from 'ol/geom/Geometry';
+import JSZip from 'jszip';
+type baseLayerTypes =
+  | 'terrain'
+  | 'standard'
+  | 'humanitarian'
+  | 'ogc_layer_light'
+  | 'ogc_layer_dark';
 const scaleControl = new ScaleLine({
   units: 'metric',
   minWidth: 100,
 });
 const attribution = new Attribution({ collapsible: false });
-
 const markerStyle = new Style({
   image: new Icon({
-    anchor: [0.5, 1],
+    anchor: [0.5, 0.85],
     anchorXUnits: 'fraction',
     anchorYUnits: 'fraction',
-    height: 35,
-    src: marker,
+    width: 25,
+    src: `icons/${markerIcons[0]}`,
   }),
 });
 
@@ -53,6 +62,7 @@ const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
   latestLayer: null as UserLayer | UgixLayer | null,
+  indianOutline: null as VectorImageLayer<VectorSource> | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
@@ -60,22 +70,47 @@ const openLayerMap = {
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      zoom: 4.9,
+      zoom: 4.5,
       // minZoom: 4,
     }),
     controls: [scaleControl, attribution],
     layers: [],
   }),
-  replaceBasemap(newLayers: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  replaceBasemap(
+    baseMapType: baseLayerTypes,
+    newLayers:
+      | VectorLayer<VectorSource>
+      | TileLayer<OSM>
+      | VectorImageLayer<VectorSource>
+  ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get('baseLayer')) {
         this.map.removeLayer(layer);
       }
     });
-    this.map.getLayers().insertAt(0, newLayers);
+    const layers = this.map.getLayers();
+    layers.insertAt(0, newLayers);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        if (layers.getLength() === 1) {
+          this.map.addLayer(this.indianOutline);
+        } else {
+          layers.insertAt(1, this.indianOutline);
+        }
+      }
+    }
   },
-  insertBaseMap(baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>) {
+  insertBaseMap(
+    baseMapType: baseLayerTypes,
+    baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>
+  ) {
     this.map.getLayers().insertAt(0, baseLayer);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        this.map.getLayers().insertAt(1, this.indianOutline);
+        // this.map.addLayer(this.indianOutline);
+      }
+    }
   },
 
   setOlTarget(target: string) {
@@ -86,9 +121,19 @@ const openLayerMap = {
       this.map.removeInteraction(this.draw);
       this.drawing = false;
     }
+    if (this.latestLayer) {
+      const layerId = this.latestLayer.layerId;
+      const source = this.getLayer(layerId)?.getSource();
+      if (source) {
+        const featureLength = source.getFeatures().length;
+        if (featureLength === 0) {
+          this.removeLayer(layerId);
+        }
+      }
+    }
   },
 
-  addLayer(layer: VectorLayer<VectorSource>) {
+  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
     this.map.addLayer(layer);
   },
 
@@ -132,20 +177,26 @@ const openLayerMap = {
       editable: true,
     };
     this.map.addLayer(layer);
+    this.removeDrawInteraction();
     this.latestLayer = newLayer;
     return newLayer;
   },
-  createNewUgixLayer(layerName: string, ugixId: string, ugixGroupId: string) {
+  createNewUgixLayer(
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string,
+    type: GeometryType
+  ) {
     const layerColor = getRandomColor();
     const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const vectorSource = new VectorSource({});
-    const vectorLayer = new VectorImageLayer({
+    const newVectorLayer = new VectorImageLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
-    vectorLayer.set('layer-id', layerId);
-    this.addLayer(vectorLayer);
+    newVectorLayer.set('layer-id', layerId);
+    this.addLayer(newVectorLayer);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       layerName: layerName,
@@ -157,6 +208,7 @@ const openLayerMap = {
       isCompleted: true,
       layerColor,
       style: featureStyle,
+      featureType: type,
     };
     this.latestLayer = newLayer;
     return newLayer;
@@ -176,6 +228,18 @@ const openLayerMap = {
     }
     return featureStyle;
   },
+  changeMarkerIcon(layerId: string, iconInd: number) {
+    const source = this.getLayer(layerId)?.getSource();
+    if (!source) return;
+    source.getFeatures().forEach((feature) => {
+      if (iconInd === 0) {
+        feature.setStyle(markerStyle);
+      } else {
+        feature.setStyle(markerStyleFunction(iconInd));
+      }
+      // feature.setProperties()
+    });
+  },
 
   addDrawFeature(
     type: drawType,
@@ -183,7 +247,6 @@ const openLayerMap = {
     featureStyle: FeatureStyle,
     callback?: (event: DrawEvent) => void
   ) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     switch (type) {
@@ -191,6 +254,7 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
+          style: drawingStyle,
           geometryFunction: createBox(),
         });
         break;
@@ -198,37 +262,39 @@ const openLayerMap = {
         this.draw = new Draw({
           type: 'Circle',
           source: source,
-          geometryFunction: circleGeomatryFunction,
+          style: drawingStyle,
+          geometryFunction: circleGeometryFunction,
         });
         break;
       case 'Polygon':
         this.draw = new Draw({
           type: 'Polygon',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Line':
         this.draw = new Draw({
           type: 'LineString',
+          style: drawingStyle,
           source: source,
         });
         break;
       case 'Measure':
         this.draw = new Draw({
           type: 'LineString',
-          source: source,
           style: () => measurementStyle(),
         });
+        this.removeLayer(layerId);
         break;
       default:
         this.removeDrawInteraction();
         return;
     }
     this.map.addInteraction(this.draw);
+    const snap = new Snap({ source: source });
+    this.map.addInteraction(snap);
     this.drawing = true;
-    // if (this.measureTooltip) {
-    //   this.map.addOverlay(this.measureTooltip);
-    // }
     const featureProprties: { [x: string]: string } = {};
     let drawChangeListener: EventsKey | undefined;
     this.draw.on('drawstart', (evt) => {
@@ -248,7 +314,14 @@ const openLayerMap = {
             featureProprties.length = output;
             tooltipPosition = geom.getLastCoordinate();
           } else if (geom instanceof Polygon) {
-            output = formatArea(geom);
+            if (type === 'Circle') {
+              const center = geom.getInteriorPoint().getCoordinates();
+              const edge = geom.getFirstCoordinate();
+              const line = new LineString([center, edge]);
+              output = formatLength(line);
+            } else {
+              output = formatArea(geom);
+            }
             featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
@@ -295,7 +368,6 @@ const openLayerMap = {
   },
 
   addMarkerFeature(layerId: string, layerName: string, callback?: () => void) {
-    this.removeDrawInteraction();
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     this.draw = new Draw({
@@ -369,12 +441,15 @@ const openLayerMap = {
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
       };
+      const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
-        geometry: feature.getGeometry() as Geometry,
+        geometry: featureGeometry,
         ...properties,
         ...newStyle,
       });
+      const type = featureGeometry.getType();
       const newStyleobj = featureUniqueStyle(
+        type,
         newStyle.stroke,
         newStyle.fill,
         newStyle['stroke-opacity'],
@@ -393,32 +468,29 @@ const openLayerMap = {
       layer.setVisible(visible);
     }
   },
-
   getLayerVisibility(layerId: string): boolean | undefined {
     return this.getLayer(layerId)?.isVisible();
+  },
+
+  swapLayerPosition(layers: string[]) {
+    const mapLayers = this.map.getLayers();
+    mapLayers.forEach((l) => {
+      const base = l.get('baseLayer');
+      if (base) return;
+      const id = l.get('layer-id');
+      const index = layers.indexOf(id);
+      l.setZIndex(index);
+    });
   },
 
   zoomToFit(layerId: string) {
     const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
     if (extent) {
-      view.fit(extent, { padding: [100, 100, 100, 100] });
+      view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     }
   },
 
-  distanceBetweenPoints(point1: number[], point2: number[]) {
-    const lat1 = point1[0] / 57.295;
-    const lat2 = point2[0] / 57.295;
-    const lng1 = point1[1] / 57.295;
-    const lng2 = point2[1] / 57.295;
-    const distance =
-      6371 *
-      Math.acos(
-        Math.sin(lat1) * Math.sin(lat2) +
-          Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
-      );
-    return distance;
-  },
   exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
     const mapCanvas = document.createElement('canvas');
     const allCanvas = this.map
@@ -465,36 +537,42 @@ const openLayerMap = {
     return null;
   },
   exportAsGeoJson(anchor: HTMLAnchorElement, exportName: string) {
-    let allGeoData: undefined | GeoJsonObj;
+    const zip = new JSZip();
     this.map.getLayers().forEach((layer) => {
       const layerId = layer.get('layer-id');
       if (layerId && layer instanceof VectorLayer) {
         if (!layer.getVisible()) return;
-        const source = layer.getSource() as VectorSource;
-        const features = source.getFeatures();
-        const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(
-          features
-        );
-        geojsonData.features.forEach((feature) => {
-          if (!feature.properties) {
-            feature.properties = {};
-          }
-        });
-        if (!allGeoData) {
-          allGeoData = geojsonData;
-        } else {
-          allGeoData.features = allGeoData.features.concat(
-            geojsonData.features
-          );
-        }
+        const geojsonData = openLayerMap.createGeojsonFromLayer(
+          layerId,
+          layer
+        ) as GeoJsonObj;
+        console.log(geojsonData.features[0].properties);
+
+        const layerName =
+          geojsonData.features[0].properties.name || `layer_${layerId}`;
+        zip.file(`${layerName}.geojson`, JSON.stringify(geojsonData));
       }
     });
-    const file = new Blob([JSON.stringify(allGeoData)], {
-      type: 'text/json;charset=utf-8',
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+      anchor.href = URL.createObjectURL(content);
+      anchor.download = `${exportName}.zip`;
+      anchor.click();
     });
-    anchor.href = URL.createObjectURL(file);
-    anchor.download = `${exportName}.geojson`;
-    anchor.click();
+  },
+  createGeojsonFromLayer(layerId: string, layer?: VectorLayer<VectorSource>) {
+    if (!layer) {
+      layer = this.getLayer(layerId);
+      if (!layer) return;
+    }
+    const source = layer.getSource() as VectorSource;
+    const features = source.getFeatures();
+    const geojsonData: GeoJsonObj = new GeoJson().writeFeaturesObject(features);
+    geojsonData.features.forEach((feature) => {
+      if (!feature.properties) {
+        feature.properties = {};
+      }
+    });
+    return geojsonData;
   },
   initialiseMapClickEvent(
     container: HTMLDivElement,
@@ -545,7 +623,7 @@ const openLayerMap = {
 // basic map interactions
 
 // Utility functions
-function circleGeomatryFunction(
+function circleGeometryFunction(
   coordinates: SketchCoordType,
   geometry: SimpleGeometry
 ) {

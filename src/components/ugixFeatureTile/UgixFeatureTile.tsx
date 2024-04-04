@@ -2,18 +2,22 @@ import { FaLock, FaUnlock } from 'react-icons/fa';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
 import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
-import { QueryParams, Resource } from '../../types/resource';
+import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { emitToast } from '../../lib/toastEmitter';
 import { MdDownloadForOffline } from 'react-icons/md';
-import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures';
+import {
+  getAccessToken,
+  getAllUgixFeatures,
+} from '../../lib/getAllUgixFeatures';
 import { Extent } from 'ol/extent';
+import axios from 'axios';
 
 function UgixFeatureTile({
   resource,
@@ -27,6 +31,7 @@ function UgixFeatureTile({
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
+  const anchorRef = useRef<HTMLAnchorElement>(null);
 
   function getinfoLink() {
     const groupId = resource.resourceGroup;
@@ -44,7 +49,8 @@ function UgixFeatureTile({
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id,
-      resource.resourceGroup
+      resource.resourceGroup,
+      resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -55,7 +61,7 @@ function UgixFeatureTile({
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
         // cleanUpSideEffects();
       },
       (message) => {
@@ -93,7 +99,8 @@ function UgixFeatureTile({
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id,
-      resource.resourceGroup
+      resource.resourceGroup,
+      resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -105,7 +112,7 @@ function UgixFeatureTile({
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
       },
       (message) => {
         emitToast('error', message);
@@ -118,6 +125,42 @@ function UgixFeatureTile({
         openLayerMap.zoomToFit(newLayer.layerId);
       }
     );
+  }
+  async function handleResourceDownload() {
+    try {
+      const url = envurls.ugixOgcServer + 'stac/collections/' + resource.id;
+      const response = await axios.get(url);
+      const assetData = response.data as ResourceDownload;
+      for (const asset in assetData.assets) {
+        const { role, href } = assetData.assets[asset];
+        if (role[0] === 'data') {
+          downloadResourceData(href);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  async function downloadResourceData(href: string) {
+    const { error, token } = await getAccessToken(resource);
+    if (error) {
+      emitToast('error', 'Unable to get Data. Access denied');
+    }
+    if (token) {
+      try {
+        const response = await axios.get(href, {
+          headers: { Token: token },
+          responseType: 'blob',
+        });
+        if (anchorRef.current) {
+          anchorRef.current.href = URL.createObjectURL(response.data);
+          anchorRef.current.download = 'hello.sqlite3';
+          anchorRef.current.click();
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
   function cleanUpSideEffects() {
     setAdding(false);
@@ -134,6 +177,7 @@ function UgixFeatureTile({
   }
   return (
     <div className={styles.tile_container}>
+      <a style={{ display: 'none' }} ref={anchorRef}></a>
       {/* content */}
       <div className={styles.tile_content}>
         <div className={styles.tile_description}>
@@ -184,7 +228,7 @@ function UgixFeatureTile({
       {/* icon container */}
       <div className={styles.icon_container}>
         <TooltipWrapper content="Download complete resources">
-          <button>
+          <button onClick={handleResourceDownload}>
             <div className={styles.icon_wrapper}>
               <MdDownloadForOffline />
             </div>

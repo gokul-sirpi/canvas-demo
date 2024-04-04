@@ -10,8 +10,7 @@ import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { QueryParams, Resource } from '../../types/resource.ts';
-import { addUgixLayer } from '../../context/ugixLayers/ugixLayerSlice.ts';
-import { addUserLayer } from '../../context/userLayers/userLayerSlice.ts';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
@@ -42,7 +41,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
 
   function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue(envurls.catalogueCookie);
-    console.log(wishList);
     if (wishList) {
       const parsedList = wishList.split(',');
       if (Array.isArray(parsedList)) {
@@ -60,7 +58,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     const newLayer = openLayerMap.createNewUgixLayer(
       resource.label,
       resource.id,
-      resource.resourceGroup
+      resource.resourceGroup,
+      resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
       limit: limit,
@@ -71,7 +70,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       newLayer,
       queryParams,
       () => {
-        dispatch(addUgixLayer(newLayer));
+        dispatch(addCanvasLayer(newLayer));
       },
       (message) => {
         emitToast('error', message);
@@ -88,7 +87,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   function handleFileDrop(event: React.DragEvent) {
     event.preventDefault();
-    if (event.dataTransfer.files) {
+    if (event.dataTransfer.files.length > 0) {
       const files = event.dataTransfer.files;
       dispatch(updateLoadingState(true));
       for (const file of files) {
@@ -130,22 +129,25 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         newLayer.style
       );
       openLayerMap.zoomToFit(newLayer.layerId);
-      dispatch(addUserLayer(newLayer));
+      dispatch(addCanvasLayer(newLayer));
     } catch (error) {
       emitToast('error', 'Invalid file format');
       dispatch(updateLoadingState(false));
     }
   }
   function handleDragOver(event: React.DragEvent) {
+    console.log('canvas');
+
     event.preventDefault();
   }
   return (
-    <section
-      onDrop={handleFileDrop}
-      onDragOver={handleDragOver}
-      className={styles.container}
-    >
-      <div id="ol-map" className={styles.ol_map}></div>
+    <section className={styles.container}>
+      <div
+        onDrop={handleFileDrop}
+        onDragOver={handleDragOver}
+        id="ol-map"
+        className={styles.ol_map}
+      ></div>
       <>
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />

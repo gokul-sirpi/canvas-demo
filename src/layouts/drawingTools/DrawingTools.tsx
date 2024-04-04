@@ -11,15 +11,12 @@ function DrawingTools() {
   const [selectedTool, setSelectedTool] = useState<drawType>('Circle');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  function togglePopover() {
-    setIsPopoverOpen(!isPopoverOpen);
-  }
   function selectDrawingTool(tool: drawType) {
     setSelectedTool(tool);
     setIsPopoverOpen(false);
   }
   return (
-    <Popover.Root open={isPopoverOpen}>
+    <Popover.Root>
       <div className={styles.popover_root} data-intro="drawing_tools">
         <Popover.Anchor>
           <TooltipWrapper content={selectedTool}>
@@ -33,7 +30,7 @@ function DrawingTools() {
         </Popover.Anchor>
         <TooltipWrapper content="Drawing tools">
           <Popover.Trigger asChild>
-            <button onClick={togglePopover} className={styles.popover_trigger}>
+            <button className={styles.popover_trigger}>
               <FaChevronDown size={10} />
             </button>
           </Popover.Trigger>

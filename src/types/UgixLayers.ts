@@ -1,3 +1,4 @@
+import { Type } from 'ol/geom/Geometry';
 import { FeatureStyle } from './FeatureStyle';
 
 export type UgixLayer = {
@@ -11,4 +12,5 @@ export type UgixLayer = {
   isCompleted: boolean;
   layerColor: string;
   style: FeatureStyle;
+  featureType:Type
 };

@@ -1,30 +1,31 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserLayer } from '../../types/UserLayer';
 import { FeatureStyle } from '../../types/FeatureStyle';
-type UserLayerState = {
-  layers: UserLayer[];
+import { UgixLayer } from '../../types/UgixLayers';
+type CanvasLayerState = {
+  layers: (UserLayer | UgixLayer)[];
 };
 
-const initialState: UserLayerState = {
+const initialState: CanvasLayerState = {
   layers: [],
 };
 
-export const userLayerSlice = createSlice({
+export const canvasLayerSlice = createSlice({
   name: 'userLayer',
   initialState,
   reducers: {
-    addUserLayer(state, action) {
+    addCanvasLayer(state, action) {
       state.layers.push(action.payload);
     },
-    updateUserLayer(state, action) {
+    updateCanvasLayer(state, action) {
       state.layers[action.payload.index] = action.payload.modifiedLayer;
     },
-    deleteUserLayer(state, { payload }) {
+    deleteCanvasLayer(state, { payload }) {
       state.layers = state.layers.filter((layer) => {
         return layer.layerId !== payload;
       });
     },
-    updateUserLayerColor(
+    updateCanvasLayerColor(
       state,
       action: PayloadAction<{
         layerId: string;
@@ -41,13 +42,17 @@ export const userLayerSlice = createSlice({
       });
       state.layers = updatedLayers;
     },
+    changeCanvasLayer(state, action: PayloadAction<(UserLayer | UgixLayer)[]>) {
+      state.layers = action.payload;
+    },
   },
 });
 
 export const {
-  addUserLayer,
-  updateUserLayer,
-  deleteUserLayer,
-  updateUserLayerColor,
-} = userLayerSlice.actions;
-export default userLayerSlice.reducer;
+  addCanvasLayer,
+  updateCanvasLayer,
+  deleteCanvasLayer,
+  updateCanvasLayerColor,
+  changeCanvasLayer,
+} = canvasLayerSlice.actions;
+export default canvasLayerSlice.reducer;

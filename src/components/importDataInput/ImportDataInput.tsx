@@ -6,7 +6,7 @@ import styles from './styles.module.css';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { GeoJsonObj } from '../../types/GeojsonType';
 import openLayerMap from '../../lib/openLayers';
-import { addUserLayer } from '../../context/userLayers/userLayerSlice';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { emitToast } from '../../lib/toastEmitter';
 
@@ -59,7 +59,7 @@ function ImportDataInput() {
         newLayer.style
       );
       openLayerMap.zoomToFit(newLayer.layerId);
-      dispatch(addUserLayer(newLayer));
+      dispatch(addCanvasLayer(newLayer));
     } catch (error) {
       emitToast('error', 'Invalid file format');
       dispatch(updateLoadingState(false));

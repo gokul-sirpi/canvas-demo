@@ -5,20 +5,19 @@ import { PiDotsThreeOutlineVerticalFill } from 'react-icons/pi';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
-import { deleteUgixLayer } from '../../context/ugixLayers/ugixLayerSlice';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
-import { deleteUserLayer } from '../../context/userLayers/userLayerSlice';
+import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
+import { useRef } from 'react';
 
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
+  const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
   function deleteLayer() {
-    if (layer.layerType === 'UserLayer') {
-      dispatch(deleteUserLayer(layer.layerId));
-    } else if (layer.layerType === 'UgixLayer') {
-      dispatch(deleteUgixLayer(layer.layerId));
+    dispatch(deleteCanvasLayer(layer.layerId));
+    if (layer.layerType === 'UgixLayer') {
       removeCookieFromWishList(layer.ugixLayerId);
     }
     openLayerMap.removeLayer(layer.layerId);
@@ -41,6 +40,17 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       window.open(path, '_blank');
     }
   }
+  function handleLayerExport() {
+    const geojsonData = openLayerMap.createGeojsonFromLayer(layer.layerId);
+    const file = new Blob([JSON.stringify(geojsonData)], {
+      type: 'text/json;charset=utf-8',
+    });
+    if (anchorRef.current) {
+      anchorRef.current.href = URL.createObjectURL(file);
+      anchorRef.current.download = `${layer.layerName}.geojson`;
+      anchorRef.current.click();
+    }
+  }
   return (
     <>
       <Popover.Root>
@@ -60,6 +70,14 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 Delete
               </button>
             </div>
+            <div>
+              <button
+                onClick={handleLayerExport}
+                className={styles.popover_btn}
+              >
+                Export
+              </button>
+            </div>
             {layer.layerType === 'UgixLayer' && (
               <div>
                 <button onClick={handleInfoOpen} className={styles.popover_btn}>
@@ -67,6 +85,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 </button>
               </div>
             )}
+            <a ref={anchorRef} href=""></a>
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

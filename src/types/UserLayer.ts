@@ -3,16 +3,16 @@ import { FeatureStyle } from './FeatureStyle';
 export type drawType =
   | 'Circle'
   | 'Rectangle'
-  | 'Marker'
+  | 'Point'
   | 'Polygon'
   | 'Measure'
   | 'Line'
   | 'GeometryCollection';
 
 export type UserLayer = {
-  layerType: 'UserLayer';
+  readonly layerType: 'UserLayer';
+  readonly layerId: string;
   layerName: string;
-  layerId: string;
   selected: boolean;
   visible: boolean;
   isCompleted: boolean;

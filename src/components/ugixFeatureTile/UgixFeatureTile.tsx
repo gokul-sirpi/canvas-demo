@@ -100,39 +100,7 @@ function UgixFeatureTile({
       }
     );
   }
-  function getFeaturesInBbox(bbox: Extent) {
-    setAdding(true);
-    dispatch(updateLoadingState(true));
-    const newLayer = openLayerMap.createNewUgixLayer(
-      resource.label,
-      resource.id,
-      resource.resourceGroup,
-      resource.ogcResourceInfo.geometryType
-    );
-    const queryParams: QueryParams = {
-      limit: limit,
-      offset: 1,
-      bbox: bbox.join(),
-    };
-    getAllUgixFeatures(
-      resource,
-      newLayer,
-      queryParams,
-      () => {
-        dispatch(addCanvasLayer(newLayer));
-      },
-      (message) => {
-        emitToast('error', message);
-        cleanUpSideEffects();
-        showNoAccessText();
-      },
-      () => {
-        cleanUpSideEffects();
-        dialogCloseTrigger(false);
-        openLayerMap.zoomToFit(newLayer.layerId);
-      }
-    );
-  }
+
   async function handleResourceDownload() {
     try {
       const url = envurls.ugixOgcServer + 'stac/collections/' + resource.id;

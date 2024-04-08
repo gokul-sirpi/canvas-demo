@@ -27,7 +27,7 @@ export async function getAllUgixFeatures(
   }
   if (token) {
     let totalFeaturesReturned = 0;
-    let totalFeatures = 0;
+    let totalFeatures = Infinity;
     const url = envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
     do {
       try {
@@ -46,7 +46,7 @@ export async function getAllUgixFeatures(
           if (totalFeaturesReturned === 0) {
             onSucess();
           }
-          totalFeatures = response.data.numberMatched;
+          totalFeatures = Math.min(totalFeatures, response.data.numberMatched);
           totalFeaturesReturned += response.data.numberReturned;
           params.offset += limit;
         } else {

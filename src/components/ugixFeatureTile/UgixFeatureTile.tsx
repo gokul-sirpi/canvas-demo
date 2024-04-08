@@ -6,7 +6,10 @@ import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
+import {
+  addCanvasLayer,
+  updateLayerFetchingStatus,
+} from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
@@ -43,7 +46,7 @@ function UgixFeatureTile({
     window.open(path, '_blank');
   }
 
-  async function handleUgixLayerAddition() {
+  async function handleUgixLayerAddition(bbox?: Extent) {
     setAdding(true);
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
@@ -56,23 +59,27 @@ function UgixFeatureTile({
       limit: limit,
       offset: 1,
     };
+    if (bbox) {
+      queryParams.bbox = bbox.join();
+    }
     getAllUgixFeatures(
       resource,
       newLayer,
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
-        // cleanUpSideEffects();
+        cleanUpSideEffects();
+        dialogCloseTrigger(false);
       },
       (message) => {
         emitToast('error', message);
         cleanUpSideEffects();
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
         showNoAccessText();
       },
       () => {
         cleanUpSideEffects();
-        dialogCloseTrigger(false);
-        openLayerMap.zoomToFit(newLayer.layerId);
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
       }
     );
   }
@@ -88,7 +95,7 @@ function UgixFeatureTile({
         openLayerMap.removeLayer(newLayer.layerId);
         const extent = event.feature.getGeometry()?.getExtent();
         if (extent) {
-          getFeaturesInBbox(extent);
+          handleUgixLayerAddition(extent);
         }
       }
     );
@@ -200,7 +207,7 @@ function UgixFeatureTile({
             <button
               className={styles.extra_button}
               disabled={adding}
-              onClick={handleUgixLayerAddition}
+              onClick={() => handleUgixLayerAddition()}
             >
               Get all
             </button>

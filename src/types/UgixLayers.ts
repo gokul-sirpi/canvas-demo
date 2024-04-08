@@ -12,5 +12,6 @@ export type UgixLayer = {
   isCompleted: boolean;
   layerColor: string;
   style: FeatureStyle;
-  featureType:Type
+  featureType: Type;
+  fetching: boolean;
 };

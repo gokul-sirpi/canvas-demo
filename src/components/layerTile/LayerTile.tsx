@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
@@ -18,6 +18,7 @@ import { GoCircle } from 'react-icons/go';
 import { IoShapesOutline, IoSquareOutline } from 'react-icons/io5';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import MarkerPicker from '../markerPicker/MarkerPicker';
+import Loader from '../loader/Loader';
 
 function LayerTile({
   layer,
@@ -31,7 +32,6 @@ function LayerTile({
     openLayerMap.getLayerVisibility(layer.layerId)
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
-  const [isTextOverflowing, setIsTextOverflowing] = useState(false);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const dispatch = useDispatch();
 
@@ -68,7 +68,8 @@ function LayerTile({
     dispatch(deleteCanvasLayer(layer.layerId));
   }
 
-  function handleColorChange(text: string) {
+  function handleColorChange(event: ChangeEvent<HTMLInputElement>) {
+    const text = event.target.value;
     const changedStyle = openLayerMap.changeLayerColor(
       layer.layerId,
       selectedColor
@@ -83,13 +84,6 @@ function LayerTile({
     setSelectedColor(text);
   }
 
-  useEffect(() => {
-    const layerTitle = titleRef.current;
-    if (layerTitle) {
-      const isOverflowing = layerTitle.scrollWidth > layerTitle.clientWidth;
-      setIsTextOverflowing(isOverflowing);
-    }
-  }, [layer.layerName]);
   return (
     <div className={styles.container} data-layer={layer.layerType}>
       <div
@@ -104,23 +98,13 @@ function LayerTile({
           </div>
         </button>
         {layer.isCompleted ? (
-          isTextOverflowing ? (
-            <TooltipWrapper content={layer.layerName}>
-              <div className={styles.layer_title_container}>
-                <p ref={titleRef} className={styles.layer_title}>
-                  {layer.layerName}
-                </p>
-              </div>
-            </TooltipWrapper>
-          ) : (
-            <>
-              <div className={styles.layer_title_container}>
-                <p ref={titleRef} className={styles.layer_title}>
-                  {layer.layerName}
-                </p>
-              </div>
-            </>
-          )
+          <TooltipWrapper content={layer.layerName}>
+            <div className={styles.layer_title_container}>
+              <p ref={titleRef} className={styles.layer_title}>
+                {layer.layerName}
+              </p>
+            </div>
+          </TooltipWrapper>
         ) : (
           <input
             placeholder={`default name - Layer${index + 1}`}
@@ -133,16 +117,19 @@ function LayerTile({
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
+            {layer.layerType === 'UgixLayer' && layer.fetching && <Loader />}
             {(layer.layerType === 'UserLayer' && !layer.editable) ||
             layer.featureType === 'Point' ||
-            layer.featureType === 'MultiPoint' ? null : (
-              <>
+            layer.featureType === 'MultiPoint' ? (
+              <MarkerPicker layerId={layer.layerId} />
+            ) : (
+              <div className={styles.color_picker_container}>
                 <input
                   type="color"
                   className={styles.color_picker}
                   defaultValue={selectedColor}
                   color={selectedColor}
-                  onChange={(e) => handleColorChange(e.target.value)}
+                  onChange={handleColorChange}
                   id={layer.layerId}
                   tabIndex={-1}
                 />
@@ -151,11 +138,7 @@ function LayerTile({
                   style={{ backgroundColor: `${selectedColor}` }}
                   className={styles.color_label}
                 ></label>
-              </>
-            )}
-            {(layer.featureType === 'Point' ||
-              layer.featureType === 'MultiPoint') && (
-              <MarkerPicker layerId={layer.layerId} />
+              </div>
             )}
             {layer.layerType === 'UserLayer' && (
               <>

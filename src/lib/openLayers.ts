@@ -198,6 +198,7 @@ const openLayerMap = {
       layerColor,
       style: featureStyle,
       featureType: type,
+      fetching: true,
     };
     this.latestLayer = newLayer;
     return newLayer;

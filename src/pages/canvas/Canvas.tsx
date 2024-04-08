@@ -10,7 +10,10 @@ import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { QueryParams, Resource } from '../../types/resource.ts';
-import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice.ts';
+import {
+  addCanvasLayer,
+  updateLayerFetchingStatus,
+} from '../../context/canvasLayers/canvasLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
@@ -71,14 +74,16 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
+        cleanUpSideEffects();
       },
       (message) => {
         emitToast('error', message);
         cleanUpSideEffects();
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
       },
       () => {
-        openLayerMap.zoomToFit(newLayer.layerId);
         cleanUpSideEffects();
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
       }
     );
   }

@@ -1,0 +1,51 @@
+.loader{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 2rem;
+    height: 1.5rem;
+    animation: rotator 1000ms steps(8)  infinite ;
+}
+
+@keyframes rotator {
+    100%{
+        rotate:360deg
+    }
+}
+.blade{
+    width: 5px;
+    height: 2px;
+    background-color: black;
+    position: absolute;
+    transform-origin: 180% 1px; 
+    translate: -7px ;
+}
+.blade:nth-child(2){
+    rotate: 45deg;
+    opacity: 0.3;
+}
+.blade:nth-child(3){
+    rotate: 90deg;
+    opacity: 0.4;
+}
+.blade:nth-child(4){
+    rotate: 135deg;
+    opacity: 0.5;
+}
+.blade:nth-child(5){
+    rotate: 180deg;
+    opacity: 0.6;
+}
+.blade:nth-child(6){
+    rotate: 225deg;
+    opacity: 0.7;
+}
+.blade:nth-child(7){
+    rotate: 270deg;
+    opacity: 0.8;
+}
+.blade:nth-child(8){
+    rotate: 315deg;
+    opacity: 0.9;
+}

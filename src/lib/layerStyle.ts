@@ -55,6 +55,23 @@ export function styleFunction(feature: FeatureLike, stroke: string) {
   return style;
 }
 
+export function hoverStyle(style: FeatureStyle) {
+  return new Style({
+    stroke: new Stroke({
+      color: style.fill,
+      width: 2,
+    }),
+    fill: new Fill({
+      color: style.fill + '77',
+    }),
+    image: new Icon({
+      anchor: [0.5, 0.85],
+      src: `icons/${markerIcons[style['marker-id']]}`,
+      width: 27,
+    }),
+  });
+}
+
 export function drawingStyle() {
   const style = new Style({
     stroke: new Stroke({

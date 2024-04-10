@@ -10,7 +10,10 @@ import axios from 'axios';
 import envurls from '../../utils/config.ts';
 import { GeoJsonObj } from '../../types/GeojsonType.ts';
 import { QueryParams, Resource } from '../../types/resource.ts';
-import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice.ts';
+import {
+  addCanvasLayer,
+  updateLayerFetchingStatus,
+} from '../../context/canvasLayers/canvasLayerSlice.ts';
 import { emitToast } from '../../lib/toastEmitter.ts';
 import Popup from '../../components/popup/Popup.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
@@ -71,14 +74,16 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
+        cleanUpSideEffects();
       },
       (message) => {
         emitToast('error', message);
         cleanUpSideEffects();
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
       },
       () => {
-        openLayerMap.zoomToFit(newLayer.layerId);
         cleanUpSideEffects();
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
       }
     );
   }
@@ -97,12 +102,17 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
           const fr = new FileReader();
           fr.readAsText(file);
           fr.onload = () => {
-            const output = fr.result as string;
-            const parsedData = JSON.parse(output) as GeoJsonObj;
-            nameSplit.pop();
-            const fileName = nameSplit.join();
-            plotGeojsonData(parsedData, fileName);
-            dispatch(updateLoadingState(false));
+            try {
+              const output = fr.result as string;
+              const parsedData = JSON.parse(output) as GeoJsonObj;
+              nameSplit.pop();
+              const fileName = nameSplit.join();
+              plotGeojsonData(parsedData, fileName);
+              dispatch(updateLoadingState(false));
+            } catch (err) {
+              emitToast('error', 'Invalid file format');
+              dispatch(updateLoadingState(false));
+            }
           };
           fr.onerror = () => {
             emitToast('error', 'Unable to load file');
@@ -136,8 +146,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
   }
   function handleDragOver(event: React.DragEvent) {
-    console.log('canvas');
-
     event.preventDefault();
   }
   return (

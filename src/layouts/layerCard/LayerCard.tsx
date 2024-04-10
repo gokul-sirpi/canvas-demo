@@ -17,9 +17,6 @@ function LayerCard() {
   const canvasLayers = useSelector((state: RootState) => {
     return state.userLayer.layers;
   });
-  useEffect(() => {
-    handleReorder(canvasLayers);
-  }, [canvasLayers]);
   function handleReorder(e: (UserLayer | UgixLayer)[]) {
     dispatch(changeCanvasLayer(e));
     const layerIdArr = e.map((layer) => {
@@ -27,6 +24,9 @@ function LayerCard() {
     });
     openLayerMap.swapLayerPosition(layerIdArr);
   }
+  useEffect(() => {
+    handleReorder(canvasLayers);
+  }, [canvasLayers]);
   return (
     <section>
       <div className={styles.container}>

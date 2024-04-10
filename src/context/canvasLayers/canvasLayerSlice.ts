@@ -42,6 +42,15 @@ export const canvasLayerSlice = createSlice({
       });
       state.layers = updatedLayers;
     },
+    updateLayerFetchingStatus(state, action) {
+      for (const layer of state.layers) {
+        if (layer.layerId === action.payload) {
+          if (layer.layerType === 'UgixLayer') {
+            layer.fetching = false;
+          }
+        }
+      }
+    },
     changeCanvasLayer(state, action: PayloadAction<(UserLayer | UgixLayer)[]>) {
       state.layers = action.payload;
     },
@@ -54,5 +63,6 @@ export const {
   deleteCanvasLayer,
   updateCanvasLayerColor,
   changeCanvasLayer,
+  updateLayerFetchingStatus,
 } = canvasLayerSlice.actions;
 export default canvasLayerSlice.reducer;

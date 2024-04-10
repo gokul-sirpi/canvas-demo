@@ -54,7 +54,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   return (
     <>
       <Popover.Root>
-        <TooltipWrapper content="More">
+        <TooltipWrapper content="More" side="right">
           <Popover.Trigger asChild>
             <button className={styles.popover_trigger}>
               <div className={styles.btn_icon_container}>
@@ -67,7 +67,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
           <Popover.Content className={styles.popover_content}>
             <div>
               <button onClick={deleteLayer} className={styles.popover_btn}>
-                Delete Layer
+                Delete layer
               </button>
             </div>
             <div>
@@ -76,6 +76,14 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 className={styles.popover_btn}
               >
                 Export layer
+              </button>
+            </div>
+            <div>
+              <button
+                className={styles.popover_btn}
+                onClick={() => openLayerMap.zoomToFit(layer.layerId)}
+              >
+                Zoom to bound
               </button>
             </div>
             {layer.layerType === 'UgixLayer' && (

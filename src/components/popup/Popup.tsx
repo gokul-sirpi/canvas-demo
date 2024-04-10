@@ -2,10 +2,12 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
+import { Feature } from 'ol';
 
 function Popup() {
   const singleRender = useRef<boolean>(false);
   const popupContainer = useRef<HTMLDivElement>(null);
+  const currentFeature = useRef<Feature>();
   const [properties, setProperties] = useState<{
     [x: string]: string | number | null;
   }>();
@@ -14,6 +16,7 @@ function Popup() {
     if (singleRender.current) return;
     singleRender.current = true;
     openLayerMap.initialiseMapClickEvent(popupContainer.current, (feature) => {
+      currentFeature.current = feature;
       const properties = feature.getProperties();
       delete properties.geometry;
       delete properties.fill;

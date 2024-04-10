@@ -14,4 +14,5 @@ export type UgixLayer = {
   style: FeatureStyle;
   featureType: Type;
   fetching: boolean;
+  editable: boolean;
 };

@@ -102,12 +102,17 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
           const fr = new FileReader();
           fr.readAsText(file);
           fr.onload = () => {
-            const output = fr.result as string;
-            const parsedData = JSON.parse(output) as GeoJsonObj;
-            nameSplit.pop();
-            const fileName = nameSplit.join();
-            plotGeojsonData(parsedData, fileName);
-            dispatch(updateLoadingState(false));
+            try {
+              const output = fr.result as string;
+              const parsedData = JSON.parse(output) as GeoJsonObj;
+              nameSplit.pop();
+              const fileName = nameSplit.join();
+              plotGeojsonData(parsedData, fileName);
+              dispatch(updateLoadingState(false));
+            } catch (err) {
+              emitToast('error', 'Invalid file format');
+              dispatch(updateLoadingState(false));
+            }
           };
           fr.onerror = () => {
             emitToast('error', 'Unable to load file');
@@ -141,8 +146,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
   }
   function handleDragOver(event: React.DragEvent) {
-    console.log('canvas');
-
     event.preventDefault();
   }
   return (

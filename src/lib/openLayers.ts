@@ -23,6 +23,7 @@ import {
   featureUniqueStyle,
   markerStyleFunction,
   drawingStyle,
+  hoverStyle,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -34,6 +35,7 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
+import { Style } from 'ol/style';
 type baseLayerTypes =
   | 'terrain'
   | 'standard'
@@ -354,7 +356,12 @@ const openLayerMap = {
     });
   },
 
-  addMarkerFeature(layerId: string, layerName: string, callback?: () => void) {
+  addMarkerFeature(
+    layerId: string,
+    layerName: string,
+    featureStyle: FeatureStyle,
+    callback?: () => void
+  ) {
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     this.draw = new Draw({
@@ -366,6 +373,7 @@ const openLayerMap = {
       const marker = drawEvent.feature as Feature<Point>;
       marker.setProperties({
         layer: layerName || 'NULL',
+        ...featureStyle,
         lat: marker.getGeometry()?.getCoordinates()[1],
         lng: marker.getGeometry()?.getCoordinates()[0],
       });
@@ -613,6 +621,27 @@ const openLayerMap = {
   },
 };
 // basic map interactions
+let selected: Feature | undefined;
+let prevStyle: Style | undefined;
+openLayerMap.map.on('pointermove', (event) => {
+  if (openLayerMap.drawing) {
+    return;
+  }
+  const feature = openLayerMap.map.getFeaturesAtPixel(event.pixel)[0] as
+    | Feature
+    | undefined;
+  if (feature) {
+    if (selected) {
+      selected.setStyle(prevStyle);
+      selected = undefined;
+    }
+    const { layer, ...style } = feature.getProperties();
+    if (!layer) return;
+    prevStyle = feature.getStyle() as Style;
+    feature.setStyle(hoverStyle(style as FeatureStyle));
+    selected = feature;
+  }
+});
 
 // Utility functions
 function circleGeometryFunction(

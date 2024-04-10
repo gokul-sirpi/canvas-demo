@@ -31,6 +31,7 @@ function DrawingTool({
       openLayerMap.addMarkerFeature(
         newLayer.layerId,
         newLayer.layerName,
+        newLayer.style,
         () => {
           if (firstLayer) {
             dispatch(addCanvasLayer(newLayer));

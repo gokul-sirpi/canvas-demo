@@ -118,27 +118,29 @@ function LayerTile({
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
             {layer.layerType === 'UgixLayer' && layer.fetching && <Loader />}
-            {(layer.layerType === 'UserLayer' && !layer.editable) ||
-            layer.featureType === 'Point' ||
-            layer.featureType === 'MultiPoint' ? (
-              <MarkerPicker layerId={layer.layerId} />
-            ) : (
-              <div className={styles.color_picker_container}>
-                <input
-                  type="color"
-                  className={styles.color_picker}
-                  defaultValue={selectedColor}
-                  color={selectedColor}
-                  onChange={handleColorChange}
-                  id={layer.layerId}
-                  tabIndex={-1}
-                />
-                <label
-                  htmlFor={layer.layerId}
-                  style={{ backgroundColor: `${selectedColor}` }}
-                  className={styles.color_label}
-                ></label>
-              </div>
+            {layer.layerType === 'UserLayer' && layer.editable && (
+              <>
+                {layer.featureType === 'Point' ? (
+                  <MarkerPicker layerId={layer.layerId} />
+                ) : (
+                  <div className={styles.color_picker_container}>
+                    <input
+                      type="color"
+                      className={styles.color_picker}
+                      defaultValue={selectedColor}
+                      color={selectedColor}
+                      onChange={handleColorChange}
+                      id={layer.layerId}
+                      tabIndex={-1}
+                    />
+                    <label
+                      htmlFor={layer.layerId}
+                      style={{ backgroundColor: `${selectedColor}` }}
+                      className={styles.color_label}
+                    ></label>
+                  </div>
+                )}
+              </>
             )}
             {layer.layerType === 'UserLayer' && (
               <>

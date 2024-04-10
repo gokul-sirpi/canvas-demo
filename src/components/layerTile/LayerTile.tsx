@@ -118,7 +118,7 @@ function LayerTile({
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
             {layer.layerType === 'UgixLayer' && layer.fetching && <Loader />}
-            {layer.layerType === 'UserLayer' && layer.editable && (
+            {layer.editable && (
               <>
                 {layer.featureType === 'Point' ? (
                   <MarkerPicker layerId={layer.layerId} />

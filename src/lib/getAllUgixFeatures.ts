@@ -28,7 +28,7 @@ export async function getAllUgixFeatures(
   if (token) {
     let totalFeaturesReturned = 0;
     let totalFeatures = Infinity;
-    const url = envurls.ugixOgcServer + 'collections1/' + resource.id + '/items';
+    const url = envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
     do {
       try {
         const response = await axios.get(url, {

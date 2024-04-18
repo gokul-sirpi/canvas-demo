@@ -48,7 +48,7 @@ export async function getAllUgixFeatures(
           }
           totalFeatures = Math.min(totalFeatures, response.data.numberMatched);
           totalFeaturesReturned += response.data.numberReturned;
-          params.offset += totalFeaturesReturned;
+          params.offset += response.data.numberReturned;
         } else {
           break;
         }

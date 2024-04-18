@@ -23,7 +23,7 @@ import Intro from '../../layouts/Intro/Intro.tsx';
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
-  const limit = 5;
+  // const limit = 5;
   const dispatch = useDispatch();
   useEffect(() => {
     if (singleRender.current) return;
@@ -65,7 +65,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
-      limit: limit,
+      // limit: limit,
       offset: 1,
     };
     getAllUgixFeatures(

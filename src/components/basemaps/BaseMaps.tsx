@@ -18,11 +18,17 @@ type baseLayerTypes =
   | 'terrain'
   | 'standard'
   | 'humanitarian'
+  | 'openseriesmap'
   | 'ogc_layer_light'
   | 'ogc_layer_dark';
 
 const baseLayers = [
   { type: 'standard', imgSrc: 'assets/osm.png', name: 'OSM' },
+  {
+    type: 'openseriesmap',
+    imgSrc: 'assets/openseries.png',
+    name: 'Open series',
+  },
   {
     type: 'humanitarian',
     imgSrc: 'assets/humanitarian.png',
@@ -52,6 +58,12 @@ function BaseMaps() {
       url: 'https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
     }),
     visible: true,
+  });
+  const openSeriesMap = new TileLayer({
+    source: new OSM({
+      url: 'https://geoserver.dx.ugix.org.in/collections/e9120dac-0700-4a41-b07e-277b4f94bad0/map/tiles/WebMercatorQuad/{z}/{x}/{-y}',
+      attributions: '',
+    }),
   });
   const terrainLayer = new TileLayer({
     source: new OSM({
@@ -112,6 +124,11 @@ function BaseMaps() {
       case 'standard':
         standardLayer.set('baseLayer', true);
         openLayerMap.replaceBasemap(baseMapType, standardLayer);
+        setMapType(baseMapType);
+        break;
+      case 'openseriesmap':
+        openSeriesMap.set('baseLayer', true);
+        openLayerMap.replaceBasemap(baseMapType, openSeriesMap);
         setMapType(baseMapType);
         break;
       case 'terrain':

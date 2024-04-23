@@ -1,6 +1,6 @@
 //
 import styles from './styles.module.css';
-import ugixLogo from '../../assets/images/ugix-logo.svg';
+import ugixLogo from '../../assets/images/ugix-logo.png';
 
 function Home() {
   return (

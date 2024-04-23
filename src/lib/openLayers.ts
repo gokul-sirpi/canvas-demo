@@ -201,6 +201,7 @@ const openLayerMap = {
       style: featureStyle,
       featureType: type,
       fetching: true,
+      editable: true,
     };
     this.latestLayer = newLayer;
     return newLayer;
@@ -576,13 +577,13 @@ const openLayerMap = {
   },
   initialiseMapClickEvent(
     container: HTMLDivElement,
-    callback: (feature: FeatureLike) => void
+    callback: (feature: Feature) => void
   ) {
     this.popupOverLay.setElement(container);
     this.map.addOverlay(this.popupOverLay);
     this.map.on('click', (evt) => {
       if (this.drawing) return;
-      const selectedFeature = this.getFeatureAtPixel(evt.pixel);
+      const selectedFeature = this.getFeatureAtPixel(evt.pixel) as Feature;
       if (selectedFeature) {
         this.popupOverLay.setPosition(evt.coordinate);
         callback(selectedFeature);
@@ -627,14 +628,14 @@ openLayerMap.map.on('pointermove', (event) => {
   if (openLayerMap.drawing) {
     return;
   }
+  if (selected) {
+    selected.setStyle(prevStyle);
+    selected = undefined;
+  }
   const feature = openLayerMap.map.getFeaturesAtPixel(event.pixel)[0] as
     | Feature
     | undefined;
   if (feature) {
-    if (selected) {
-      selected.setStyle(prevStyle);
-      selected = undefined;
-    }
     const { layer, ...style } = feature.getProperties();
     if (!layer) return;
     prevStyle = feature.getStyle() as Style;

@@ -29,7 +29,7 @@ function UgixFeatureTile({
   resource: Resource;
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
 }) {
-  const limit = 5;
+  // const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -56,7 +56,7 @@ function UgixFeatureTile({
       resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
-      limit: limit,
+      // limit: limit,
       offset: 1,
     };
     if (bbox) {

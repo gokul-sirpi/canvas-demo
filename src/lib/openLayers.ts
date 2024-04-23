@@ -38,6 +38,7 @@ import JSZip from 'jszip';
 import { Style } from 'ol/style';
 type baseLayerTypes =
   | 'terrain'
+  | 'openseriesmap'
   | 'standard'
   | 'humanitarian'
   | 'ogc_layer_light'

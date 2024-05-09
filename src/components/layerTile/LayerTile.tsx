@@ -70,10 +70,7 @@ function LayerTile({
 
   function handleColorChange(event: ChangeEvent<HTMLInputElement>) {
     const text = event.target.value;
-    const changedStyle = openLayerMap.changeLayerColor(
-      layer.layerId,
-      selectedColor
-    );
+    const changedStyle = openLayerMap.changeLayerColor(layer.layerId, text);
     dispatch(
       updateCanvasLayerColor({
         layerId: layer.layerId,

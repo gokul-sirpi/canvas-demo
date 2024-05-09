@@ -5,12 +5,17 @@ import * as Dialog from '@radix-ui/react-dialog';
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../context/store';
 
 function ExportDataDialog() {
   const exportAnchor = useRef(null);
   const [exportName, setExportName] = useState('');
   const [exportType, setExportType] = useState('jpeg');
   const [dialogOpenStatus, setDialogOpenStatus] = useState(false);
+  const canvasLayers = useSelector((state: RootState) => {
+    return state.userLayer.layers;
+  });
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setExportName(e.target.value);
@@ -43,10 +48,11 @@ function ExportDataDialog() {
         <TooltipWrapper content="Export all features">
           <Dialog.Trigger asChild>
             <button
+              className="header_button"
               data-intro="export_as"
               onClick={() => setDialogOpenStatus(true)}
             >
-              <div className={styles.btn_icon_container}>
+              <div>
                 <LiaFileDownloadSolid size={24} />
               </div>
             </button>

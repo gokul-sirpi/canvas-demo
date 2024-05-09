@@ -71,20 +71,15 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
       'bbox-drawer',
       'Rectangle'
     );
-    openLayerMap.addDrawFeature(
-      'Rectangle',
-      bboxLayer.layerId,
-      bboxLayer.style,
-      (event) => {
-        openLayerMap.removeDrawInteraction();
-        openLayerMap.removeLayer(bboxLayer.layerId);
-        const extent = event.feature.getGeometry()?.getExtent();
-        if (extent) {
-          getIntersectingResources(extent);
-        }
-        setIsDialogOpen(true);
+    openLayerMap.addDrawFeature('Rectangle', bboxLayer, (event) => {
+      openLayerMap.removeDrawInteraction();
+      openLayerMap.removeLayer(bboxLayer.layerId);
+      const extent = event.feature.getGeometry()?.getExtent();
+      if (extent) {
+        getIntersectingResources(extent);
       }
-    );
+      setIsDialogOpen(true);
+    });
   }
   function getIntersectingResources(extent: Extent) {
     const filtered = [];
@@ -124,8 +119,12 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   return (
     <Dialog.Root open={isDialogOpen}>
       <Dialog.Trigger asChild>
-        <button autoFocus onClick={() => setIsDialogOpen(true)}>
-          <div className={styles.btn_icon_container_primary}>
+        <button
+          className="header_button"
+          autoFocus
+          onClick={() => setIsDialogOpen(true)}
+        >
+          <div>
             <TbWorldSearch size={25} />
           </div>
         </button>

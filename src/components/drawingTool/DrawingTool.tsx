@@ -28,31 +28,21 @@ function DrawingTool({
     }
     let firstLayer = true;
     if (type === 'Point') {
-      openLayerMap.addMarkerFeature(
-        newLayer.layerId,
-        newLayer.layerName,
-        newLayer.style,
-        () => {
-          if (firstLayer) {
-            dispatch(addCanvasLayer(newLayer));
-          }
-          firstLayer = false;
+      openLayerMap.addMarkerFeature(newLayer, () => {
+        if (firstLayer) {
+          dispatch(addCanvasLayer(newLayer));
         }
-      );
+        firstLayer = false;
+      });
     } else if (type === 'Measure') {
-      openLayerMap.addDrawFeature(type, newLayer.layerId, newLayer.style);
+      openLayerMap.addDrawFeature(type, newLayer);
     } else {
-      openLayerMap.addDrawFeature(
-        type,
-        newLayer.layerId,
-        newLayer.style,
-        () => {
-          if (firstLayer) {
-            dispatch(addCanvasLayer(newLayer));
-          }
-          firstLayer = false;
+      openLayerMap.addDrawFeature(type, newLayer, () => {
+        if (firstLayer) {
+          dispatch(addCanvasLayer(newLayer));
         }
-      );
+        firstLayer = false;
+      });
     }
   }
   function clearAllEvents() {
@@ -69,8 +59,11 @@ function DrawingTool({
     <>
       {toolType === 'Circle' && (
         <Popover.Close asChild>
-          <button onClick={() => drawFeature('Circle')}>
-            <div className={styles.btn_icon_container}>
+          <button
+            className="header_button"
+            onClick={() => drawFeature('Circle')}
+          >
+            <div>
               <GoCircle size={25} />
             </div>
           </button>
@@ -78,47 +71,56 @@ function DrawingTool({
       )}
       {toolType === 'Rectangle' && (
         <Popover.Close asChild>
-          <button onClick={() => drawFeature('Rectangle')}>
-            <div className={styles.btn_icon_container}>
+          <button
+            className="header_button"
+            onClick={() => drawFeature('Rectangle')}
+          >
+            <div>
               <IoSquareOutline size={25} />
             </div>
           </button>
         </Popover.Close>
       )}
       {toolType === 'Point' && (
-        <button onClick={() => drawFeature('Point')}>
-          <div className={styles.btn_icon_container}>
-            <SlLocationPin size={25} />
+        <button className="header_button" onClick={() => drawFeature('Point')}>
+          <div>
+            <SlLocationPin size={23} />
           </div>
         </button>
       )}
       {toolType === 'Polygon' && (
         <Popover.Close asChild>
-          <button onClick={() => drawFeature('Polygon')}>
-            <div className={styles.btn_icon_container}>
-              <PiPolygon size={25} />
+          <button
+            className="header_button"
+            onClick={() => drawFeature('Polygon')}
+          >
+            <div>
+              <PiPolygon size={26} />
             </div>
           </button>
         </Popover.Close>
       )}
       {toolType === 'Measure' && (
-        <button onClick={() => drawFeature('Measure')}>
-          <div className={styles.btn_icon_container}>
+        <button
+          className="header_button"
+          onClick={() => drawFeature('Measure')}
+        >
+          <div>
             <RxRulerHorizontal size={25} />
           </div>
         </button>
       )}
       {toolType === 'Cursor' && (
-        <button onClick={clearAllEvents}>
-          <div className={styles.btn_icon_container}>
+        <button className="header_button" onClick={clearAllEvents}>
+          <div>
             <LuMousePointer2 size={25} />
           </div>
         </button>
       )}
       {toolType === 'Line' && (
         <Popover.Close asChild>
-          <button onClick={() => drawFeature('Line')}>
-            <div className={styles.btn_icon_container}>
+          <button className="header_button" onClick={() => drawFeature('Line')}>
+            <div>
               <PiLineSegments size={25} />
             </div>
           </button>

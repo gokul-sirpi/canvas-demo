@@ -25,6 +25,7 @@ function Popup() {
       delete properties['stroke-width'];
       delete properties['stroke-opacity'];
       delete properties['marker-id'];
+      delete properties.layerGeom;
       setProperties(properties);
       if (Object.keys(properties).length === 0) {
         openLayerMap.closePopupOverLay();

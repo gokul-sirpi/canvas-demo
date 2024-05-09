@@ -623,8 +623,7 @@ const openLayerMap = {
               image.src = '/icons/line.svg';
               break;
             case 'Point':
-              const iconInd = properties['marker-id'];
-              image.src = `icons/marker/${markerIcons[iconInd]}`;
+              image.src = `icons/marker/${markerIcons[properties['marker-id']]}`;
               break;
             default:
               image.src = '/icons/shapes.svg';

@@ -2,7 +2,6 @@ import { GoCircle } from 'react-icons/go';
 import { IoSquareOutline } from 'react-icons/io5';
 import { SlLocationPin } from 'react-icons/sl';
 //
-import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch } from 'react-redux';
 import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';

@@ -15,7 +15,10 @@ function MarkerPicker({ layerId }: { layerId: string }) {
       <Popover.Root>
         <Popover.Trigger asChild>
           <button className={styles.popover_trigger}>
-            <img src={`icons/${markerIcons[selectedInd]}`} alt="marker" />
+            <img
+              src={`icons/marker/${markerIcons[selectedInd]}`}
+              alt="marker"
+            />
           </button>
         </Popover.Trigger>
         <Popover.Portal>
@@ -29,7 +32,7 @@ function MarkerPicker({ layerId }: { layerId: string }) {
                     className={styles.marker_btn}
                     key={icon}
                   >
-                    <img src={`icons/${icon}`} alt="marker" />
+                    <img src={`icons/marker/${icon}`} alt="marker" />
                   </button>
                 </Popover.Close>
               );

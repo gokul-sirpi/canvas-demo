@@ -1,6 +1,6 @@
 //
 import DrawingTool from '../../components/drawingTool/DrawingTool';
-import ugix_logo from '../../assets/images/ugix-logo.svg';
+import ugix_logo from '../../assets/images/ugix-logo.png';
 import styles from './styles.module.css';
 import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
 import BaseMaps from '../../components/basemaps/BaseMaps';

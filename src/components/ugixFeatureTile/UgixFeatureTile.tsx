@@ -29,7 +29,7 @@ function UgixFeatureTile({
   resource: Resource;
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
 }) {
-  const limit = 5;
+  // const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -56,7 +56,7 @@ function UgixFeatureTile({
       resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
-      limit: limit,
+      // limit: limit,
       offset: 1,
     };
     if (bbox) {
@@ -86,19 +86,14 @@ function UgixFeatureTile({
   function handleBboxSearch() {
     dialogCloseTrigger(false);
     const newLayer = openLayerMap.createNewUserLayer('', 'Rectangle');
-    openLayerMap.addDrawFeature(
-      'Rectangle',
-      newLayer.layerId,
-      newLayer.style,
-      (event) => {
-        openLayerMap.removeDrawInteraction();
-        openLayerMap.removeLayer(newLayer.layerId);
-        const extent = event.feature.getGeometry()?.getExtent();
-        if (extent) {
-          handleUgixLayerAddition(extent);
-        }
+    openLayerMap.addDrawFeature('Rectangle', newLayer, (event) => {
+      openLayerMap.removeDrawInteraction();
+      openLayerMap.removeLayer(newLayer.layerId);
+      const extent = event.feature.getGeometry()?.getExtent();
+      if (extent) {
+        handleUgixLayerAddition(extent);
       }
-    );
+    });
   }
 
   async function handleResourceDownload() {
@@ -129,7 +124,7 @@ function UgixFeatureTile({
         });
         if (anchorRef.current) {
           anchorRef.current.href = URL.createObjectURL(response.data);
-          anchorRef.current.download = 'hello.sqlite3';
+          anchorRef.current.download = `${resource.label}.sqlite3`;
           anchorRef.current.click();
         }
       } catch (error) {

@@ -10,7 +10,7 @@ type onSucess = () => void;
 type onError = (message: string) => void;
 type onFinished = () => void;
 
-const limit = 5;
+// const limit = 5;
 
 export async function getAllUgixFeatures(
   resource: Resource,
@@ -48,7 +48,7 @@ export async function getAllUgixFeatures(
           }
           totalFeatures = Math.min(totalFeatures, response.data.numberMatched);
           totalFeaturesReturned += response.data.numberReturned;
-          params.offset += limit;
+          params.offset += response.data.numberReturned;
         } else {
           break;
         }

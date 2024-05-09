@@ -68,8 +68,12 @@ function ImportDataInput() {
   return (
     <>
       <TooltipWrapper content="Import json/geojson file">
-        <button data-intro="import_as" onClick={handleSelectFile}>
-          <div className={styles.btn_icon_container}>
+        <button
+          className="header_button"
+          data-intro="import_as"
+          onClick={handleSelectFile}
+        >
+          <div>
             <TbFileImport size={23} />
           </div>
         </button>

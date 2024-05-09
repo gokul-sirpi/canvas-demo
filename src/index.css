@@ -10,7 +10,7 @@
 dialog {
   margin: auto;
 }
-ul{
+ul {
   list-style: none;
   padding: 0;
 }
@@ -34,6 +34,26 @@ button {
   border: 1px solid transparent;
   cursor: pointer;
 }
+
+.header_button {
+  padding: 0;
+  --svg-width: 2rem;
+  width: calc(var(--svg-width) + 2px);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header_button > div {
+  width: var(--svg-width);
+  display: flex;
+  align-items: center;
+}
+.header_button svg {
+  width: 100%;
+}
+
+/* ol style */
 .ol-tooltip {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
@@ -68,6 +88,12 @@ button {
 }
 .ol-tooltip-static:before {
   border-top-color: #ffcc33;
+}
+
+.ol-zoom {
+  right: 0.5rem;
+  left: auto;
+  top: 3.5rem;
 }
 /* toastify toast */
 .react-toast {

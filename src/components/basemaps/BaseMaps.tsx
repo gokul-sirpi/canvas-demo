@@ -162,13 +162,12 @@ function BaseMaps() {
     <>
       <Popover.Root>
         <TooltipWrapper content="Toggle base layer">
-          <Popover.Trigger
-            data-intro="base_layer"
-            className={styles.popover_trigger}
-          >
-            <div className={styles.btn_icon_container}>
-              <IoLayersOutline size={25} />
-            </div>
+          <Popover.Trigger asChild data-intro="base_layer">
+            <button className="header_button">
+              <div>
+                <IoLayersOutline size={25} />
+              </div>
+            </button>
           </Popover.Trigger>
         </TooltipWrapper>
         <Popover.Portal>

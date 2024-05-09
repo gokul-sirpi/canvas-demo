@@ -51,4 +51,5 @@ export const {
   updateUgixLayer,
   updateUgixLayerColor,
 } = ugixLayerSlice.actions;
+
 export default ugixLayerSlice.reducer;

@@ -199,7 +199,7 @@ export function markerStyleFunction(iconInd: number) {
   return new Style({
     image: new Icon({
       anchor: [0.5, 0.85],
-      src: `icons/${markerIcons[iconInd]}`,
+      src: `icons/marker/${markerIcons[iconInd]}`,
       width: 25,
     }),
   });

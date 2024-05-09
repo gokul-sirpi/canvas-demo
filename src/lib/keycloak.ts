@@ -9,14 +9,9 @@ const keycloak: Keycloak = new Keycloak({
 
 keycloak.onTokenExpired = () => {
   if (keycloak.authenticated) {
-    keycloak
-      .updateToken()
-      .then(() => {
-        console.log('token updated');
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    keycloak.updateToken().catch((err) => {
+      console.log(err);
+    });
   }
 };
 

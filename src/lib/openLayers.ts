@@ -1,7 +1,11 @@
-import { Feature, Map, Overlay, View } from 'ol';
+import { Feature, Map as OlMap, Overlay, View } from 'ol';
 import { Pixel } from 'ol/pixel';
 import { drawType } from '../types/UserLayer';
-import { Attribution, ScaleLine } from 'ol/control';
+import {
+  Attribution,
+  ScaleLine,
+  defaults as defaultControls,
+} from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import { OSM } from 'ol/source';
 import Draw, {
@@ -24,6 +28,7 @@ import {
   markerStyleFunction,
   drawingStyle,
   hoverStyle,
+  markerIcons,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -48,7 +53,8 @@ const scaleControl = new ScaleLine({
   minWidth: 100,
 });
 const attribution = new Attribution({ collapsible: false });
-
+const newControls = defaultControls().extend([scaleControl, attribution]);
+const LAYER_ID_KEY = 'layer-id';
 // Map properties and methods
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
@@ -58,14 +64,14 @@ const openLayerMap = {
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
-  map: new Map({
+  map: new OlMap({
     view: new View({
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
       zoom: 4.5,
       // minZoom: 4,
     }),
-    controls: [scaleControl, attribution],
+    controls: newControls,
     layers: [],
   }),
   replaceBasemap(
@@ -234,10 +240,10 @@ const openLayerMap = {
 
   addDrawFeature(
     type: drawType,
-    layerId: string,
-    featureStyle: FeatureStyle,
+    newLayer: UserLayer,
     callback?: (event: DrawEvent) => void
   ) {
+    const { layerId, style } = newLayer;
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     switch (type) {
@@ -325,8 +331,9 @@ const openLayerMap = {
     this.draw.on('drawend', (event) => {
       event.feature.setProperties({
         layer: 'Null',
-        ...featureStyle,
+        ...style,
         ...featureProprties,
+        layerGeom: type,
       });
       if (this.tooltipElement) {
         this.tooltipElement.remove();
@@ -358,12 +365,8 @@ const openLayerMap = {
     });
   },
 
-  addMarkerFeature(
-    layerId: string,
-    layerName: string,
-    featureStyle: FeatureStyle,
-    callback?: () => void
-  ) {
+  addMarkerFeature(newLayer: UserLayer, callback?: () => void) {
+    const { layerId, layerName, style } = newLayer;
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
     this.draw = new Draw({
@@ -375,7 +378,8 @@ const openLayerMap = {
       const marker = drawEvent.feature as Feature<Point>;
       marker.setProperties({
         layer: layerName || 'NULL',
-        ...featureStyle,
+        layerGeom: 'Point',
+        ...style,
         lat: marker.getGeometry()?.getCoordinates()[1],
         lng: marker.getGeometry()?.getCoordinates()[0],
       });
@@ -492,21 +496,24 @@ const openLayerMap = {
     }
   },
 
-  exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
+  async exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
     const mapCanvas = document.createElement('canvas');
     const allCanvas = this.map
       .getViewport()
       .querySelectorAll(
         '.ol-layer canvas, canvas.ol-layer'
       ) as NodeListOf<HTMLCanvasElement>;
-
     mapCanvas.width = allCanvas[0].width;
     mapCanvas.height = allCanvas[0].height;
     const mapContext = mapCanvas.getContext('2d');
     if (!mapContext) return [new Error('No context found')];
-
+    const legendCanvas = await this.createLegend(
+      allCanvas[0].width,
+      allCanvas[0].height
+    );
     this.map.once('rendercomplete', function () {
       for (const canvas of allCanvas) {
+        console.log(canvas);
         if (canvas.width > 0) {
           mapContext.globalAlpha = 1;
           let matrix = [
@@ -529,7 +536,9 @@ const openLayerMap = {
           mapContext.drawImage(canvas, 0, 0);
         }
       }
-      mapContext.setTransform(1, 0, 0, 1, 0, 0);
+      if (legendCanvas) {
+        mapContext.drawImage(legendCanvas, 0, 0);
+      }
       anchor.href = mapCanvas.toDataURL();
       anchor.download = `${imageName}.jpeg`;
       anchor.click();
@@ -537,10 +546,147 @@ const openLayerMap = {
     this.map.renderSync();
     return null;
   },
+  async createLegend(width: number, height: number) {
+    const padding = 10;
+    const imageSize = 12;
+    const rowGap = 4;
+    const colGap = 5;
+    let minWidth = 100;
+    const canvas = document.createElement('canvas');
+    canvas.height = height;
+    canvas.width = width;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.beginPath();
+    context.fillStyle = 'white';
+    context.roundRect(
+      padding,
+      padding,
+      minWidth,
+      imageSize + colGap + 10,
+      [10, 0, 0, 0]
+    );
+    context.fill();
+    context.closePath();
+    context.beginPath();
+    context.fillStyle = 'black';
+    context.textBaseline = 'hanging';
+    context.font = `${imageSize}px roboto`;
+    context.fillText('Legend', padding + 10, padding + 10);
+    context.closePath();
+    context.fill();
+    let count = 1;
+    const promises: Promise<boolean>[] = [];
+    this.map.getLayers().forEach((layer) => {
+      if (!layer.getVisible()) return;
+      const layerId = layer.get(LAYER_ID_KEY);
+      if (layerId) {
+        const source = this.getLayer(layerId)?.getSource();
+        if (source) {
+          const feature = source.getFeatures()[0];
+          const properties = feature.getProperties();
+          console.log(properties);
+          const layerGeometry = properties.layerGeom as drawType | undefined;
+          //
+          const top = padding + count * (imageSize + colGap) + 10;
+          const left = padding + 10;
+          //
+          const rowWidth = drawbackgroundBox(
+            context,
+            properties.layer,
+            top,
+            padding,
+            imageSize,
+            rowGap,
+            colGap,
+            minWidth
+          );
+          if (rowWidth > minWidth) {
+            context.beginPath();
+            context.fillRect(minWidth, 10, rowWidth - minWidth + 10, top);
+            context.fill();
+            context.closePath();
+            minWidth = rowWidth;
+          }
+          const image = new Image();
+          switch (layerGeometry) {
+            case 'Circle':
+              image.src = '/icons/circle.svg';
+              break;
+            case 'Polygon':
+              image.src = '/icons/polygon.svg';
+              break;
+            case 'Rectangle':
+              image.src = '/icons/square.svg';
+              break;
+            case 'Line':
+              image.src = '/icons/line.svg';
+              break;
+            case 'Point':
+              const iconInd = properties['marker-id'];
+              image.src = `icons/marker/${markerIcons[iconInd]}`;
+              break;
+            default:
+              image.src = '/icons/shapes.svg';
+              break;
+          }
+          const imageLoad = new Promise<boolean>((resolve) => {
+            image.onload = () => {
+              context.drawImage(image, left, top, imageSize, imageSize);
+              resolve(true);
+            };
+          });
+          if (layerGeometry !== 'Point') {
+            context.beginPath();
+            context.fillStyle = properties.fill;
+            context.fillRect(
+              left + imageSize + rowGap,
+              top,
+              imageSize,
+              imageSize
+            );
+            context.closePath();
+          } else {
+            context.beginPath();
+            context.fillStyle = 'black';
+            context.fillRect(
+              left + imageSize + rowGap + imageSize / 4,
+              top + imageSize / 2 - 1,
+              imageSize / 2,
+              2
+            );
+            context.closePath();
+          }
+          promises.push(imageLoad);
+          context.fillStyle = 'black';
+          context.textBaseline = 'hanging';
+          context.fillText(
+            properties.layer,
+            left + (imageSize + rowGap) * 2,
+            top + 1
+          );
+          context.fill();
+          count++;
+        }
+      }
+    });
+    if (count === 1) {
+      return undefined;
+    }
+    const top = count * (imageSize + colGap) + padding + 10;
+    context.beginPath();
+    context.fillStyle = 'white';
+    context.roundRect(10, top, minWidth, 10, [0, 0, 0, 10]);
+    context.roundRect(minWidth + 10, 10, 10, top, [0, 10, 10, 0]);
+    context.fill();
+    context.closePath();
+    await Promise.all(promises);
+    return canvas;
+  },
   exportAsGeoJson(anchor: HTMLAnchorElement, exportName: string) {
     const zip = new JSZip();
     this.map.getLayers().forEach((layer) => {
-      const layerId = layer.get('layer-id');
+      const layerId = layer.get(LAYER_ID_KEY);
       if (layerId) {
         if (!layer.getVisible()) return;
         const geojsonData = openLayerMap.createGeojsonFromLayer(
@@ -548,8 +694,6 @@ const openLayerMap = {
           //@ts-expect-error this case will not happen
           layer
         ) as GeoJsonObj;
-        console.log(geojsonData.features[0].properties);
-
         const layerName =
           geojsonData.features[0].properties.layer || `layer_${layerId}`;
         zip.file(`${layerName}.geojson`, JSON.stringify(geojsonData));
@@ -711,6 +855,30 @@ function getRandomColor(): string {
     num += Math.floor(Math.random() * 11).toString(16);
   }
   return '#' + num;
+}
+
+// draw a white box in canvas
+
+function drawbackgroundBox(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  top: number,
+  left: number,
+  h: number,
+  rowGap: number,
+  colGap: number,
+  minWidth: number
+) {
+  const { width } = ctx.measureText(text);
+  console.log(width);
+  let rowWidth = width + (h + rowGap) * 2 + 10;
+  rowWidth = Math.max(minWidth, rowWidth);
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.fillRect(left, top, rowWidth, h + colGap);
+  ctx.fill();
+  ctx.closePath();
+  return rowWidth;
 }
 
 export default openLayerMap;

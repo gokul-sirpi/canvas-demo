@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-import userLayerSlice from './canvasLayers/canvasLayerSlice';
 import ugixLayerSlice from './ugixLayers/ugixLayerSlice';
 import LoaderSlice from './loading/LoaderSlice';
+import swiperSlice from './SwipeShowing/SwipeSlice';
+import canvasLayerSlice from './canvasLayers/canvasLayerSlice';
 
 export const store = configureStore({
   reducer: {
-    userLayer: userLayerSlice,
+    canvasLayer: canvasLayerSlice,
     ugixLayer: ugixLayerSlice,
     loading: LoaderSlice,
+    swipeShown: swiperSlice,
   },
 });
 

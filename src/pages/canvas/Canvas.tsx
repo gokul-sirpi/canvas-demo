@@ -19,6 +19,7 @@ import Popup from '../../components/popup/Popup.tsx';
 import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
 import { getCookieValue } from '../../lib/cookieManger.ts';
 import Intro from '../../layouts/Intro/Intro.tsx';
+import SwipeLine from '../../layouts/swipeLine/SwipeLine.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -157,6 +158,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         className={styles.ol_map}
       ></div>
       <>
+        <SwipeLine />
         <Popup />
         <Header profileData={profileData} resourceList={allResrources} />
         <LayerCard />

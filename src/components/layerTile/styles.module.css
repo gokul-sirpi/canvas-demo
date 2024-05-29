@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.2rem 0.2rem 0.2rem 0.5rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.5rem;
   min-width: 15rem;
   transition: 100ms;
   position: relative;
@@ -10,14 +10,14 @@
   border: 1px solid var(--color-accent);
   cursor: grab;
 }
-.container:active{
+.container:active {
   cursor: grabbing;
 }
 .container:hover {
   box-shadow: 0 2px 2px var(--color-accent);
 }
 
-.layer_badge{
+.layer_badge {
   font-size: var(--font-xsm);
   padding: 0.1rem 0.3rem;
   background-color: var(--color-primary);
@@ -30,15 +30,16 @@
   align-items: center;
   left: 0rem;
 }
-.userTile{
+.userTile {
   background-color: var(--color-secondary);
- /* background-color: black; */
+  /* background-color: black; */
 }
 
 .layer_title_container {
   white-space: noWrap;
   width: 8rem;
-  padding: 0.1rem; 
+  padding: 0.1rem;
+  padding-left: 0.5rem;
 }
 .layer_title {
   overflow: hidden;
@@ -48,7 +49,7 @@
 .input_container {
   display: flex;
   align-items: center;
-  gap: 0rem;
+  min-height: 1.7rem;
 }
 .input_container > input {
   padding: 0.2rem 0.3rem;
@@ -57,6 +58,9 @@
 .input_container > input,
 .input_container > label {
   cursor: pointer;
+}
+.eye_btn {
+  padding-right: 0rem;
 }
 
 .btn_container {
@@ -82,7 +86,10 @@
   gap: 0.4rem;
 }
 
-.color_picker_container{
+.empty_box {
+  width: 0.9rem;
+}
+.color_picker_container {
   position: relative;
   display: flex;
   align-items: center;

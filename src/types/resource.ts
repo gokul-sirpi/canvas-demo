@@ -35,32 +35,31 @@ export type QueryParams = {
 
 export type ResourceDownload = {
   id: string;
-title:string;
-    description:string;
-    license:string;
-    assets: {
-       [x:string]: {
-            title:string;
-            href:string;
-            type:string;
-            role: string[]
-            "file:size": 69644288
-        }
-    },
-    type:string;
-    links: 
-        {
-            rel:string;
-            href:string;
-            type:string;
-        }[]
-    stac_version:string;
-    extent: {
-        spatial: {
-            bbox:number[][]
-        },
-        temporal: {
-            interval: []
-        }
-    }
-}
+  title: string;
+  description: string;
+  license: string;
+  assets: {
+    [x: string]: {
+      title: string;
+      href: string;
+      type: string;
+      role: string[];
+      'file:size': number;
+    };
+  };
+  type: string;
+  links: {
+    rel: string;
+    href: string;
+    type: string;
+  }[];
+  stac_version: string;
+  extent: {
+    spatial: {
+      bbox: number[][];
+    };
+    temporal: {
+      interval: [];
+    };
+  };
+};

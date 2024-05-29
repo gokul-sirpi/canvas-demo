@@ -15,4 +15,5 @@ export type UgixLayer = {
   featureType: Type;
   fetching: boolean;
   editable: boolean;
+  side: 'left' | 'right';
 };

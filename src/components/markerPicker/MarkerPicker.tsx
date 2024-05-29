@@ -2,21 +2,33 @@ import * as Popover from '@radix-ui/react-popover';
 //
 import styles from './styles.module.css';
 import { markerIcons } from '../../lib/layerStyle';
-import { useState } from 'react';
 import openLayerMap from '../../lib/openLayers';
-function MarkerPicker({ layerId }: { layerId: string }) {
-  const [selectedInd, setSelectedInd] = useState(0);
-  function handleMarkerChange(index: number) {
-    setSelectedInd(index);
-    openLayerMap.changeMarkerIcon(layerId, index);
+import { useDispatch } from 'react-redux';
+import { updateLayerMarkerIcon } from '../../context/canvasLayers/canvasLayerSlice';
+import { UserLayer } from '../../types/UserLayer';
+import { UgixLayer } from '../../types/UgixLayers';
+function MarkerPicker({
+  layer,
+  index,
+  disable,
+}: {
+  layer: UserLayer | UgixLayer;
+  index: number;
+  disable: boolean;
+}) {
+  const dispatch = useDispatch();
+
+  function handleMarkerChange(id: number) {
+    dispatch(updateLayerMarkerIcon({ index, id }));
+    openLayerMap.changeMarkerIcon(layer.layerId, id);
   }
   return (
     <div className={styles.container}>
       <Popover.Root>
         <Popover.Trigger asChild>
-          <button className={styles.popover_trigger}>
+          <button disabled={disable} className={styles.popover_trigger}>
             <img
-              src={`icons/marker/${markerIcons[selectedInd]}`}
+              src={`icons/marker/${markerIcons[layer.style['marker-id']]}`}
               alt="marker"
             />
           </button>

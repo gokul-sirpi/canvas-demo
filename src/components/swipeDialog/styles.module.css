@@ -1,0 +1,82 @@
+.dialog_overlay {
+  background-color: rgba(155, 155, 155, 0.238);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog_content {
+  background-color: rgba(235, 235, 235, 0.8);
+  border-radius: 6px;
+  box-shadow:
+    hsl(210, 22%, 7%, 0.35) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(35rem, 90%, 50rem);
+  max-height: 85vh;
+  padding: 25px;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.dialog_content:focus {
+  outline: none;
+}
+/*  */
+.dialog_container {
+  background-color: white;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+.two_sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+.heading {
+  text-align: center;
+  padding: 0.3rem;
+  border-bottom: 1px solid var(--color-accent);
+}
+.heading:first-child {
+  border-right: 1px solid var(--color-accent);
+}
+.two_sides > .droppable_container {
+  overflow: auto;
+  min-height: 10rem;
+  max-height: 19rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.two_sides > div:nth-child(3) {
+  /* background-color: red; */
+  border-right: 1px solid var(--color-accent);
+}
+/* footer */
+.dialog_footer {
+  display: flex;
+  justify-content: space-between;
+}
+.dialog_footer button {
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-sm);
+  color: white;
+}
+
+.cancel_btn {
+  background-color: rgb(214, 59, 59);
+}
+.save_btn {
+  background-color: var(--color-secondary);
+}
+.remove_btn {
+  background-color: var(--color-primary);
+}

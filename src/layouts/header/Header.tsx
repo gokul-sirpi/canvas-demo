@@ -15,6 +15,7 @@ import { IoMdMail } from 'react-icons/io';
 import { HiUser } from 'react-icons/hi2';
 import { LuLogOut } from 'react-icons/lu';
 import keycloak from '../../lib/keycloak';
+import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
 
 function Header({
   profileData,
@@ -63,6 +64,11 @@ function Header({
           <BaseMaps />
           <ExportDataDialog />
           <ImportDataInput />
+          <TooltipWrapper content="Add swipe layer">
+            <span data-intro="measure">
+              <SwipeDialog />
+            </span>
+          </TooltipWrapper>
         </div>
         <div className={styles.profile_container}>
           <Popover.Root>

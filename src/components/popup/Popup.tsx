@@ -31,7 +31,7 @@ function Popup() {
         openLayerMap.closePopupOverLay();
       }
     });
-  }, [popupContainer.current]);
+  }, []);
   function handlePopupClosing() {
     openLayerMap.closePopupOverLay();
   }

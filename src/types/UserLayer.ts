@@ -1,4 +1,6 @@
+import VectorLayer from 'ol/layer/Vector';
 import { FeatureStyle } from './FeatureStyle';
+import VectorSource from 'ol/source/Vector';
 
 export type drawType =
   | 'Circle'
@@ -17,7 +19,17 @@ export type UserLayer = {
   visible: boolean;
   isCompleted: boolean;
   layerColor: string;
-  featureType: drawType | 'GeometryCollection';
+  featureType: drawType;
   editable: boolean;
   style: FeatureStyle;
+  side: 'left' | 'right';
+};
+
+export type CanvasLayer = {
+  layerId: string;
+  layerName: string;
+  layerType: 'UserLayer' | 'UgixLayer';
+  layer: VectorLayer<VectorSource>;
+  style: FeatureStyle;
+  side: 'left' | 'right';
 };

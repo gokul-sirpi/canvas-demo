@@ -1,6 +1,6 @@
 .container {
   position: absolute;
-  top:5rem;
+  top: 5rem;
   left: 1rem;
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
@@ -10,12 +10,12 @@
 
 .card_container {
   max-height: 80vh;
-  min-width: 16.4rem;
+  min-width: 17rem;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: white;
 }
-.card_container[data-visible="false"]{
+.card_container[data-visible='false'] {
   display: none;
 }
 
@@ -23,13 +23,13 @@
   overflow: hidden;
   padding: 0.3rem;
 }
-.layer_group{
+.layer_group {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 }
 
-.layer_card_heading{
+.layer_card_heading {
   font-weight: 400;
   padding: 0.3rem 0.4rem;
   padding-right: 1.2rem;
@@ -41,9 +41,9 @@
 }
 
 .min_max_container {
-  --icon-height:1rem;
-  --icon-padd:0.3rem;
-  position:absolute;
+  --icon-height: 1rem;
+  --icon-padd: 0.3rem;
+  position: absolute;
   right: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2));
   /* left: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2)); */
   top: calc(0px - (var(--icon-height) / 2 + var(--icon-padd) / 2));
@@ -54,7 +54,7 @@
   padding: var(--icon-padd);
   background-color: white;
 }
-.icon_container{
+.icon_container {
   width: var(--icon-height);
   height: var(--icon-height);
   position: relative;
@@ -62,7 +62,7 @@
   align-items: center;
   transition: 200ms;
 }
-.icon_container[data-open="false"]{
+.icon_container[data-open='false'] {
   rotate: 180deg;
 }
 

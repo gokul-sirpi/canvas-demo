@@ -1,6 +1,6 @@
 import { Feature, Map as OlMap, Overlay, View } from 'ol';
 import { Pixel } from 'ol/pixel';
-import { drawType } from '../types/UserLayer';
+import { CanvasLayer, drawType } from '../types/UserLayer';
 import {
   Attribution,
   ScaleLine,
@@ -41,6 +41,7 @@ import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
+import { getRenderPixel } from 'ol/render';
 type baseLayerTypes =
   | 'terrain'
   | 'openseriesmap'
@@ -55,10 +56,13 @@ const scaleControl = new ScaleLine({
 const attribution = new Attribution({ collapsible: false });
 const newControls = defaultControls().extend([scaleControl, attribution]);
 const LAYER_ID_KEY = 'layer-id';
+const BASE_LAYER_KEY = 'baselayer';
 // Map properties and methods
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
+  swipePercentage: 1,
+  canvasLayers: new Map<string, CanvasLayer>(),
   latestLayer: null as UserLayer | UgixLayer | null,
   indianOutline: null as VectorImageLayer<VectorSource> | null,
   measureTooltip: null as Overlay | null,
@@ -82,7 +86,7 @@ const openLayerMap = {
       | VectorImageLayer<VectorSource>
   ) {
     this.map.getAllLayers().forEach((layer) => {
-      if (layer.get('baseLayer')) {
+      if (layer.get(BASE_LAYER_KEY)) {
         this.map.removeLayer(layer);
       }
     });
@@ -139,6 +143,7 @@ const openLayerMap = {
     const layer = this.getLayer(layerId);
     if (layer) {
       this.map.removeLayer(layer);
+      this.canvasLayers.delete(layerId);
     }
   },
 
@@ -155,11 +160,10 @@ const openLayerMap = {
   createNewUserLayer(layerName: string, featureType: drawType): UserLayer {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
-    const layer = new VectorImageLayer({
+    const layer = new VectorLayer({
       source: source,
       style: (feature) => styleFunction(feature, featureColor),
     });
-    const featureStyle = createFeatureStyle(featureColor);
     const layerId = createUniqueId();
     layer.set('layer-id', layerId);
     const newLayer: UserLayer = {
@@ -171,9 +175,19 @@ const openLayerMap = {
       isCompleted: false,
       layerColor: featureColor,
       featureType: featureType,
-      style: featureStyle,
+      style: createFeatureStyle(featureColor),
       editable: true,
+      side: 'left',
     };
+    this.canvasLayers.set(layerId, {
+      layer,
+      layerId,
+      layerName,
+      layerType: 'UserLayer',
+      style: createFeatureStyle(featureColor),
+      side: 'left',
+    });
+    this.addSwipeFuncToLayer(layer);
     this.map.addLayer(layer);
     this.removeDrawInteraction();
     this.latestLayer = newLayer;
@@ -186,15 +200,13 @@ const openLayerMap = {
     type: GeometryType
   ) {
     const layerColor = getRandomColor();
-    const featureStyle = createFeatureStyle(layerColor);
     const layerId = createUniqueId();
     const vectorSource = new VectorSource({});
-    const newVectorLayer = new VectorImageLayer({
+    const newVectorLayer = new VectorLayer({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
     newVectorLayer.set('layer-id', layerId);
-    this.addLayer(newVectorLayer);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       layerName: layerName,
@@ -205,11 +217,22 @@ const openLayerMap = {
       visible: true,
       isCompleted: true,
       layerColor,
-      style: featureStyle,
+      style: createFeatureStyle(layerColor),
       featureType: type,
       fetching: true,
       editable: true,
+      side: 'left',
     };
+    this.canvasLayers.set(layerId, {
+      layer: newVectorLayer,
+      layerId,
+      layerName,
+      layerType: 'UgixLayer',
+      style: createFeatureStyle(layerColor),
+      side: 'left',
+    });
+    this.addLayer(newVectorLayer);
+    this.addSwipeFuncToLayer(newVectorLayer);
     this.latestLayer = newLayer;
     return newLayer;
   },
@@ -763,6 +786,69 @@ const openLayerMap = {
         feature.setProperties({ [key]: value });
       });
     }
+  },
+  addSwipeFuncToLayer(layer: VectorLayer<VectorSource>) {
+    layer.on('prerender', (event) => {
+      const ctx = event.context as CanvasRenderingContext2D;
+      const mapSize = this.map.getSize();
+      if (!mapSize || !ctx) return;
+      let tl, tr, bl, br;
+      const layerId = layer.get(LAYER_ID_KEY);
+      const side = this.canvasLayers.get(layerId)?.side;
+      const width = mapSize[0] * this.swipePercentage;
+      if (side === 'left') {
+        tl = getRenderPixel(event, [0, 0]);
+        tr = getRenderPixel(event, [width, 0]);
+        bl = getRenderPixel(event, [0, mapSize[1]]);
+        br = getRenderPixel(event, [width, mapSize[1]]);
+      } else {
+        tl = getRenderPixel(event, [width, 0]);
+        tr = getRenderPixel(event, [mapSize[0], 0]);
+        bl = getRenderPixel(event, [width, mapSize[1]]);
+        br = getRenderPixel(event, mapSize);
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(tl[0], tl[1]);
+      ctx.lineTo(bl[0], bl[1]);
+      ctx.lineTo(br[0], br[1]);
+      ctx.lineTo(tr[0], tr[1]);
+      ctx.closePath();
+      ctx.clip();
+    });
+    layer.on('postrender', (event) => {
+      const ctx = event.context as CanvasRenderingContext2D;
+      ctx.restore();
+    });
+  },
+  addSwipeLayer(leftIds: string[], rightIds: string[]) {
+    for (const id of rightIds) {
+      const layer = this.canvasLayers.get(id);
+      if (layer) {
+        layer.side = 'right';
+      }
+    }
+    for (const id of leftIds) {
+      const layer = this.canvasLayers.get(id);
+      if (layer) {
+        layer.side = 'left';
+      }
+    }
+    this.map.render();
+  },
+  updateSwipeLayer(percentage: number) {
+    this.swipePercentage = percentage;
+    this.map.render();
+  },
+  removeSwipeLayer(rightIds: string[]) {
+    for (const id of rightIds) {
+      const layer = this.canvasLayers.get(id);
+      if (layer) {
+        layer.side = 'left';
+      }
+    }
+    this.swipePercentage = 1;
+    this.map.render();
   },
 };
 // basic map interactions

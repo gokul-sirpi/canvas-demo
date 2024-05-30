@@ -11,7 +11,7 @@ const initialState: CanvasLayerState = {
 };
 
 export const canvasLayerSlice = createSlice({
-  name: 'userLayer',
+  name: 'canvasLayer',
   initialState,
   reducers: {
     addCanvasLayer(state, action) {
@@ -19,6 +19,13 @@ export const canvasLayerSlice = createSlice({
     },
     updateCanvasLayer(state, action) {
       state.layers[action.payload.index] = action.payload.modifiedLayer;
+    },
+    updateLayerMarkerIcon(
+      state,
+      action: PayloadAction<{ index: number; id: number }>
+    ) {
+      const { index, id } = action.payload;
+      state.layers[index].style['marker-id'] = id;
     },
     deleteCanvasLayer(state, { payload }) {
       state.layers = state.layers.filter((layer) => {
@@ -54,6 +61,20 @@ export const canvasLayerSlice = createSlice({
     changeCanvasLayer(state, action: PayloadAction<(UserLayer | UgixLayer)[]>) {
       state.layers = action.payload;
     },
+    updateLayerSides(
+      state,
+      action: PayloadAction<{ rightIds: string[]; leftIds: string[] }>
+    ) {
+      const { rightIds, leftIds } = action.payload;
+      state.layers.forEach((layer) => {
+        if (rightIds.includes(layer.layerId)) {
+          layer.side = 'right';
+        }
+        if (leftIds.includes(layer.layerId)) {
+          layer.side = 'left';
+        }
+      });
+    },
   },
 });
 
@@ -64,5 +85,7 @@ export const {
   updateCanvasLayerColor,
   changeCanvasLayer,
   updateLayerFetchingStatus,
+  updateLayerSides,
+  updateLayerMarkerIcon,
 } = canvasLayerSlice.actions;
 export default canvasLayerSlice.reducer;

@@ -15,7 +15,7 @@ function LayerCard() {
   const [isCardOpen, setIsCardOpen] = useState<boolean>(true);
   const dispatch = useDispatch();
   const canvasLayers = useSelector((state: RootState) => {
-    return state.userLayer.layers;
+    return state.canvasLayer.layers;
   });
   function handleReorder(e: (UserLayer | UgixLayer)[]) {
     dispatch(changeCanvasLayer(e));

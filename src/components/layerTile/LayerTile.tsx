@@ -1,11 +1,12 @@
 import { ChangeEvent, useRef, useState } from 'react';
+import { RootState } from '../../context/store';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
 //
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   deleteCanvasLayer,
   updateCanvasLayerColor,
@@ -23,9 +24,11 @@ import Loader from '../loader/Loader';
 function LayerTile({
   layer,
   index,
+  isTile = true,
 }: {
   layer: UserLayer | UgixLayer;
   index: number;
+  isTile?: boolean;
 }) {
   const layerNameRef = useRef<HTMLInputElement>(null);
   const [visible, setVisible] = useState<boolean | undefined>(
@@ -33,6 +36,9 @@ function LayerTile({
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
   const titleRef = useRef<HTMLParagraphElement>(null);
+  const swiperShown = useSelector((state: RootState) => {
+    return state.swipeShown.swipeShown;
+  });
   const dispatch = useDispatch();
 
   function toggleLayerVisibility() {
@@ -89,11 +95,13 @@ function LayerTile({
         {/* {layer.layerType == 'UgixLayer' ? 'UGIX' : 'User'} */}
       </div>
       <div className={styles.input_container}>
-        <button onClick={toggleLayerVisibility}>
-          <div className={styles.btn_icon_container}>
-            {visible ? <FaRegEye size={15} /> : <FaRegEyeSlash size={15} />}
-          </div>
-        </button>
+        {isTile && (
+          <button className={styles.eye_btn} onClick={toggleLayerVisibility}>
+            <div className={styles.btn_icon_container}>
+              {visible ? <FaRegEye size={15} /> : <FaRegEyeSlash size={15} />}
+            </div>
+          </button>
+        )}
         {layer.isCompleted ? (
           <TooltipWrapper content={layer.layerName}>
             <div className={styles.layer_title_container}>
@@ -111,6 +119,7 @@ function LayerTile({
           />
         )}
       </div>
+      {swiperShown && isTile && <div>{layer.side === 'left' ? 'L' : 'R'}</div>}
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
@@ -118,20 +127,28 @@ function LayerTile({
             {layer.editable && (
               <>
                 {layer.featureType === 'Point' ? (
-                  <MarkerPicker layerId={layer.layerId} />
+                  <>
+                    <div className={styles.empty_box}></div>
+                    <MarkerPicker
+                      disable={!isTile}
+                      index={index}
+                      layer={layer}
+                    />
+                  </>
                 ) : (
                   <div className={styles.color_picker_container}>
                     <input
+                      disabled={!isTile}
                       type="color"
                       className={styles.color_picker}
                       defaultValue={selectedColor}
                       color={selectedColor}
                       onChange={handleColorChange}
-                      id={layer.layerId}
+                      id={layer.layerId + isTile}
                       tabIndex={-1}
                     />
                     <label
-                      htmlFor={layer.layerId}
+                      htmlFor={layer.layerId + isTile}
                       style={{ backgroundColor: `${selectedColor}` }}
                       className={styles.color_label}
                     ></label>
@@ -152,7 +169,7 @@ function LayerTile({
                 )}
               </>
             )}
-            <LayerMorePopover layer={layer} />
+            {isTile && <LayerMorePopover layer={layer} />}
           </div>
         ) : (
           <>

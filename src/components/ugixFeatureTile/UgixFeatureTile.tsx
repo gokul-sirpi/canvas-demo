@@ -124,7 +124,7 @@ function UgixFeatureTile({
         });
         if (anchorRef.current) {
           anchorRef.current.href = URL.createObjectURL(response.data);
-          anchorRef.current.download = `${resource.label}.sqlite3`;
+          anchorRef.current.download = `${resource.label}.gpkg`;
           anchorRef.current.click();
         }
       } catch (error) {

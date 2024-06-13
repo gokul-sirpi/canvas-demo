@@ -66,7 +66,7 @@ export function hoverStyle(style: FeatureStyle) {
     }),
     image: new Icon({
       anchor: [0.5, 0.85],
-      src: `icons/${markerIcons[style['marker-id']]}`,
+      src: `icons/marker/${markerIcons[Number(style['marker-id'])]}`,
       width: 27,
     }),
   });

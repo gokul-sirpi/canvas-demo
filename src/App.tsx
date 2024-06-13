@@ -21,6 +21,7 @@ function App() {
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
+    // setLoggedIn(true);
     initialiseKeycloak();
   }, []);
 

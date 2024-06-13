@@ -22,7 +22,7 @@ export type UserLayer = {
   featureType: drawType;
   editable: boolean;
   style: FeatureStyle;
-  side: 'left' | 'right';
+  side: 'left' | 'right' | 'middle';
 };
 
 export type CanvasLayer = {
@@ -31,5 +31,5 @@ export type CanvasLayer = {
   layerType: 'UserLayer' | 'UgixLayer';
   layer: VectorLayer<VectorSource>;
   style: FeatureStyle;
-  side: 'left' | 'right';
+  side: 'left' | 'right' | 'middle';
 };

@@ -63,15 +63,22 @@ export const canvasLayerSlice = createSlice({
     },
     updateLayerSides(
       state,
-      action: PayloadAction<{ rightIds: string[]; leftIds: string[] }>
+      action: PayloadAction<{
+        rightIds: string[];
+        leftIds: string[];
+        middleIds: string[];
+      }>
     ) {
-      const { rightIds, leftIds } = action.payload;
+      const { rightIds, leftIds, middleIds } = action.payload;
       state.layers.forEach((layer) => {
         if (rightIds.includes(layer.layerId)) {
           layer.side = 'right';
         }
         if (leftIds.includes(layer.layerId)) {
           layer.side = 'left';
+        }
+        if (middleIds.includes(layer.layerId)) {
+          layer.side = 'middle';
         }
       });
     },

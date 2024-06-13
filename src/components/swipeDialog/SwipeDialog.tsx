@@ -10,6 +10,7 @@ import { DragEvent, useEffect, useRef, useState } from 'react';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
 import { updateLayerSides } from '../../context/canvasLayers/canvasLayerSlice';
+import { IoMdClose } from 'react-icons/io';
 
 export default function SwipeDialog() {
   const swipeShown = useSelector((state: RootState) => {
@@ -20,6 +21,7 @@ export default function SwipeDialog() {
   });
   const [leftSide, setLeftSide] = useState<(UserLayer | UgixLayer)[]>([]);
   const [rightSide, setRightSide] = useState<(UserLayer | UgixLayer)[]>([]);
+  const [middle, setMiddle] = useState<(UserLayer | UgixLayer)[]>([]);
   const selectedRef = useRef<HTMLDivElement>();
   const dispatch = useDispatch();
 
@@ -34,24 +36,30 @@ export default function SwipeDialog() {
     }
     const newLeft = [];
     const newRight = [];
+    const newMiddle = [];
     for (const layer of canvasLayers) {
       if (rightMap.get(layer.layerId)) {
         newRight.push(layer);
         continue;
+      } else if (leftMap.get(layer.layerId)) {
+        newLeft.push(layer);
+      } else {
+        newMiddle.push(layer);
       }
-      newLeft.push(layer);
     }
     setRightSide(newRight);
     setLeftSide(newLeft);
+    setMiddle(newMiddle);
   }, [canvasLayers]);
 
-  function showSwipeLayer() {
+  function saveSwipeLayer() {
     const leftIds = leftSide.map((layer) => {
       return layer.layerId;
     });
     const rightIds = rightSide.map((layer) => layer.layerId);
-    openLayerMap.addSwipeLayer(leftIds, rightIds);
-    dispatch(updateLayerSides({ rightIds, leftIds }));
+    const middleIds = middle.map((layer) => layer.layerId);
+    openLayerMap.addSwipeLayer(leftIds, rightIds, middleIds);
+    dispatch(updateLayerSides({ rightIds, leftIds, middleIds }));
     dispatch(updateSwipeState(true));
   }
 
@@ -70,12 +78,12 @@ export default function SwipeDialog() {
     event.preventDefault();
   }
 
-  function dropHandler(event: DragEvent, side: 'right' | 'left') {
+  function dropHandler(event: DragEvent, side: 'right' | 'left' | 'middle') {
     event.preventDefault();
     const layerId = selectedRef.current?.getAttribute('data-id');
     if (side === 'left') {
-      for (let i = 0; i < rightSide.length; i++) {
-        const layer = rightSide[i];
+      for (let i = 0; i < canvasLayers.length; i++) {
+        const layer = canvasLayers[i];
         if (layer.layerId === layerId) {
           setLeftSide((prev) => {
             prev.push(layer);
@@ -84,14 +92,16 @@ export default function SwipeDialog() {
           const newRightSide = rightSide.filter(
             (layer) => layer.layerId !== layerId
           );
+          const newMiddle = middle.filter((layer) => layer.layerId !== layerId);
+          setMiddle(newMiddle);
           setRightSide(newRightSide);
           break;
         }
       }
     }
     if (side === 'right') {
-      for (let i = 0; i < leftSide.length; i++) {
-        const layer = leftSide[i];
+      for (let i = 0; i < canvasLayers.length; i++) {
+        const layer = canvasLayers[i];
         if (layer.layerId === layerId) {
           setRightSide((prev) => {
             prev.push(layer);
@@ -100,6 +110,28 @@ export default function SwipeDialog() {
           const newLeftSide = leftSide.filter(
             (layer) => layer.layerId !== layerId
           );
+          const newMiddle = middle.filter((layer) => layer.layerId !== layerId);
+          setMiddle(newMiddle);
+          setLeftSide(newLeftSide);
+          break;
+        }
+      }
+    }
+    if (side === 'middle') {
+      for (let i = 0; i < canvasLayers.length; i++) {
+        const layer = canvasLayers[i];
+        if (layer.layerId === layerId) {
+          setMiddle((prev) => {
+            prev.push(layer);
+            return [...prev];
+          });
+          const newLeftSide = leftSide.filter(
+            (layer) => layer.layerId !== layerId
+          );
+          const newRightSide = rightSide.filter(
+            (layer) => layer.layerId !== layerId
+          );
+          setRightSide(newRightSide);
           setLeftSide(newLeftSide);
           break;
         }
@@ -116,9 +148,19 @@ export default function SwipeDialog() {
       <Dialog.Portal>
         <Dialog.Overlay className={styles.dialog_overlay} />
         <Dialog.Content className={styles.dialog_content}>
+          <Dialog.Title className={styles.dialog_title}>
+            <Dialog.Close asChild>
+              <button className={styles.close_btn}>
+                <div className={styles.btn_icon_container}>
+                  <IoMdClose size={20} />
+                </div>
+              </button>
+            </Dialog.Close>
+          </Dialog.Title>
           <div className={styles.dialog_container}>
             <section className={styles.two_sides}>
               <div className={styles.heading}>L</div>
+              <div className={styles.heading}>Default</div>
               <div className={styles.heading}>R</div>
               <div
                 className={styles.droppable_container}
@@ -126,6 +168,24 @@ export default function SwipeDialog() {
                 onDragOver={handleDragOver}
               >
                 {leftSide.map((layer, index) => {
+                  return (
+                    <div
+                      data-id={layer.layerId}
+                      key={layer.layerId}
+                      draggable="true"
+                      onDragStart={handleDragStart}
+                    >
+                      <LayerTile layer={layer} index={index} isTile={false} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div
+                className={styles.droppable_container}
+                onDrop={(ev) => dropHandler(ev, 'middle')}
+                onDragOver={handleDragOver}
+              >
+                {middle.map((layer, index) => {
                   return (
                     <div
                       data-id={layer.layerId}
@@ -172,7 +232,7 @@ export default function SwipeDialog() {
                 </Dialog.Close>
               )}
               <Dialog.Close asChild>
-                <button className={styles.save_btn} onClick={showSwipeLayer}>
+                <button className={styles.save_btn} onClick={saveSwipeLayer}>
                   Save
                 </button>
               </Dialog.Close>

@@ -119,7 +119,12 @@ function LayerTile({
           />
         )}
       </div>
-      {swiperShown && isTile && <div>{layer.side === 'left' ? 'L' : 'R'}</div>}
+      {swiperShown && isTile && (
+        <div>
+          {layer.side === 'left' && 'L'}
+          {layer.side === 'right' && 'R'}
+        </div>
+      )}
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>

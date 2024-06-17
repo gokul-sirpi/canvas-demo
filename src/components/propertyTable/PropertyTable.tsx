@@ -1,30 +1,33 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import * as Popover from '@radix-ui/react-popover';
 //
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
 import { emitToast } from '../../lib/toastEmitter';
-import { useRef, useState } from 'react';
-import { IoMdClose } from 'react-icons/io';
+import { useEffect, useRef, useState } from 'react';
 import IntersectObserver from '../intersectObserver/IntersectObserver';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../context/store';
 
-export default function PropertyTable({
-  layer,
-}: {
-  layer: UserLayer | UgixLayer;
-}) {
+export default function PropertyTable() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [layerProp, setLayerProp] = useState<
     { [x: string]: string | number }[]
   >([]);
-  const rootRef = useRef<HTMLDivElement>(null);
-  function getLayerProperties(open: boolean) {
-    if (open) {
-      const layerData = openLayerMap.canvasLayers.get(layer.layerId);
+  const canvasLayer = useSelector((state: RootState) => {
+    return state.footerState.canvasLayer;
+  });
+  useEffect(() => {
+    if (canvasLayer) {
+      getLayerProperties();
+    }
+  }, [canvasLayer]);
+  function getLayerProperties() {
+    if (canvasLayer) {
+      const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
       if (!layerData) return;
       const layerJsonData = openLayerMap.createGeojsonFromLayer(
-        layer.layerId,
+        canvasLayer.layerId,
         layerData.layer
       );
       if (layerJsonData) {
@@ -50,76 +53,57 @@ export default function PropertyTable({
     }
   }
   return (
-    <Dialog.Root onOpenChange={getLayerProperties}>
-      <Dialog.Trigger asChild>
-        <button className={styles.popover_btn}>Properties</button>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className={styles.dialog_overlay} />
-        <Dialog.Content className={styles.dialog_content}>
-          <Dialog.Title className={styles.dialog_title}>
-            <Dialog.Close asChild>
-              <Popover.Close asChild>
-                <button className={styles.close_btn}>
-                  <div className={styles.btn_icon_container}>
-                    <IoMdClose size={20} />
-                  </div>
-                </button>
-              </Popover.Close>
-            </Dialog.Close>
-          </Dialog.Title>
-          <section className={styles.dialog_container}>
-            <header>
-              <h2 className={styles.layer_name}>{layer.layerName}</h2>
-            </header>
-            {layerProp.length > 0 && (
-              <div ref={rootRef} className={styles.tb_container}>
-                <table className={styles.prop_table}>
-                  <thead className={styles.tb_thead}>
-                    <tr className={styles.tb_tr}>
-                      <th>Sr.No</th>
-                      {Object.keys(layerProp[0]).map((prop, index) => {
-                        return (
-                          <th key={index} className={styles.tb_th}>
-                            {prop}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody className={styles.tb_tbody}>
-                    {layerProp.map((feature, index) => {
+    <section className={styles.container}>
+      <header className={styles.header}>
+        <h2 className={styles.layer_name} title={canvasLayer?.layerName}>
+          {canvasLayer?.layerName}
+        </h2>
+      </header>
+      {layerProp.length > 0 && (
+        <div ref={rootRef} className={styles.tb_container}>
+          <table className={styles.prop_table}>
+            <thead className={styles.tb_thead}>
+              <tr className={styles.tb_tr}>
+                <th>Sr.No</th>
+                {Object.keys(layerProp[0]).map((prop, index) => {
+                  return (
+                    <th key={index} className={styles.tb_th}>
+                      {prop}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody className={styles.tb_tbody}>
+              {layerProp.map((feature, index) => {
+                return (
+                  <IntersectObserver
+                    key={index}
+                    root={rootRef.current}
+                    length={Object.keys(feature).length}
+                  >
+                    {/* <tr key={index} className={styles.tb_tr}> */}
+                    <td className={styles.tb_td}>{index + 1}</td>
+                    {Object.keys(feature).map((prop, index) => {
                       return (
-                        <IntersectObserver
+                        <td
+                          data-overflow={`${feature[prop]}`.length > 80}
+                          title={`${feature[prop]}`}
                           key={index}
-                          root={rootRef.current}
-                          length={Object.keys(feature).length}
+                          className={styles.tb_td}
                         >
-                          {/* <tr key={index} className={styles.tb_tr}> */}
-                          <td className={styles.tb_td}>{index + 1}</td>
-                          {Object.keys(feature).map((prop, index) => {
-                            return (
-                              <td
-                                data-overflow={`${feature[prop]}`.length > 80}
-                                title={`${feature[prop]}`}
-                                key={index}
-                                className={styles.tb_td}
-                              >
-                                {feature[prop]}
-                              </td>
-                            );
-                          })}
-                          {/* </tr> */}
-                        </IntersectObserver>
+                          {feature[prop]}
+                        </td>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+                    {/* </tr> */}
+                  </IntersectObserver>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }

@@ -3,6 +3,7 @@ import ugixLayerSlice from './ugixLayers/ugixLayerSlice';
 import LoaderSlice from './loading/LoaderSlice';
 import swiperSlice from './SwipeShowing/SwipeSlice';
 import canvasLayerSlice from './canvasLayers/canvasLayerSlice';
+import footerStateSlice from './footerState/footerStateSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     ugixLayer: ugixLayerSlice,
     loading: LoaderSlice,
     swipeShown: swiperSlice,
+    footerState: footerStateSlice,
   },
 });
 

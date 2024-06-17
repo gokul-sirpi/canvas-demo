@@ -11,7 +11,10 @@ import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
-import PropertyTable from '../propertyTable/PropertyTable';
+import {
+  updateFooterLayerState,
+  updateFooterShownState,
+} from '../../context/footerState/footerStateSlice';
 
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -51,6 +54,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       anchorRef.current.download = `${layer.layerName}.geojson`;
       anchorRef.current.click();
     }
+  }
+  function handleFooterUpdate() {
+    dispatch(updateFooterShownState(true));
+    dispatch(updateFooterLayerState(layer));
   }
   return (
     <>
@@ -92,7 +99,14 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
               </Popover.Close>
             </div>
             <div>
-              <PropertyTable layer={layer} />
+              <Popover.Close asChild>
+                <button
+                  onClick={handleFooterUpdate}
+                  className={styles.popover_btn}
+                >
+                  Properties
+                </button>
+              </Popover.Close>
             </div>
             {layer.layerType === 'UgixLayer' && (
               <div>

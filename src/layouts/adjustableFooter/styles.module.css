@@ -1,0 +1,29 @@
+.container {
+  position: relative;
+  /* overflow: hidden; */
+  border-top: 1px solid var(--color-accent);
+  /* background-color: wheat; */
+}
+.footer_top_border {
+  /* background-color: var(--color-accent); */
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 5px;
+  width: 100%;
+  z-index: 100;
+  cursor: n-resize;
+  user-select: none;
+}
+.close_btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0rem;
+  display: flex;
+  align-self: center;
+  color: gray;
+  &:hover {
+    color: black;
+  }
+}

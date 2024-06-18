@@ -68,7 +68,6 @@ function App() {
   async function checkUserProfile() {
     try {
       const response = await axiosAuthClient.get('v1/user/roles');
-      // const response = await axiosAuthClient.get('v1/user/profile');
       if (response.status === 200 && response.data.results) {
         const user = response.data.results as UserProfile;
         if (user.roles.length > 0) {

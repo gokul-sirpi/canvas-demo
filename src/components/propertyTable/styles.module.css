@@ -28,14 +28,47 @@
   background-color: white;
   border-radius: var(--radius-sm);
   height: 100%;
-  padding: 1rem;
+  padding: 0.5rem;
 }
-
-/*  */
-.layer_name {
+/* header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding-bottom: 0.5rem;
+  padding-right: 1rem;
+  flex-wrap: wrap;
+}
+.layer_name {
   font-size: var(--font-md);
 }
+.input_container {
+  display: flex;
+  align-items: center;
+  width: clamp(12rem, 30%, 40rem);
+  position: relative;
+}
+.search_input {
+  padding: 0.4rem 1.8rem 0.4rem 0.3rem;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  flex: 1;
+}
+.icon_container {
+  background-color: var(--color-accent);
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0rem 0.3rem;
+  color: white;
+  border-radius: 0px var(--radius-sm) var(--radius-sm) 0px;
+}
+.search_input:focus + .icon_container {
+  background-color: black;
+}
+/* table */
 .tb_container {
   height: calc(100% - 1.5rem);
   overflow: auto;

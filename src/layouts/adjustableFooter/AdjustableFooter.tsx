@@ -6,8 +6,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
 import { updateFooterShownState } from '../../context/footerState/footerStateSlice';
 
-const MIN_HEIGHT = 100;
-const MAX_HEIGHT = 350;
+const MIN_HEIGHT = window.innerHeight * 0.2;
+const MAX_HEIGHT = window.innerHeight * 0.7;
+const DEFAULT_HEIGHT = window.innerHeight * 0.5;
 export default function AdjustableFooter() {
   const moverRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +38,7 @@ export default function AdjustableFooter() {
   useEffect(() => {
     if (!containerRef.current) return;
     if (isFooterShown) {
-      containerRef.current.style.height = `${(MIN_HEIGHT + MAX_HEIGHT) / 2}px`;
+      containerRef.current.style.height = `${DEFAULT_HEIGHT}px`;
     } else {
       containerRef.current.style.height = '0px';
     }

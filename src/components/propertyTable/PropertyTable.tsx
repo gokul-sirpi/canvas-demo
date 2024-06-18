@@ -4,16 +4,18 @@ import openLayerMap from '../../lib/openLayers';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
 import { emitToast } from '../../lib/toastEmitter';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import IntersectObserver from '../intersectObserver/IntersectObserver';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../context/store';
+import { FaSearch } from 'react-icons/fa';
+import { GenericObject } from '../../types/GeojsonType';
 
 export default function PropertyTable() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [layerProp, setLayerProp] = useState<
-    { [x: string]: string | number }[]
-  >([]);
+  const keywordMap = useRef<Map<string, Set<number>>>(new Map());
+  const [layerProp, setLayerProp] = useState<GenericObject[]>([]);
+  const [filteredProps, setFilteredProps] = useState<GenericObject[]>([]);
   const canvasLayer = useSelector((state: RootState) => {
     return state.footerState.canvasLayer;
   });
@@ -31,7 +33,6 @@ export default function PropertyTable() {
         layerData.layer
       );
       if (layerJsonData) {
-        console.log(layerJsonData);
         const layerProperties = layerJsonData.features.map((feature) => {
           const { properties } = feature;
           delete properties.geometry;
@@ -46,11 +47,53 @@ export default function PropertyTable() {
           delete properties.layer;
           return properties;
         });
+        createSearchableData(layerProperties);
         setLayerProp(layerProperties);
+        setFilteredProps(layerProperties);
       } else {
         emitToast('error', 'unable to get layer properties');
       }
     }
+  }
+  function createSearchableData(properties: GenericObject[]) {
+    const wordToRowMap = new Map<string, Set<number>>();
+    for (let i = 0; i < properties.length; i++) {
+      const property = properties[i];
+      Object.values(property).forEach((value) => {
+        if (typeof value === 'string') {
+          value = value.toLowerCase();
+          if (wordToRowMap.has(value)) {
+            wordToRowMap.get(value)?.add(i);
+          } else {
+            wordToRowMap.set(value, new Set([i]));
+          }
+        }
+      });
+    }
+    keywordMap.current = wordToRowMap;
+    console.log(wordToRowMap);
+  }
+  function handleFuzzySearch(event: ChangeEvent<HTMLInputElement>) {
+    const text = event.target.value;
+    if (keywordMap.current.size === 0) return;
+    const filteredRows = fuzzySearch(text);
+    //
+    const filtered: GenericObject[] = [];
+    filteredRows.forEach((value) => {
+      filtered.push(layerProp[value]);
+    });
+    setFilteredProps(filtered);
+  }
+  function fuzzySearch(input: string) {
+    const unionSet = new Set<number>();
+    keywordMap.current.forEach((value, key) => {
+      if (key.includes(input)) {
+        value.forEach((value) => {
+          unionSet.add(value);
+        });
+      }
+    });
+    return unionSet;
   }
   return (
     <section className={styles.container}>
@@ -58,14 +101,24 @@ export default function PropertyTable() {
         <h2 className={styles.layer_name} title={canvasLayer?.layerName}>
           {canvasLayer?.layerName}
         </h2>
+        <div className={styles.input_container}>
+          <input
+            onInput={handleFuzzySearch}
+            type="text"
+            className={styles.search_input}
+          />
+          <div className={styles.icon_container}>
+            <FaSearch size={18} className={styles.search_icon} />
+          </div>
+        </div>
       </header>
-      {layerProp.length > 0 && (
+      {filteredProps.length > 0 && (
         <div ref={rootRef} className={styles.tb_container}>
           <table className={styles.prop_table}>
             <thead className={styles.tb_thead}>
               <tr className={styles.tb_tr}>
                 <th>Sr.No</th>
-                {Object.keys(layerProp[0]).map((prop, index) => {
+                {Object.keys(filteredProps[0]).map((prop, index) => {
                   return (
                     <th key={index} className={styles.tb_th}>
                       {prop}
@@ -75,7 +128,7 @@ export default function PropertyTable() {
               </tr>
             </thead>
             <tbody className={styles.tb_tbody}>
-              {layerProp.map((feature, index) => {
+              {filteredProps.map((feature, index) => {
                 return (
                   <IntersectObserver
                     key={index}

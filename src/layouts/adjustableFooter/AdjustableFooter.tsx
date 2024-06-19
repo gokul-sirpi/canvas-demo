@@ -55,7 +55,7 @@ export default function AdjustableFooter() {
         <IoMdClose size={20} />
       </button>
       {/* <section> */}
-      <PropertyTable />
+      <PropertyTable footerStatus={isFooterShown} />
       {/* </section> */}
     </div>
   );

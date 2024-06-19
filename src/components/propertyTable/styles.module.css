@@ -70,7 +70,7 @@
 }
 /* table */
 .tb_container {
-  height: calc(100% - 1.5rem);
+  height: calc(100% - 2rem);
   overflow: auto;
   position: relative;
 }
@@ -95,8 +95,37 @@
   max-width: 10rem;
   max-height: 5rem;
 }
+.tb_th {
+  position: relative;
+  padding-inline: 1rem;
+}
+.sort_btn {
+  position: absolute;
+  right: 0px;
+  height: 100%;
+  top: 0;
+  padding: 0.1rem;
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  transition: transform 400ms;
+}
+.sort_btn[data-rotated='true'] {
+  transform: rotateX(180deg);
+}
+
 .tb_td[data-overflow='true'] {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+/* no data */
+.no_data {
+  font-size: var(--font-md);
+  font-weight: 500;
+  height: calc(100% - 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
 }

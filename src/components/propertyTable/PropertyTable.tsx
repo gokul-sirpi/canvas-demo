@@ -1,29 +1,52 @@
-//
-import styles from './styles.module.css';
-import openLayerMap from '../../lib/openLayers';
-import { UserLayer } from '../../types/UserLayer';
-import { UgixLayer } from '../../types/UgixLayers';
-import { emitToast } from '../../lib/toastEmitter';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import IntersectObserver from '../intersectObserver/IntersectObserver';
 import { useSelector } from 'react-redux';
+import { FaArrowCircleDown, FaArrowCircleUp, FaSearch } from 'react-icons/fa';
+import Fuse from 'fuse.js';
+//
+import styles from './styles.module.css';
+import openLayerMap from '../../lib/openLayers';
+import { emitToast } from '../../lib/toastEmitter';
 import { RootState } from '../../context/store';
-import { FaSearch } from 'react-icons/fa';
 import { GenericObject } from '../../types/GeojsonType';
+import { LuSearchX } from 'react-icons/lu';
 
-export default function PropertyTable() {
+export default function PropertyTable({
+  footerStatus,
+}: {
+  footerStatus: boolean;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const keywordMap = useRef<Map<string, Set<number>>>(new Map());
+  const fuseOperator = useRef<Fuse<{ key: string }>>();
+  const debounceTimer = useRef<number>();
+  //
   const [layerProp, setLayerProp] = useState<GenericObject[]>([]);
   const [filteredProps, setFilteredProps] = useState<GenericObject[]>([]);
+  const [currSortKey, setCurrSortKey] = useState('');
+  const [currSortBy, setCurrSortBy] = useState<'ASC' | 'DSC'>('ASC');
   const canvasLayer = useSelector((state: RootState) => {
     return state.footerState.canvasLayer;
   });
   useEffect(() => {
     if (canvasLayer) {
       getLayerProperties();
+      if (inputRef.current) {
+        inputRef.current.value = '';
+        inputRef.current?.focus();
+      }
     }
   }, [canvasLayer]);
+  useEffect(() => {
+    if (!footerStatus && inputRef.current) {
+      inputRef.current.value = '';
+      setFilteredProps(layerProp);
+      setCurrSortKey('');
+    } else {
+      inputRef.current?.focus();
+    }
+  }, [footerStatus]);
   function getLayerProperties() {
     if (canvasLayer) {
       const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
@@ -57,6 +80,7 @@ export default function PropertyTable() {
   }
   function createSearchableData(properties: GenericObject[]) {
     const wordToRowMap = new Map<string, Set<number>>();
+    const keyList: { key: string }[] = [];
     for (let i = 0; i < properties.length; i++) {
       const property = properties[i];
       Object.values(property).forEach((value) => {
@@ -66,34 +90,89 @@ export default function PropertyTable() {
             wordToRowMap.get(value)?.add(i);
           } else {
             wordToRowMap.set(value, new Set([i]));
+            keyList.push({ key: value });
           }
         }
       });
     }
     keywordMap.current = wordToRowMap;
-    console.log(wordToRowMap);
+    fuseOperator.current = new Fuse(keyList, {
+      keys: ['key'],
+      threshold: 0.5,
+      includeScore: true,
+    });
   }
   function handleFuzzySearch(event: ChangeEvent<HTMLInputElement>) {
     const text = event.target.value;
+    if (text === '') {
+      setFilteredProps(layerProp);
+      return;
+    }
     if (keywordMap.current.size === 0) return;
-    const filteredRows = fuzzySearch(text);
-    //
-    const filtered: GenericObject[] = [];
-    filteredRows.forEach((value) => {
-      filtered.push(layerProp[value]);
-    });
-    setFilteredProps(filtered);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    debounceTimer.current = setTimeout(() => {
+      const filteredRows = fuzzySearch(text);
+      //
+      const filtered: GenericObject[] = [];
+      if (filteredRows) {
+        filteredRows.forEach((value) => {
+          filtered.push(layerProp[value]);
+        });
+      }
+      setFilteredProps(filtered);
+    }, 500);
   }
   function fuzzySearch(input: string) {
     const unionSet = new Set<number>();
-    keywordMap.current.forEach((value, key) => {
-      if (key.includes(input)) {
-        value.forEach((value) => {
+    if (fuseOperator.current) {
+      const result = fuseOperator.current.search(input);
+      result.forEach((item) => {
+        const key = item.item.key;
+        keywordMap.current.get(key)?.forEach((value) => {
           unionSet.add(value);
         });
+      });
+      // });
+    }
+    return unionSet;
+  }
+  function handleSort(key: string) {
+    setCurrSortKey(key);
+    let sortBy: 'ASC' | 'DSC' = 'ASC';
+    let order = 1;
+    if (currSortKey === key) {
+      if (currSortBy === 'ASC') {
+        sortBy = 'DSC';
+        order = -1;
+      } else {
+        sortBy = 'ASC';
+        order = 1;
+      }
+    }
+    setCurrSortBy(sortBy);
+    const notNull = [];
+    const onlyNull = [];
+    for (let i = 0; i < filteredProps.length; i++) {
+      if (
+        filteredProps[i][key] === null ||
+        filteredProps[i][key] === undefined
+      ) {
+        onlyNull.push(filteredProps[i]);
+      } else {
+        notNull.push(filteredProps[i]);
+      }
+    }
+    notNull.sort((a, b) => {
+      //@ts-expect-error all null values are already removed
+      if (a[key] >= b[key]) {
+        return order;
+      } else {
+        return -order;
       }
     });
-    return unionSet;
+    setFilteredProps([...notNull, ...onlyNull]);
   }
   return (
     <section className={styles.container}>
@@ -103,6 +182,7 @@ export default function PropertyTable() {
         </h2>
         <div className={styles.input_container}>
           <input
+            ref={inputRef}
             onInput={handleFuzzySearch}
             type="text"
             className={styles.search_input}
@@ -112,7 +192,7 @@ export default function PropertyTable() {
           </div>
         </div>
       </header>
-      {filteredProps.length > 0 && (
+      {filteredProps.length > 0 ? (
         <div ref={rootRef} className={styles.tb_container}>
           <table className={styles.prop_table}>
             <thead className={styles.tb_thead}>
@@ -121,7 +201,20 @@ export default function PropertyTable() {
                 {Object.keys(filteredProps[0]).map((prop, index) => {
                   return (
                     <th key={index} className={styles.tb_th}>
-                      {prop}
+                      <p>{prop}</p>
+                      <button
+                        onClick={() => {
+                          handleSort(prop);
+                        }}
+                        className={styles.sort_btn}
+                        data-rotated={
+                          currSortKey === prop && currSortBy === 'DSC'
+                        }
+                      >
+                        <FaArrowCircleUp
+                          color={currSortKey === prop ? '#565656' : '#d6d6d6'}
+                        />
+                      </button>
                     </th>
                   );
                 })}
@@ -155,6 +248,11 @@ export default function PropertyTable() {
               })}
             </tbody>
           </table>
+        </div>
+      ) : (
+        <div className={styles.no_data}>
+          <LuSearchX size={30} />
+          <p>No Results</p>
         </div>
       )}
     </section>

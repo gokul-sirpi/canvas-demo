@@ -518,6 +518,22 @@ const openLayerMap = {
       view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     }
   },
+  
+  zoomToCombinedExtend(resourcesFromCatalogue : string[]){
+    const extent : number[]=[90,180,-90,-180];
+    
+    resourcesFromCatalogue.map((layerId: string)=>{
+      const layerExtent = this.getLayer(layerId)?.getSource()?.getExtent();
+      extent[0] = Math.min(layerExtent![0],extent![0]);
+      extent[1] = Math.min(layerExtent![1],extent![1]);
+      extent[2] = Math.max(layerExtent![2],extent![2]);
+      extent[3] = Math.max(layerExtent![3],extent![3]);
+    });
+    const view = this.map.getView();
+    if (extent) {
+      view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
+    }
+  },
 
   async exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
     const mapCanvas = document.createElement('canvas');

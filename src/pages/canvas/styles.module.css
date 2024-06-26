@@ -3,6 +3,13 @@
   height: 100dvh;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ol_map_container {
+  position: relative;
+  /* height: 100%; */
+  flex: 1;
 }
 .ol_map {
   position: absolute;

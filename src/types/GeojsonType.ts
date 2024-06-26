@@ -13,7 +13,7 @@ export type JsonFeature = {
     };
     coordinates: number[][][];
   };
-  properties: { [x: string]: string | number };
+  properties: GenericObject;
 };
 
 export type GeoJsonObj = {
@@ -26,3 +26,5 @@ export type GeoJsonObj = {
   };
   features: JsonFeature[];
 };
+
+export type GenericObject = { [x: string]: string | number | null };

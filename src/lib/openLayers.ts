@@ -1,6 +1,6 @@
 import { Feature, Map as OlMap, Overlay, View } from 'ol';
 import { Pixel } from 'ol/pixel';
-import { CanvasLayer, drawType } from '../types/UserLayer';
+import { CanvasLayer, DrawType } from '../types/UserLayer';
 import {
   Attribution,
   ScaleLine,
@@ -157,7 +157,7 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createNewUserLayer(layerName: string, featureType: drawType): UserLayer {
+  createNewUserLayer(layerName: string, featureType: DrawType): UserLayer {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
     const layer = new VectorLayer({
@@ -262,7 +262,7 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: drawType,
+    type: DrawType,
     newLayer: UserLayer,
     callback?: (event: DrawEvent) => void
   ) {
@@ -614,7 +614,7 @@ const openLayerMap = {
           const feature = source.getFeatures()[0];
           const properties = feature.getProperties();
           console.log(properties);
-          const layerGeometry = properties.layerGeom as drawType | undefined;
+          const layerGeometry = properties.layerGeom as DrawType | undefined;
           //
           const top = padding + count * (imageSize + colGap) + 10;
           const left = padding + 10;

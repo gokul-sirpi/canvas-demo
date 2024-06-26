@@ -3,25 +3,31 @@ import { IoSquareOutline } from 'react-icons/io5';
 import { SlLocationPin } from 'react-icons/sl';
 //
 import openLayerMap from '../../lib/openLayers';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
-import { drawType } from '../../types/UserLayer';
+import { DrawType } from '../../types/UserLayer';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import { RxRulerHorizontal } from 'react-icons/rx';
 import { LuMousePointer2 } from 'react-icons/lu';
 import * as Popover from '@radix-ui/react-popover';
+import { RootState } from '../../context/store';
+import { updateDrawingTool } from '../../context/drawingTool/drawingToolSlice';
 
 function DrawingTool({
   toolType,
   changeSelectedTool,
 }: {
-  toolType: drawType | 'Cursor';
-  changeSelectedTool?: (tool: drawType) => void;
+  toolType: DrawType | 'Cursor';
+  changeSelectedTool?: (tool: DrawType) => void;
 }) {
   const dispatch = useDispatch();
+  const currDrawingTool = useSelector((state: RootState) => {
+    return state.drawingTool.currDrawingTool;
+  });
 
-  function drawFeature(type: drawType) {
+  function drawFeature(type: DrawType) {
     const newLayer = openLayerMap.createNewUserLayer('', type);
+    dispatch(updateDrawingTool(type));
     if (changeSelectedTool) {
       changeSelectedTool(type);
     }
@@ -46,6 +52,7 @@ function DrawingTool({
   }
   function clearAllEvents() {
     openLayerMap.removeDrawInteraction();
+    dispatch(updateDrawingTool('None'));
     if (
       openLayerMap.latestLayer &&
       openLayerMap.latestLayer.layerType === 'UserLayer' &&
@@ -60,6 +67,7 @@ function DrawingTool({
         <Popover.Close asChild>
           <button
             className="header_button"
+            data-selected={currDrawingTool === toolType}
             onClick={() => drawFeature('Circle')}
           >
             <div>
@@ -72,6 +80,7 @@ function DrawingTool({
         <Popover.Close asChild>
           <button
             className="header_button"
+            data-selected={currDrawingTool === toolType}
             onClick={() => drawFeature('Rectangle')}
           >
             <div>
@@ -81,7 +90,11 @@ function DrawingTool({
         </Popover.Close>
       )}
       {toolType === 'Point' && (
-        <button className="header_button" onClick={() => drawFeature('Point')}>
+        <button
+          className="header_button"
+          data-selected={currDrawingTool === toolType}
+          onClick={() => drawFeature('Point')}
+        >
           <div>
             <SlLocationPin size={23} />
           </div>
@@ -91,6 +104,7 @@ function DrawingTool({
         <Popover.Close asChild>
           <button
             className="header_button"
+            data-selected={currDrawingTool === toolType}
             onClick={() => drawFeature('Polygon')}
           >
             <div>
@@ -102,6 +116,7 @@ function DrawingTool({
       {toolType === 'Measure' && (
         <button
           className="header_button"
+          data-selected={currDrawingTool === toolType}
           onClick={() => drawFeature('Measure')}
         >
           <div>
@@ -118,7 +133,11 @@ function DrawingTool({
       )}
       {toolType === 'Line' && (
         <Popover.Close asChild>
-          <button className="header_button" onClick={() => drawFeature('Line')}>
+          <button
+            className="header_button"
+            data-selected={currDrawingTool === toolType}
+            onClick={() => drawFeature('Line')}
+          >
             <div>
               <PiLineSegments size={25} />
             </div>

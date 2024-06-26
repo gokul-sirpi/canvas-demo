@@ -2,7 +2,7 @@ import VectorLayer from 'ol/layer/Vector';
 import { FeatureStyle } from './FeatureStyle';
 import VectorSource from 'ol/source/Vector';
 
-export type drawType =
+export type DrawType =
   | 'Circle'
   | 'Rectangle'
   | 'Point'
@@ -19,7 +19,7 @@ export type UserLayer = {
   visible: boolean;
   isCompleted: boolean;
   layerColor: string;
-  featureType: drawType;
+  featureType: DrawType;
   editable: boolean;
   style: FeatureStyle;
   side: 'left' | 'right' | 'middle';

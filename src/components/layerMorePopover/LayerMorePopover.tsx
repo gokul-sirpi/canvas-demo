@@ -98,7 +98,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 </button>
               </Popover.Close>
             </div>
-            <div>
+            {/* <div>
               <Popover.Close asChild>
                 <button
                   onClick={handleFooterUpdate}
@@ -107,7 +107,7 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                   Properties
                 </button>
               </Popover.Close>
-            </div>
+            </div> */}
             {layer.layerType === 'UgixLayer' && (
               <div>
                 <button onClick={handleInfoOpen} className={styles.popover_btn}>

@@ -36,6 +36,7 @@ export default function PropertyTable({
         inputRef.current.value = '';
         inputRef.current?.focus();
       }
+      setCurrSortKey('');
     }
   }, [canvasLayer]);
   useEffect(() => {
@@ -121,7 +122,11 @@ export default function PropertyTable({
           filtered.push(layerProp[value]);
         });
       }
-      setFilteredProps(filtered);
+      if (currSortKey) {
+        columnBasedSort(currSortKey, currSortBy, filtered);
+      } else {
+        setFilteredProps(filtered);
+      }
     }, 500);
   }
   function fuzzySearch(input: string) {
@@ -141,32 +146,42 @@ export default function PropertyTable({
   function handleSort(key: string) {
     setCurrSortKey(key);
     let sortBy: 'ASC' | 'DSC' = 'ASC';
-    let order = 1;
     if (currSortKey === key) {
       if (currSortBy === 'ASC') {
         sortBy = 'DSC';
-        order = -1;
       } else {
         sortBy = 'ASC';
-        order = 1;
       }
     }
     setCurrSortBy(sortBy);
+    columnBasedSort(key, sortBy, filteredProps);
+  }
+  function columnBasedSort(
+    sortKey: string,
+    sortBy: 'ASC' | 'DSC',
+    arrayToSort: GenericObject[]
+  ) {
+    let order = 1;
+    if (sortBy === 'DSC') {
+      order = -1;
+    }
+    console.log('sorting');
+
     const notNull = [];
     const onlyNull = [];
-    for (let i = 0; i < filteredProps.length; i++) {
+    for (let i = 0; i < arrayToSort.length; i++) {
       if (
-        filteredProps[i][key] === null ||
-        filteredProps[i][key] === undefined
+        arrayToSort[i][sortKey] === null ||
+        arrayToSort[i][sortKey] === undefined
       ) {
-        onlyNull.push(filteredProps[i]);
+        onlyNull.push(arrayToSort[i]);
       } else {
-        notNull.push(filteredProps[i]);
+        notNull.push(arrayToSort[i]);
       }
     }
     notNull.sort((a, b) => {
       //@ts-expect-error all null values are already removed
-      if (a[key] >= b[key]) {
+      if (a[sortKey] >= b[sortKey]) {
         return order;
       } else {
         return -order;

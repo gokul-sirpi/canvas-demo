@@ -65,9 +65,9 @@ export function hoverStyle(style: FeatureStyle) {
       color: style.fill + '77',
     }),
     image: new Icon({
-      anchor: [0.5, 0.85],
+      anchor: [0.5, 0.87],
       src: `icons/marker/${markerIcons[Number(style['marker-id'])]}`,
-      width: 27,
+      width: 28,
     }),
   });
 }

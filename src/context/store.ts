@@ -4,6 +4,7 @@ import LoaderSlice from './loading/LoaderSlice';
 import swiperSlice from './SwipeShowing/SwipeSlice';
 import canvasLayerSlice from './canvasLayers/canvasLayerSlice';
 import footerStateSlice from './footerState/footerStateSlice';
+import drawingToolSlice from './drawingTool/drawingToolSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     loading: LoaderSlice,
     swipeShown: swiperSlice,
     footerState: footerStateSlice,
+    drawingTool: drawingToolSlice,
   },
 });
 

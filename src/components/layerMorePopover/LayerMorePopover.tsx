@@ -11,10 +11,10 @@ import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
-import {
-  updateFooterLayerState,
-  updateFooterShownState,
-} from '../../context/footerState/footerStateSlice';
+// import {
+//   updateFooterLayerState,
+//   updateFooterShownState,
+// } from '../../context/footerState/footerStateSlice';
 
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -55,10 +55,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       anchorRef.current.click();
     }
   }
-  function handleFooterUpdate() {
-    dispatch(updateFooterShownState(true));
-    dispatch(updateFooterLayerState(layer));
-  }
+  // function handleFooterUpdate() {
+  //   dispatch(updateFooterShownState(true));
+  //   dispatch(updateFooterLayerState(layer));
+  // }
   return (
     <>
       <Popover.Root>

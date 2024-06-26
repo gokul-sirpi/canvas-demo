@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import IntersectObserver from '../intersectObserver/IntersectObserver';
 import { useSelector } from 'react-redux';
-import { FaArrowCircleDown, FaArrowCircleUp, FaSearch } from 'react-icons/fa';
+import { FaArrowCircleUp, FaSearch } from 'react-icons/fa';
 import Fuse from 'fuse.js';
 //
 import styles from './styles.module.css';

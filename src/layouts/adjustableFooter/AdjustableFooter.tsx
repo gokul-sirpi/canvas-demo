@@ -1,4 +1,4 @@
-import { DragEvent, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import styles from './styles.module.css';
 import PropertyTable from '../../components/propertyTable/PropertyTable';
 import { IoMdClose } from 'react-icons/io';

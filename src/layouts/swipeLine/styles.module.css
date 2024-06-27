@@ -1,6 +1,6 @@
 .container {
   background-color: black;
-  height: 100vh;
+  height: 100%;
   width: 2px;
   position: absolute;
   right: calc(100vw / 2);

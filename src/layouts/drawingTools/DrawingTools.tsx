@@ -5,12 +5,12 @@ import DrawingTool from '../../components/drawingTool/DrawingTool';
 import { useState } from 'react';
 //
 import styles from './styles.module.css';
-import { drawType } from '../../types/UserLayer';
+import { DrawType } from '../../types/UserLayer';
 
 function DrawingTools() {
-  const [selectedTool, setSelectedTool] = useState<drawType>('Circle');
+  const [selectedTool, setSelectedTool] = useState<DrawType>('Circle');
 
-  function selectDrawingTool(tool: drawType) {
+  function selectDrawingTool(tool: DrawType) {
     setSelectedTool(tool);
   }
   return (

@@ -52,6 +52,10 @@ button {
 .header_button svg {
   width: 100%;
 }
+.header_button[data-selected='true'] {
+  /* box-shadow: 0px 0px 2px 2px var(--color-secondary); */
+  color: #108bb0;
+}
 
 /* ol style */
 .ol-tooltip {

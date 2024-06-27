@@ -1,6 +1,6 @@
 import { Feature, Map as OlMap, Overlay, View } from 'ol';
 import { Pixel } from 'ol/pixel';
-import { CanvasLayer, drawType } from '../types/UserLayer';
+import { CanvasLayer, DrawType } from '../types/UserLayer';
 import {
   Attribution,
   ScaleLine,
@@ -56,7 +56,7 @@ const scaleControl = new ScaleLine({
 const attribution = new Attribution({ collapsible: false });
 const newControls = defaultControls().extend([scaleControl, attribution]);
 const LAYER_ID_KEY = 'layer-id';
-const BASE_LAYER_KEY = 'baselayer';
+const BASE_LAYER_KEY = 'baseLayer';
 // Map properties and methods
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
@@ -80,7 +80,7 @@ const openLayerMap = {
   }),
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayers:
+    newLayer:
       | VectorLayer<VectorSource>
       | TileLayer<OSM>
       | VectorImageLayer<VectorSource>
@@ -91,7 +91,7 @@ const openLayerMap = {
       }
     });
     const layers = this.map.getLayers();
-    layers.insertAt(0, newLayers);
+    layers.insertAt(0, newLayer);
     if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
       if (this.indianOutline) {
         if (layers.getLength() === 1) {
@@ -157,7 +157,7 @@ const openLayerMap = {
     return reqLayer;
   },
 
-  createNewUserLayer(layerName: string, featureType: drawType): UserLayer {
+  createNewUserLayer(layerName: string, featureType: DrawType): UserLayer {
     const source = new VectorSource({});
     const featureColor = getRandomColor();
     const layer = new VectorLayer({
@@ -177,7 +177,7 @@ const openLayerMap = {
       featureType: featureType,
       style: createFeatureStyle(featureColor),
       editable: true,
-      side: 'left',
+      side: 'middle',
     };
     this.canvasLayers.set(layerId, {
       layer,
@@ -185,7 +185,7 @@ const openLayerMap = {
       layerName,
       layerType: 'UserLayer',
       style: createFeatureStyle(featureColor),
-      side: 'left',
+      side: 'middle',
     });
     this.addSwipeFuncToLayer(layer);
     this.map.addLayer(layer);
@@ -221,7 +221,7 @@ const openLayerMap = {
       featureType: type,
       fetching: true,
       editable: true,
-      side: 'left',
+      side: 'middle',
     };
     this.canvasLayers.set(layerId, {
       layer: newVectorLayer,
@@ -229,7 +229,7 @@ const openLayerMap = {
       layerName,
       layerType: 'UgixLayer',
       style: createFeatureStyle(layerColor),
-      side: 'left',
+      side: 'middle',
     });
     this.addLayer(newVectorLayer);
     this.addSwipeFuncToLayer(newVectorLayer);
@@ -262,7 +262,7 @@ const openLayerMap = {
   },
 
   addDrawFeature(
-    type: drawType,
+    type: DrawType,
     newLayer: UserLayer,
     callback?: (event: DrawEvent) => void
   ) {
@@ -339,10 +339,12 @@ const openLayerMap = {
               const edge = geom.getFirstCoordinate();
               const line = new LineString([center, edge]);
               output = formatLength(line);
+              featureProprties.radius = output;
+              featureProprties.area = formatArea(geom);
             } else {
               output = formatArea(geom);
+              featureProprties.area = output;
             }
-            featureProprties.area = output;
             tooltipPosition = geom.getInteriorPoint().getCoordinates();
           }
           if (output[0] !== '0') {
@@ -354,6 +356,7 @@ const openLayerMap = {
     this.draw.on('drawend', (event) => {
       event.feature.setProperties({
         layer: 'Null',
+        layerId,
         ...style,
         ...featureProprties,
         layerGeom: type,
@@ -401,6 +404,7 @@ const openLayerMap = {
       const marker = drawEvent.feature as Feature<Point>;
       marker.setProperties({
         layer: layerName || 'NULL',
+        layerId,
         layerGeom: 'Point',
         ...style,
         lat: marker.getGeometry()?.getCoordinates()[1],
@@ -433,6 +437,7 @@ const openLayerMap = {
         geometry: featureLike.getGeometry() as Geometry,
         ...featureLike.getProperties(),
         layer: layerName,
+        layerId,
       });
     });
     const vectorSource = this.getLayer(layerId)?.getSource();
@@ -466,7 +471,7 @@ const openLayerMap = {
         'stroke-opacity':
           properties['stroke-opacity'] || style['stroke-opacity'],
         'stroke-width': properties['stroke-width'] || style['stroke-width'],
-        'marker-id': properties['marker-id'] || style['marker-id'],
+        'marker-id': Number(properties['marker-id']) || style['marker-id'],
       };
       const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
@@ -609,7 +614,7 @@ const openLayerMap = {
           const feature = source.getFeatures()[0];
           const properties = feature.getProperties();
           console.log(properties);
-          const layerGeometry = properties.layerGeom as drawType | undefined;
+          const layerGeometry = properties.layerGeom as DrawType | undefined;
           //
           const top = padding + count * (imageSize + colGap) + 10;
           const left = padding + 10;
@@ -719,6 +724,7 @@ const openLayerMap = {
         const layerName =
           geojsonData.features[0].properties.layer || `layer_${layerId}`;
         zip.file(`${layerName}.geojson`, JSON.stringify(geojsonData));
+        this.canvasLayers.get(layerId)?.layerName || `layer_${layerId}`;
       }
     });
     zip.generateAsync({ type: 'blob' }).then((content) => {
@@ -767,7 +773,17 @@ const openLayerMap = {
     this.map.forEachFeatureAtPixel(
       pixel,
       (selected) => {
-        if (!feature) {
+        if (feature) return;
+        const side = this.getMouseSideStatus(pixel);
+        if (side !== null) {
+          const layerID: string = selected.get('layerId');
+          const layer = this.canvasLayers.get(layerID);
+          if (layer) {
+            if (side === layer.side) {
+              feature = selected;
+            }
+          }
+        } else {
           feature = selected;
         }
       },
@@ -775,6 +791,22 @@ const openLayerMap = {
     );
     return feature;
   },
+  getMouseSideStatus(pixel: Pixel) {
+    let side = null;
+    if (this.swipePercentage < 1) {
+      const mapSize = this.map.getSize();
+      if (mapSize) {
+        const clickedPercentage = pixel[0] / mapSize[0];
+        if (clickedPercentage < this.swipePercentage) {
+          side = 'left';
+        } else {
+          side = 'right';
+        }
+      }
+    }
+    return side;
+  },
+
   updateFeatureProperties(
     layerId: string,
     key: string,
@@ -792,9 +824,10 @@ const openLayerMap = {
       const ctx = event.context as CanvasRenderingContext2D;
       const mapSize = this.map.getSize();
       if (!mapSize || !ctx) return;
-      let tl, tr, bl, br;
       const layerId = layer.get(LAYER_ID_KEY);
       const side = this.canvasLayers.get(layerId)?.side;
+      if (side === 'middle') return;
+      let tl, tr, bl, br;
       const width = mapSize[0] * this.swipePercentage;
       if (side === 'left') {
         tl = getRenderPixel(event, [0, 0]);
@@ -807,6 +840,12 @@ const openLayerMap = {
         bl = getRenderPixel(event, [width, mapSize[1]]);
         br = getRenderPixel(event, mapSize);
       }
+      // else {
+      //   tl = getRenderPixel(event, [0, 0]);
+      //   tr = getRenderPixel(event, [mapSize[0], 0]);
+      //   bl = getRenderPixel(event, [0, mapSize[1]]);
+      //   br = getRenderPixel(event, mapSize);
+      // }
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(tl[0], tl[1]);
@@ -821,7 +860,7 @@ const openLayerMap = {
       ctx.restore();
     });
   },
-  addSwipeLayer(leftIds: string[], rightIds: string[]) {
+  addSwipeLayer(leftIds: string[], rightIds: string[], middleIds: string[]) {
     for (const id of rightIds) {
       const layer = this.canvasLayers.get(id);
       if (layer) {
@@ -832,6 +871,12 @@ const openLayerMap = {
       const layer = this.canvasLayers.get(id);
       if (layer) {
         layer.side = 'left';
+      }
+    }
+    for (const id of middleIds) {
+      const layer = this.canvasLayers.get(id);
+      if (layer) {
+        layer.side = 'middle';
       }
     }
     this.map.render();
@@ -862,17 +907,21 @@ openLayerMap.map.on('pointermove', (event) => {
     selected.setStyle(prevStyle);
     selected = undefined;
   }
-  const feature = openLayerMap.map.getFeaturesAtPixel(event.pixel)[0] as
+  const feature = openLayerMap.getFeatureAtPixel(event.pixel) as
     | Feature
     | undefined;
   if (feature) {
     const { layer, ...style } = feature.getProperties();
     if (!layer) return;
     prevStyle = feature.getStyle() as Style;
+    // console.log(style);
     feature.setStyle(hoverStyle(style as FeatureStyle));
     selected = feature;
   }
 });
+// openLayerMap.map.on('pointerdrag', (event) => {
+//   console.log(event);
+// });
 
 // Utility functions
 function circleGeometryFunction(
@@ -907,9 +956,9 @@ function formatArea(polygon: Polygon) {
   const area = getArea(polygon, { projection: 'EPSG:4326' });
   let output;
   if (area > 10000) {
-    output = Math.round(area / 10000) / 100 + ' ' + 'km2';
+    output = Math.round(area / 10000) / 100 + ' ' + 'sq. km';
   } else {
-    output = Math.round(area * 100) / 100 + ' ' + 'm2';
+    output = Math.round(area * 100) / 100 + ' ' + 'sq. m';
   }
   return output;
 }

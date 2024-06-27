@@ -44,3 +44,12 @@
   font-size: var(--font-sm);
   text-transform: uppercase;
 }
+
+.table_cell {
+  /* background-color: red; */
+  max-width: 13rem;
+  /* overflow: ellipsis; */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

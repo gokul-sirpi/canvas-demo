@@ -33,7 +33,7 @@ function LayerCard() {
         <h3 className={styles.layer_card_heading}>Layers</h3>
         <div data-visible={isCardOpen} className={`${styles.card_container} `}>
           {canvasLayers.length === 0 ? (
-            <div className={styles.noData}>No layers avalaible</div>
+            <div className={styles.noData}>No layers available</div>
           ) : (
             <div className={styles.layer_container}>
               <Reorder.Group

@@ -26,6 +26,7 @@ function Popup() {
       delete properties['stroke-opacity'];
       delete properties['marker-id'];
       delete properties.layerGeom;
+      delete properties.layerId;
       setProperties(properties);
       if (Object.keys(properties).length === 0) {
         openLayerMap.closePopupOverLay();
@@ -36,27 +37,32 @@ function Popup() {
     openLayerMap.closePopupOverLay();
   }
   return (
-    <div>
-      <div id="popup" ref={popupContainer} className={styles.ol_popup}>
-        <button
-          onClick={handlePopupClosing}
-          className={styles.ol_popup_closer}
-        ></button>
-        <div id="popup-content">
-          <table className={styles.popup_table}>
-            <tbody>
-              {properties &&
-                Object.keys(properties).map((property) => {
-                  return (
-                    <tr key={property}>
-                      <td>{property}</td>
-                      <td>: {properties[property]}</td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
+    <div id="popup" ref={popupContainer} className={styles.ol_popup}>
+      <button
+        onClick={handlePopupClosing}
+        className={styles.ol_popup_closer}
+      ></button>
+      <div id="popup-content">
+        <table className={styles.popup_table}>
+          <tbody>
+            {properties &&
+              Object.keys(properties).map((property) => {
+                return (
+                  <tr key={property}>
+                    <td title={property} className={styles.table_cell}>
+                      {property}
+                    </td>
+                    <td
+                      title={`${properties[property]}`}
+                      className={styles.table_cell}
+                    >
+                      : {properties[property]}
+                    </td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

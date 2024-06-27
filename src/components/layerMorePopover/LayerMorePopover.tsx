@@ -11,6 +11,10 @@ import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
+// import {
+//   updateFooterLayerState,
+//   updateFooterShownState,
+// } from '../../context/footerState/footerStateSlice';
 
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
@@ -51,6 +55,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       anchorRef.current.click();
     }
   }
+  // function handleFooterUpdate() {
+  //   dispatch(updateFooterShownState(true));
+  //   dispatch(updateFooterLayerState(layer));
+  // }
   return (
     <>
       <Popover.Root>
@@ -71,21 +79,35 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
               </button>
             </div>
             <div>
-              <button
-                onClick={handleLayerExport}
-                className={styles.popover_btn}
-              >
-                Export layer
-              </button>
+              <Popover.Close asChild>
+                <button
+                  onClick={handleLayerExport}
+                  className={styles.popover_btn}
+                >
+                  Export layer
+                </button>
+              </Popover.Close>
             </div>
             <div>
-              <button
-                className={styles.popover_btn}
-                onClick={() => openLayerMap.zoomToFit(layer.layerId)}
-              >
-                Zoom to bound
-              </button>
+              <Popover.Close asChild>
+                <button
+                  className={styles.popover_btn}
+                  onClick={() => openLayerMap.zoomToFit(layer.layerId)}
+                >
+                  Zoom to bound
+                </button>
+              </Popover.Close>
             </div>
+            {/* <div>
+              <Popover.Close asChild>
+                <button
+                  onClick={handleFooterUpdate}
+                  className={styles.popover_btn}
+                >
+                  Properties
+                </button>
+              </Popover.Close>
+            </div> */}
             {layer.layerType === 'UgixLayer' && (
               <div>
                 <button onClick={handleInfoOpen} className={styles.popover_btn}>

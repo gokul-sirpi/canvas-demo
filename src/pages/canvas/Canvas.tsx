@@ -20,6 +20,7 @@ import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
 import { getCookieValue } from '../../lib/cookieManger.ts';
 import Intro from '../../layouts/Intro/Intro.tsx';
 import SwipeLine from '../../layouts/swipeLine/SwipeLine.tsx';
+import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter.tsx';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -151,19 +152,22 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   }
   return (
     <section className={styles.container}>
-      <div
-        onDrop={handleFileDrop}
-        onDragOver={handleDragOver}
-        id="ol-map"
-        className={styles.ol_map}
-      ></div>
-      <>
-        <SwipeLine />
-        <Popup />
-        <Header profileData={profileData} resourceList={allResrources} />
-        <LayerCard />
-        <Intro />
-      </>
+      <div className={styles.ol_map_container}>
+        <div
+          onDrop={handleFileDrop}
+          onDragOver={handleDragOver}
+          id="ol-map"
+          className={styles.ol_map}
+        ></div>
+        <>
+          <SwipeLine />
+          <Popup />
+          <Header profileData={profileData} resourceList={allResrources} />
+          <LayerCard />
+          <Intro />
+        </>
+      </div>
+      <AdjustableFooter />
     </section>
   );
 }

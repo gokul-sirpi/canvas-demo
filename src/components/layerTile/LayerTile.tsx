@@ -20,6 +20,7 @@ import { IoShapesOutline, IoSquareOutline } from 'react-icons/io5';
 import { PiLineSegments, PiPolygon } from 'react-icons/pi';
 import MarkerPicker from '../markerPicker/MarkerPicker';
 import Loader from '../loader/Loader';
+import { updateDrawingTool } from '../../context/drawingTool/drawingToolSlice';
 
 function LayerTile({
   layer,
@@ -53,6 +54,7 @@ function LayerTile({
 
   function completeLayerCreation() {
     openLayerMap.removeDrawInteraction();
+    dispatch(updateDrawingTool('None'));
     let layerName = layerNameRef.current?.value;
     if (!layerName) {
       layerName = `Layer${index + 1}`;
@@ -71,6 +73,7 @@ function LayerTile({
   function cancelLayerCreation() {
     openLayerMap.removeLayer(layer.layerId);
     openLayerMap.removeDrawInteraction();
+    dispatch(updateDrawingTool('None'));
     dispatch(deleteCanvasLayer(layer.layerId));
   }
 
@@ -119,7 +122,12 @@ function LayerTile({
           />
         )}
       </div>
-      {swiperShown && isTile && <div>{layer.side === 'left' ? 'L' : 'R'}</div>}
+      {swiperShown && isTile && (
+        <div>
+          {layer.side === 'left' && 'L'}
+          {layer.side === 'right' && 'R'}
+        </div>
+      )}
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>

@@ -5,7 +5,7 @@ import { RiInformationFill } from 'react-icons/ri';
 import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   addCanvasLayer,
   updateLayerFetchingStatus,
@@ -21,6 +21,7 @@ import {
 } from '../../lib/getAllUgixFeatures';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
+import { RootState } from '../../context/store';
 
 function UgixFeatureTile({
   resource,
@@ -35,7 +36,15 @@ function UgixFeatureTile({
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
-
+  const ugixResources: string[] = [];
+  const canvasLayers = useSelector((state: RootState) => {
+    return state.canvasLayer.layers;
+  });
+  canvasLayers.map((layer)=>{
+    if(layer.layerType === 'UgixLayer'){
+      ugixResources.push(layer.layerId);
+    }
+  })
   function getinfoLink() {
     const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
@@ -68,6 +77,8 @@ function UgixFeatureTile({
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
+        ugixResources.push(newLayer.layerId);
+        openLayerMap.zoomToCombinedExtend(ugixResources);
         cleanUpSideEffects();
         dialogCloseTrigger(false);
       },

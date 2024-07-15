@@ -1,4 +1,9 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { RootState } from '../../context/store';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
@@ -31,6 +36,16 @@ function LayerTile({
   index: number;
   isTile?: boolean;
 }) {
+  const canvasLayers = useSelector((state: RootState) => {
+    return state.canvasLayer.layers;
+  });
+  const ugixResources: string[] = [];
+  canvasLayers.map((layer) => {
+    if (layer.layerType === 'UgixLayer') {
+      ugixResources.push(layer.layerId);
+    }
+  });
+
   const layerNameRef = useRef<HTMLInputElement>(null);
   const [visible, setVisible] = useState<boolean | undefined>(
     openLayerMap.getLayerVisibility(layer.layerId)
@@ -41,6 +56,16 @@ function LayerTile({
     return state.swipeShown.swipeShown;
   });
   const dispatch = useDispatch();
+
+  useLayoutEffect(() => {
+    if (
+      layer.layerType === 'UgixLayer' &&
+      layer.isCompleted &&
+      !layer.fetching
+    ) {
+      openLayerMap.zoomToCombinedExtend(ugixResources);
+    }
+  }, [layer, ugixResources]);
 
   function toggleLayerVisibility() {
     if (visible) {

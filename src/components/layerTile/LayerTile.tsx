@@ -58,10 +58,6 @@ function LayerTile({
     return state.swipeShown.swipeShown;
   });
   const dispatch = useDispatch();
-  
-  console.log(layer);
-  
-  console.log(useEffIndex, index);
   useEffect(() => {
     if (
       layer.layerType === 'UgixLayer' &&
@@ -69,7 +65,6 @@ function LayerTile({
       !layer.fetching && useEffIndex == index
     ) {
       setUseEffIndex(useEffIndex+1);
-      console.log(layer.layerName, layer.fetching);
       openLayerMap.zoomToCombinedExtend(ugixResources);
     }
   }, [layer, ugixResources]);
@@ -95,12 +90,12 @@ function LayerTile({
     modifiedLayer.layerName = layerName;
     modifiedLayer.isCompleted = true;
     dispatch(updateCanvasLayer({ index, modifiedLayer }));
-    console.log(modifiedLayer);
     openLayerMap.updateFeatureProperties(
       modifiedLayer.layerId,
       'layer',
       layerName
     );
+
   }
 
   function cancelLayerCreation() {

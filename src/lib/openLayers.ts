@@ -542,7 +542,7 @@ const openLayerMap = {
   },
 
   zoomToCombinedExtend(resourcesFromCatalogue: string[]) {
-    let extent: number[] = [90, 180, -90, -180];
+    let extent: number[] = [180, 180, -180, -180];
     if (resourcesFromCatalogue.length == 0) {
       extent = [67, 4, 98, 39];
     }

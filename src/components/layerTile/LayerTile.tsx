@@ -1,5 +1,6 @@
 import {
   ChangeEvent,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -51,18 +52,24 @@ function LayerTile({
     openLayerMap.getLayerVisibility(layer.layerId)
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+  const [useEffIndex, setUseEffIndex] = useState(index);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const swiperShown = useSelector((state: RootState) => {
     return state.swipeShown.swipeShown;
   });
   const dispatch = useDispatch();
-
-  useLayoutEffect(() => {
+  
+  console.log(layer);
+  
+  console.log(useEffIndex, index);
+  useEffect(() => {
     if (
       layer.layerType === 'UgixLayer' &&
       layer.isCompleted &&
-      !layer.fetching
+      !layer.fetching && useEffIndex == index
     ) {
+      setUseEffIndex(useEffIndex+1);
+      console.log(layer.layerName, layer.fetching);
       openLayerMap.zoomToCombinedExtend(ugixResources);
     }
   }, [layer, ugixResources]);
@@ -88,6 +95,7 @@ function LayerTile({
     modifiedLayer.layerName = layerName;
     modifiedLayer.isCompleted = true;
     dispatch(updateCanvasLayer({ index, modifiedLayer }));
+    console.log(modifiedLayer);
     openLayerMap.updateFeatureProperties(
       modifiedLayer.layerId,
       'layer',

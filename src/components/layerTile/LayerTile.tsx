@@ -1,5 +1,6 @@
 import {
   ChangeEvent,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -51,18 +52,19 @@ function LayerTile({
     openLayerMap.getLayerVisibility(layer.layerId)
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+  const [useEffIndex, setUseEffIndex] = useState(index);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const swiperShown = useSelector((state: RootState) => {
     return state.swipeShown.swipeShown;
   });
   const dispatch = useDispatch();
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (
       layer.layerType === 'UgixLayer' &&
       layer.isCompleted &&
-      !layer.fetching
+      !layer.fetching && useEffIndex == index
     ) {
+      setUseEffIndex(useEffIndex+1);
       openLayerMap.zoomToCombinedExtend(ugixResources);
     }
   }, [layer, ugixResources]);
@@ -93,6 +95,7 @@ function LayerTile({
       'layer',
       layerName
     );
+
   }
 
   function cancelLayerCreation() {

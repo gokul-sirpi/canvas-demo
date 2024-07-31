@@ -156,8 +156,7 @@ const openLayerMap = {
       if (ugixResources.length == 1) {
         openLayerMap.zoomToCombinedExtend([]);
       }
-
-      if (ugixResources.indexOf(layerId)) {
+      if (ugixResources.indexOf(layerId)!=-1) {
         ugixResources.splice(ugixResources.indexOf(layerId), 1);
         openLayerMap.zoomToCombinedExtend(ugixResources);
       }
@@ -542,7 +541,7 @@ const openLayerMap = {
   },
 
   zoomToCombinedExtend(resourcesFromCatalogue: string[]) {
-    let extent: number[] = [90, 180, -90, -180];
+    let extent: number[] = [180, 180, -180, -180];
     if (resourcesFromCatalogue.length == 0) {
       extent = [67, 4, 98, 39];
     }

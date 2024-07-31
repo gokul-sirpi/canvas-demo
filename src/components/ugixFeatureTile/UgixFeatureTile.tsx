@@ -75,7 +75,6 @@ function UgixFeatureTile({
       () => {
         dispatch(addCanvasLayer(newLayer));
         ugixResources.push(newLayer.layerId);
-        openLayerMap.zoomToCombinedExtend(ugixResources);
         cleanUpSideEffects();
         dialogCloseTrigger(false);
       },

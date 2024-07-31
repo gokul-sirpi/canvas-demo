@@ -1,4 +1,9 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { RootState } from '../../context/store';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
@@ -31,16 +36,37 @@ function LayerTile({
   index: number;
   isTile?: boolean;
 }) {
+  const canvasLayers = useSelector((state: RootState) => {
+    return state.canvasLayer.layers;
+  });
+  const ugixResources: string[] = [];
+  canvasLayers.map((layer) => {
+    if (layer.layerType === 'UgixLayer') {
+      ugixResources.push(layer.layerId);
+    }
+  });
+
   const layerNameRef = useRef<HTMLInputElement>(null);
   const [visible, setVisible] = useState<boolean | undefined>(
     openLayerMap.getLayerVisibility(layer.layerId)
   );
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
+  const [useEffIndex, setUseEffIndex] = useState(index);
   const titleRef = useRef<HTMLParagraphElement>(null);
   const swiperShown = useSelector((state: RootState) => {
     return state.swipeShown.swipeShown;
   });
   const dispatch = useDispatch();
+  useEffect(() => {
+    if (
+      layer.layerType === 'UgixLayer' &&
+      layer.isCompleted &&
+      !layer.fetching && useEffIndex == index
+    ) {
+      setUseEffIndex(useEffIndex+1);
+      openLayerMap.zoomToCombinedExtend(ugixResources);
+    }
+  }, [layer, ugixResources]);
 
   function toggleLayerVisibility() {
     if (visible) {
@@ -68,6 +94,7 @@ function LayerTile({
       'layer',
       layerName
     );
+
   }
 
   function cancelLayerCreation() {

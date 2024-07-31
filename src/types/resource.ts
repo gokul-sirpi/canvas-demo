@@ -28,8 +28,6 @@ export type Resource = {
 };
 
 export type QueryParams = {
-  // limit: number;
-  offset: number;
   [x: string]: string | number;
 };
 

@@ -5,7 +5,7 @@ import { RiInformationFill } from 'react-icons/ri';
 import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { SetStateAction, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   addCanvasLayer,
   updateLayerFetchingStatus,
@@ -21,6 +21,7 @@ import {
 } from '../../lib/getAllUgixFeatures';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
+import { RootState } from '../../context/store';
 
 function UgixFeatureTile({
   resource,
@@ -35,7 +36,15 @@ function UgixFeatureTile({
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
-
+  const ugixResources: string[] = [];
+  const canvasLayers = useSelector((state: RootState) => {
+    return state.canvasLayer.layers;
+  });
+  canvasLayers.map((layer) => {
+    if (layer.layerType === 'UgixLayer') {
+      ugixResources.push(layer.layerId);
+    }
+  });
   function getinfoLink() {
     const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
@@ -55,10 +64,7 @@ function UgixFeatureTile({
       resource.resourceGroup,
       resource.ogcResourceInfo.geometryType
     );
-    const queryParams: QueryParams = {
-      // limit: limit,
-      offset: 1,
-    };
+    const queryParams: QueryParams = {};
     if (bbox) {
       queryParams.bbox = bbox.join();
     }
@@ -68,6 +74,7 @@ function UgixFeatureTile({
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
+        ugixResources.push(newLayer.layerId);
         cleanUpSideEffects();
         dialogCloseTrigger(false);
       },
@@ -145,6 +152,21 @@ function UgixFeatureTile({
   function toggleExtraButtonDrawer() {
     setIsExtraBtnVisible(!isExtraBtnVisible);
   }
+  function plotTiles() {
+    console.log('tiles');
+    // const newLayer = openLayerMap.createNewUgixTileLayer(
+    //   resource.label,
+    //   resource.id,
+    //   resource.resourceGroup,
+    //   resource.ogcResourceInfo.geometryType
+    // );
+    // const newLayer = openLayerMap.createNewUgixRasterLayer(
+    //   resource.label,
+    //   resource.id,
+    //   resource.resourceGroup,
+    //   resource.ogcResourceInfo.geometryType
+    // );
+  }
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>
@@ -180,6 +202,13 @@ function UgixFeatureTile({
               onClick={handleBboxSearch}
             >
               BBOX search
+            </button>
+            <button
+              disabled={adding}
+              className={styles.extra_button}
+              onClick={plotTiles}
+            >
+              Get tiles
             </button>
           </div>
         </div>

@@ -25,6 +25,7 @@ import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter.ts
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
+  const resourcesFromCatalogue: string[] = [];
   // const limit = 5;
   const dispatch = useDispatch();
   useEffect(() => {
@@ -44,7 +45,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     }
   }
 
-  function renderWishListItems(resourceList: Resource[]) {
+  async function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue(envurls.catalogueCookie);
     if (wishList) {
       const parsedList = wishList.split(',');
@@ -76,6 +77,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
+        resourcesFromCatalogue.push(newLayer.layerId);
+        openLayerMap.zoomToCombinedExtend(resourcesFromCatalogue);
         cleanUpSideEffects();
       },
       (message) => {

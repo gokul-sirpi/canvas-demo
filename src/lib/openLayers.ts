@@ -57,6 +57,8 @@ const attribution = new Attribution({ collapsible: false });
 const newControls = defaultControls().extend([scaleControl, attribution]);
 const LAYER_ID_KEY = 'layer-id';
 const BASE_LAYER_KEY = 'baseLayer';
+let ugixResources: string[] = [];
+
 // Map properties and methods
 const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
@@ -140,10 +142,24 @@ const openLayerMap = {
   },
 
   removeLayer(layerId: string) {
+    ugixResources = [];
+    [...this.canvasLayers.values()].map((layer) => {
+      if (layer.layerType === 'UgixLayer') {
+        ugixResources.push(layer.layerId);
+      }
+    });
     const layer = this.getLayer(layerId);
     if (layer) {
       this.map.removeLayer(layer);
       this.canvasLayers.delete(layerId);
+
+      if (ugixResources.length == 1) {
+        openLayerMap.zoomToCombinedExtend([]);
+      }
+      if (ugixResources.indexOf(layerId) != -1) {
+        ugixResources.splice(ugixResources.indexOf(layerId), 1);
+        openLayerMap.zoomToCombinedExtend(ugixResources);
+      }
     }
   },
 
@@ -524,6 +540,28 @@ const openLayerMap = {
     }
   },
 
+  zoomToCombinedExtend(resourcesFromCatalogue: string[]) {
+    let extent: number[] = [180, 180, -180, -180];
+    if (resourcesFromCatalogue.length == 0) {
+      extent = [67, 4, 98, 39];
+    }
+    resourcesFromCatalogue.map((layerId: string) => {
+      const layerExtent = this.getLayer(layerId)?.getSource()?.getExtent();
+      if (layerExtent != undefined || resourcesFromCatalogue.length > 0) {
+        extent[0] = Math.min(layerExtent![0], extent![0]);
+        extent[1] = Math.min(layerExtent![1], extent![1]);
+        extent[2] = Math.max(layerExtent![2], extent![2]);
+        extent[3] = Math.max(layerExtent![3], extent![3]);
+      } else {
+        extent = [67, 4, 98, 39];
+      }
+    });
+    const view = this.map.getView();
+    if (extent) {
+      view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
+    }
+  },
+
   async exportAsImage(anchor: HTMLAnchorElement, imageName: string) {
     const mapCanvas = document.createElement('canvas');
     const allCanvas = this.map
@@ -541,7 +579,6 @@ const openLayerMap = {
     );
     this.map.once('rendercomplete', function () {
       for (const canvas of allCanvas) {
-        console.log(canvas);
         if (canvas.width > 0) {
           mapContext.globalAlpha = 1;
           let matrix = [
@@ -896,6 +933,7 @@ const openLayerMap = {
     this.map.render();
   },
 };
+
 // basic map interactions
 let selected: Feature | undefined;
 let prevStyle: Style | undefined;

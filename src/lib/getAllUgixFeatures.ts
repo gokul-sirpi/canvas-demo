@@ -10,6 +10,11 @@ type onSucess = () => void;
 type onError = (message: string) => void;
 type onFinished = () => void;
 
+type UgixLinks = {
+  href: string;
+  rel: 'alternate' | 'next' | 'self';
+  type: string;
+};
 // const limit = 5;
 
 export async function getAllUgixFeatures(
@@ -28,7 +33,9 @@ export async function getAllUgixFeatures(
   if (token) {
     let totalFeaturesReturned = 0;
     let totalFeatures = Infinity;
-    const url = envurls.ugixOgcServer + 'collections/' + resource.id + '/items';
+    let currFeaturesReturned = Infinity;
+    let url =
+      envurls.ugixOgcServer + 'collections/' + resource.id + '/items?offset=1';
     do {
       try {
         const response = await axios.get(url, {
@@ -46,9 +53,15 @@ export async function getAllUgixFeatures(
           if (totalFeaturesReturned === 0) {
             onSucess();
           }
+          const links: UgixLinks[] = response.data.links;
+          links.forEach((link) => {
+            if (link.rel === 'next') {
+              url = link.href;
+            }
+          });
           totalFeatures = Math.min(totalFeatures, response.data.numberMatched);
           totalFeaturesReturned += response.data.numberReturned;
-          params.offset += response.data.numberReturned;
+          currFeaturesReturned = response.data.numberReturned;
         } else {
           break;
         }
@@ -61,7 +74,7 @@ export async function getAllUgixFeatures(
         }
         break;
       }
-    } while (totalFeaturesReturned < totalFeatures);
+    } while (totalFeaturesReturned < totalFeatures || currFeaturesReturned > 0);
     if (onFinished) {
       onFinished();
     }

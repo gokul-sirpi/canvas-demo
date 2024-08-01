@@ -156,7 +156,11 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
               </button>
             </div>
             <div className={styles.bbox_btn_container}>
-              <button onClick={handleBboxSelection} className={styles.bbox_btn}>
+              <button
+                disabled
+                onClick={handleBboxSelection}
+                className={styles.bbox_btn}
+              >
                 <div className={styles.btn_icon_container}>
                   <PiSelection size={25} />
                 </div>

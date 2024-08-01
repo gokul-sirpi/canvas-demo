@@ -156,7 +156,7 @@ const openLayerMap = {
       if (ugixResources.length == 1) {
         openLayerMap.zoomToCombinedExtend([]);
       }
-      if (ugixResources.indexOf(layerId)!=-1) {
+      if (ugixResources.indexOf(layerId) != -1) {
         ugixResources.splice(ugixResources.indexOf(layerId), 1);
         openLayerMap.zoomToCombinedExtend(ugixResources);
       }

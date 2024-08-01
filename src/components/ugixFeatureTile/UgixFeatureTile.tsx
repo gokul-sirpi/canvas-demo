@@ -203,13 +203,13 @@ function UgixFeatureTile({
             >
               BBOX search
             </button>
-            <button
+            {/* <button
               disabled={adding}
               className={styles.extra_button}
               onClick={plotTiles}
             >
               Get tiles
-            </button>
+            </button> */}
           </div>
         </div>
         <TooltipWrapper content="add">

@@ -54,11 +54,16 @@ export async function getAllUgixFeatures(
             onSucess();
           }
           const links: UgixLinks[] = response.data.links;
+          let nextLinkExist = false;
           links.forEach((link) => {
             if (link.rel === 'next') {
               url = link.href;
+              nextLinkExist = true;
             }
           });
+          if (!nextLinkExist) {
+            break;
+          }
           totalFeatures = Math.min(totalFeatures, response.data.numberMatched);
           totalFeaturesReturned += response.data.numberReturned;
           currFeaturesReturned = response.data.numberReturned;
@@ -74,7 +79,7 @@ export async function getAllUgixFeatures(
         }
         break;
       }
-    } while (totalFeaturesReturned < totalFeatures || currFeaturesReturned > 0);
+    } while (totalFeaturesReturned < totalFeatures && currFeaturesReturned > 0);
     if (onFinished) {
       onFinished();
     }

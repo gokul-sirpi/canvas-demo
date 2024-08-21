@@ -7,7 +7,10 @@ import { GeoJsonObj } from '../types/GeojsonType';
 import openLayerMap from './openLayers';
 
 type onSucess = () => void;
-type onError = (message: string) => void;
+type onError = (
+  type: 'no-access' | 'unknown' | 'empty',
+  message: string
+) => void;
 type onFinished = () => void;
 
 type UgixLinks = {
@@ -27,7 +30,7 @@ export async function getAllUgixFeatures(
 ) {
   const { error, token } = await getAccessToken(resource);
   if (error) {
-    onError(error);
+    onError('no-access', error);
     return;
   }
   if (token) {
@@ -44,6 +47,10 @@ export async function getAllUgixFeatures(
         });
         if (response.status === 200) {
           const geojsonData: GeoJsonObj = response.data;
+          if (response.data.numberMatched === 0) {
+            throw new Error('empty');
+            break;
+          }
           openLayerMap.addGeoJsonFeature(
             geojsonData,
             ugixLayer.layerId,
@@ -73,9 +80,18 @@ export async function getAllUgixFeatures(
       } catch (error) {
         console.log(error);
         if (error instanceof AxiosError) {
-          onError(error.message);
+          if (error.status === 403) {
+            onError('no-access', error.message);
+          } else {
+            onError('unknown', 'Something went wrong, please try again later');
+          }
         } else {
-          onError('Something went wrong, please try again later');
+          //@ts-expect-error no error type
+          if (error.message && error.message === 'empty') {
+            onError('empty', 'No data available');
+          } else {
+            onError('unknown', 'Something went wrong, please try again later');
+          }
         }
         break;
       }

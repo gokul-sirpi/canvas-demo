@@ -7,7 +7,7 @@ import {
   defaults as defaultControls,
 } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
-import { OSM } from 'ol/source';
+import { OGCVectorTile, OSM } from 'ol/source';
 import Draw, {
   DrawEvent,
   SketchCoordType,
@@ -16,10 +16,12 @@ import Draw, {
 import { Snap } from 'ol/interaction';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import VectorTileLayer from 'ol/layer/VectorTile';
 import { UserLayer } from '../types/UserLayer';
 import { Geometry, LineString, Point, Polygon, SimpleGeometry } from 'ol/geom';
 import GeoJson from 'ol/format/GeoJSON';
 import { GeoJsonObj } from '../types/GeojsonType';
+import { MVT } from 'ol/format';
 import {
   styleFunction,
   measurementStyle,
@@ -57,7 +59,7 @@ const attribution = new Attribution({ collapsible: false });
 const newControls = defaultControls().extend([scaleControl, attribution]);
 const LAYER_ID_KEY = 'layer-id';
 const BASE_LAYER_KEY = 'baseLayer';
-let ugixResources: string[] = [];
+// let ugixResources: string[] = [];
 
 // Map properties and methods
 const openLayerMap = {
@@ -72,8 +74,10 @@ const openLayerMap = {
   popupOverLay: new Overlay({}),
   map: new OlMap({
     view: new View({
+      // center: transform([78.9629, 22.5397], 'EPSG:4326', 'EPSG:3857'),
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
+      // projection: 'EPSG:3857',
       zoom: 4.5,
       // minZoom: 4,
     }),
@@ -142,24 +146,24 @@ const openLayerMap = {
   },
 
   removeLayer(layerId: string) {
-    ugixResources = [];
-    [...this.canvasLayers.values()].map((layer) => {
-      if (layer.layerType === 'UgixLayer') {
-        ugixResources.push(layer.layerId);
-      }
-    });
+    // ugixResources = [];
+    // [...this.canvasLayers.values()].map((layer) => {
+    //   if (layer.layerType === 'UgixLayer') {
+    //     ugixResources.push(layer.layerId);
+    //   }
+    // });
     const layer = this.getLayer(layerId);
     if (layer) {
       this.map.removeLayer(layer);
       this.canvasLayers.delete(layerId);
 
-      if (ugixResources.length == 1) {
-        openLayerMap.zoomToCombinedExtend([]);
-      }
-      if (ugixResources.indexOf(layerId) != -1) {
-        ugixResources.splice(ugixResources.indexOf(layerId), 1);
-        openLayerMap.zoomToCombinedExtend(ugixResources);
-      }
+      // if (ugixResources.length === 1) {
+      //   openLayerMap.zoomToCombinedExtend([]);
+      // }
+      // if (ugixResources.indexOf(layerId) !== -1) {
+      //   ugixResources.splice(ugixResources.indexOf(layerId), 1);
+      //   openLayerMap.zoomToCombinedExtend(ugixResources);
+      // }
     }
   },
 
@@ -248,6 +252,101 @@ const openLayerMap = {
       side: 'middle',
     });
     this.addLayer(newVectorLayer);
+    this.addSwipeFuncToLayer(newVectorLayer);
+    this.latestLayer = newLayer;
+    return newLayer;
+  },
+  createNewUgixTileLayer(
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string,
+    type: GeometryType
+  ) {
+    const layerColor = getRandomColor();
+    const layerId = createUniqueId();
+
+    const vectorSource = new OGCVectorTile({
+      url: `https://geoserver.dx.ugix.org.in/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      format: new MVT(),
+      mediaType: 'application/vnd.mapbox-vector-tile',
+      projection: 'EPSG:4326',
+    });
+    vectorSource.setTileLoadFunction(function (tile, url) {
+      console.log(url);
+      //uncomment to convert url to positive values
+
+      const urlSplit = url.split('/');
+      urlSplit[urlSplit.length - 1] =
+        `${0 - Number(urlSplit[urlSplit.length - 1])}`;
+      urlSplit[urlSplit.length - 2] =
+        `${0 - Number(urlSplit[urlSplit.length - 2])}`;
+      url = urlSplit.join('/');
+      //@ts-expect-error ignore for now
+      tile.setLoader(function (extent, resolution, projection) {
+        console.log(extent, resolution, projection);
+        fetch(url, {
+          headers: {
+            Accept: 'application/vnd.mapbox-vector-tile',
+            token:
+              'eyJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsInR5cCI6IkpXVCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJjYmQ0OGIzOS01MWUzLTQ2ZDUtYWVhMS1iZTQwMTFjYjUyYzIiLCJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsImF1ZCI6Imdlb3NlcnZlci5keC51Z2l4Lm9yZy5pbiIsImV4cCI6MTcyNDI1NjcwNSwiaWF0IjoxNzI0MjEzNTA1LCJpaWQiOiJyczpnZW9zZXJ2ZXIuZHgudWdpeC5vcmcuaW4iLCJyb2xlIjoiY29uc3VtZXIiLCJjb25zIjp7fX0.cbEYW9XmQqDocxlA_FXZgZIZ8MyKJ8RlMVLH1N6FAe0cKyE_rQH4rczXhQLbNCLl_HlbAD3kq62MwXWnA871Ig',
+          },
+        }).then(function (response) {
+          if (!response.ok) {
+            // if failed, then set tile state to error
+            // https://github.com/openlayers/openlayers/issues/8404
+            tile.setState(3);
+            return;
+          }
+          response.arrayBuffer().then(function (data) {
+            //@ts-expect-error tile problem
+            const format = tile.getFormat(); // ol/format/MVT configured as source format
+            try {
+              const features = format.readFeatures(data, {
+                extent: extent,
+                featureProjection: projection,
+              });
+              //@ts-expect-error another tile
+              tile.setFeatures(features);
+            } catch (err) {
+              console.log(url, err);
+            }
+          });
+        });
+      });
+    });
+    const newVectorLayer = new VectorTileLayer({
+      source: vectorSource,
+      style: (feature) => styleFunction(feature, layerColor),
+    });
+    newVectorLayer.set('layer-id', layerId);
+    const newLayer: UgixLayer = {
+      layerType: 'UgixLayer',
+      layerName: layerName,
+      layerId,
+      ugixLayerId: ugixId,
+      ugixGroupId: ugixGroupId,
+      selected: true,
+      visible: true,
+      isCompleted: true,
+      layerColor,
+      style: createFeatureStyle(layerColor),
+      featureType: type,
+      fetching: false,
+      editable: true,
+      side: 'middle',
+    };
+    this.canvasLayers.set(layerId, {
+      //@ts-expect-error for now
+      layer: newVectorLayer,
+      layerId,
+      layerName,
+      layerType: 'UgixLayer',
+      style: createFeatureStyle(layerColor),
+      side: 'middle',
+    });
+    //@ts-expect-error for now
+    this.addLayer(newVectorLayer);
+    //@ts-expect-error for now
     this.addSwipeFuncToLayer(newVectorLayer);
     this.latestLayer = newLayer;
     return newLayer;
@@ -533,6 +632,8 @@ const openLayerMap = {
   },
 
   zoomToFit(layerId: string) {
+    console.log('zoom to fit is called');
+
     const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
     if (extent) {
@@ -541,6 +642,8 @@ const openLayerMap = {
   },
 
   zoomToCombinedExtend(resourcesFromCatalogue: string[]) {
+    console.log('zoom to combined called');
+
     let extent: number[] = [180, 180, -180, -180];
     if (resourcesFromCatalogue.length == 0) {
       extent = [67, 4, 98, 39];

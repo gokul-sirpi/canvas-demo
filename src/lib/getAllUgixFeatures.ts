@@ -78,7 +78,7 @@ export async function getAllUgixFeatures(
           break;
         }
       } catch (error) {
-        console.log(error.message);
+        console.log(error);
         if (error instanceof AxiosError) {
           if (error.status === 403) {
             onError('no-access', error.message);

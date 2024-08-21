@@ -157,25 +157,25 @@ function UgixFeatureTile({
   function toggleExtraButtonDrawer() {
     setIsExtraBtnVisible(!isExtraBtnVisible);
   }
-  function plotTiles() {
-    console.log('tiles');
-    const newLayer = openLayerMap.createNewUgixTileLayer(
-      resource.label,
-      resource.id,
-      resource.resourceGroup,
-      resource.ogcResourceInfo.geometryType
-    );
-    dispatch(addCanvasLayer(newLayer));
-    cleanUpSideEffects();
-    dialogCloseTrigger(false);
-    // dispatch(updateLayerFetchingStatus(newLayer.layerId));
-    // const newLayer = openLayerMap.createNewUgixRasterLayer(
-    //   resource.label,
-    //   resource.id,
-    //   resource.resourceGroup,
-    //   resource.ogcResourceInfo.geometryType
-    // );
-  }
+  // function plotTiles() {
+  //   console.log('tiles');
+  //   const newLayer = openLayerMap.createNewUgixTileLayer(
+  //     resource.label,
+  //     resource.id,
+  //     resource.resourceGroup,
+  //     resource.ogcResourceInfo.geometryType
+  //   );
+  //   dispatch(addCanvasLayer(newLayer));
+  //   cleanUpSideEffects();
+  //   dialogCloseTrigger(false);
+  //   // dispatch(updateLayerFetchingStatus(newLayer.layerId));
+  //   // const newLayer = openLayerMap.createNewUgixRasterLayer(
+  //   //   resource.label,
+  //   //   resource.id,
+  //   //   resource.resourceGroup,
+  //   //   resource.ogcResourceInfo.geometryType
+  //   // );
+  // }
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>
@@ -212,13 +212,13 @@ function UgixFeatureTile({
             >
               BBOX search
             </button>
-            <button
+            {/* <button
               disabled={adding}
               className={styles.extra_button}
               onClick={plotTiles}
             >
               Get tiles
-            </button>
+            </button> */}
           </div>
         </div>
         <TooltipWrapper content="add">

@@ -298,12 +298,14 @@ const openLayerMap = {
             return;
           }
           response.arrayBuffer().then(function (data) {
+            //@ts-expect-error tile problem
             const format = tile.getFormat(); // ol/format/MVT configured as source format
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
+              //@ts-expect-error another tile
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);
@@ -334,6 +336,7 @@ const openLayerMap = {
       side: 'middle',
     };
     this.canvasLayers.set(layerId, {
+      //@ts-expect-error for now
       layer: newVectorLayer,
       layerId,
       layerName,
@@ -341,7 +344,9 @@ const openLayerMap = {
       style: createFeatureStyle(layerColor),
       side: 'middle',
     });
+    //@ts-expect-error for now
     this.addLayer(newVectorLayer);
+    //@ts-expect-error for now
     this.addSwipeFuncToLayer(newVectorLayer);
     this.latestLayer = newLayer;
     return newLayer;

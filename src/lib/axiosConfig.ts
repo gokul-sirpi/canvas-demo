@@ -7,8 +7,8 @@ export const axiosAuthClient = axios.create({
 });
 
 axiosAuthClient.interceptors.request.use((config) => {
-  // const token =``;
-  // config.headers.Authorization = `${token}`;
+  // const token =
+  // config.headers.Authorization = token;
   config.headers.Authorization = `Bearer ${keycloak.token}`;
   return config;
 });

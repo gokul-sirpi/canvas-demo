@@ -1,9 +1,4 @@
-import {
-  ChangeEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { RootState } from '../../context/store';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
@@ -61,10 +56,11 @@ function LayerTile({
     if (
       layer.layerType === 'UgixLayer' &&
       layer.isCompleted &&
-      !layer.fetching && useEffIndex == index
+      !layer.fetching &&
+      useEffIndex == index
     ) {
-      setUseEffIndex(useEffIndex+1);
-      openLayerMap.zoomToCombinedExtend(ugixResources);
+      setUseEffIndex(useEffIndex + 1);
+      // openLayerMap.zoomToCombinedExtend(ugixResources);
     }
   }, [layer, ugixResources]);
 
@@ -94,7 +90,6 @@ function LayerTile({
       'layer',
       layerName
     );
-
   }
 
   function cancelLayerCreation() {

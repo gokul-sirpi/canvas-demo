@@ -78,11 +78,16 @@ function UgixFeatureTile({
         cleanUpSideEffects();
         dialogCloseTrigger(false);
       },
-      (message) => {
+      (type, message) => {
+        if (type === 'no-access') {
+          showNoAccessText();
+        }
+        if (type === 'empty') {
+          openLayerMap.removeLayer(newLayer.layerId);
+        }
+        dispatch(updateLayerFetchingStatus(newLayer.layerId));
         emitToast('error', message);
         cleanUpSideEffects();
-        dispatch(updateLayerFetchingStatus(newLayer.layerId));
-        showNoAccessText();
       },
       () => {
         cleanUpSideEffects();
@@ -112,10 +117,13 @@ function UgixFeatureTile({
         const { role, href } = assetData.assets[asset];
         if (role[0] === 'data') {
           downloadResourceData(href);
+        } else {
+          emitToast('error', 'Unable to download data');
         }
       }
     } catch (err) {
       console.log(err);
+      emitToast('error', 'Unable to download data');
     }
   }
   async function downloadResourceData(href: string) {
@@ -126,7 +134,7 @@ function UgixFeatureTile({
     if (token) {
       try {
         const response = await axios.get(href, {
-          headers: { Token: token },
+          headers: { Authorization: token },
           responseType: 'blob',
         });
         if (anchorRef.current) {
@@ -152,6 +160,25 @@ function UgixFeatureTile({
   function toggleExtraButtonDrawer() {
     setIsExtraBtnVisible(!isExtraBtnVisible);
   }
+  // function plotTiles() {
+  //   console.log('tiles');
+  //   const newLayer = openLayerMap.createNewUgixTileLayer(
+  //     resource.label,
+  //     resource.id,
+  //     resource.resourceGroup,
+  //     resource.ogcResourceInfo.geometryType
+  //   );
+  //   dispatch(addCanvasLayer(newLayer));
+  //   cleanUpSideEffects();
+  //   dialogCloseTrigger(false);
+  //   // dispatch(updateLayerFetchingStatus(newLayer.layerId));
+  //   // const newLayer = openLayerMap.createNewUgixRasterLayer(
+  //   //   resource.label,
+  //   //   resource.id,
+  //   //   resource.resourceGroup,
+  //   //   resource.ogcResourceInfo.geometryType
+  //   // );
+  // }
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>

@@ -15,9 +15,7 @@ ul {
   padding: 0;
 }
 body {
-  /* --color-primary: #058d05; */
   --color-primary: #108bb0;
-  /* --color-secondary: #f86925; */
   --color-secondary: #058d05;
   --color-accent: #d6d6d6;
   --radius-sm: 0.3rem;

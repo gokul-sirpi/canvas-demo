@@ -42,7 +42,7 @@ export async function getAllUgixFeatures(
     do {
       try {
         const response = await axios.get(url, {
-          headers: { Token: token },
+          headers: { Authorization: token },
           params,
         });
         if (response.status === 200) {

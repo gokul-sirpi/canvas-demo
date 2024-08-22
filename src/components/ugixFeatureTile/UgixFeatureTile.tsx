@@ -117,10 +117,13 @@ function UgixFeatureTile({
         const { role, href } = assetData.assets[asset];
         if (role[0] === 'data') {
           downloadResourceData(href);
+        } else {
+          emitToast('error', 'Unable to download data');
         }
       }
     } catch (err) {
       console.log(err);
+      emitToast('error', 'Unable to download data');
     }
   }
   async function downloadResourceData(href: string) {
@@ -131,7 +134,7 @@ function UgixFeatureTile({
     if (token) {
       try {
         const response = await axios.get(href, {
-          headers: { Token: token },
+          headers: { Authorization: token },
           responseType: 'blob',
         });
         if (anchorRef.current) {

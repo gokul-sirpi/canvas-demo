@@ -114,11 +114,13 @@ function LayerTile({
 
   return (
     <div className={styles.container} data-layer={layer.layerType}>
+      {/* badge */}
       <div
         className={`${styles.layer_badge} ${layer.layerType === 'UserLayer' ? styles.userTile : null}`}
       >
         {/* {layer.layerType == 'UgixLayer' ? 'UGIX' : 'User'} */}
       </div>
+      {/* name & eye icon */}
       <div className={styles.input_container}>
         {isTile && (
           <button className={styles.eye_btn} onClick={toggleLayerVisibility}>
@@ -144,12 +146,14 @@ function LayerTile({
           />
         )}
       </div>
+      {/* swipe side */}
       {swiperShown && isTile && (
         <div>
           {layer.side === 'left' && 'L'}
           {layer.side === 'right' && 'R'}
         </div>
       )}
+      {/* interactive buttons */}
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>

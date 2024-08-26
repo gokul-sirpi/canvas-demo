@@ -68,28 +68,33 @@ const openLayerMap = {
   swipePercentage: 1,
   canvasLayers: new Map<string, CanvasLayer>(),
   latestLayer: null as UserLayer | UgixLayer | null,
-  indianOutline: null as VectorImageLayer<VectorSource> | null,
+  indianOutline: null as VectorImageLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
   map: new OlMap({
     view: new View({
-      // center: transform([78.9629, 22.5397], 'EPSG:4326', 'EPSG:3857'),
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      // projection: 'EPSG:3857',
       zoom: 4.5,
-      // minZoom: 4,
     }),
     controls: newControls,
     layers: [],
   }),
+  insertBaseMap(
+    baseMapType: baseLayerTypes,
+    baseLayer: TileLayer<OSM> | VectorImageLayer
+  ) {
+    this.map.getLayers().insertAt(0, baseLayer);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        this.map.getLayers().insertAt(1, this.indianOutline);
+      }
+    }
+  },
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayer:
-      | VectorLayer<VectorSource>
-      | TileLayer<OSM>
-      | VectorImageLayer<VectorSource>
+    newLayer: VectorLayer<VectorSource> | TileLayer<OSM> | VectorImageLayer
   ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get(BASE_LAYER_KEY)) {
@@ -105,18 +110,6 @@ const openLayerMap = {
         } else {
           layers.insertAt(1, this.indianOutline);
         }
-      }
-    }
-  },
-  insertBaseMap(
-    baseMapType: baseLayerTypes,
-    baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>
-  ) {
-    this.map.getLayers().insertAt(0, baseLayer);
-    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
-      if (this.indianOutline) {
-        this.map.getLayers().insertAt(1, this.indianOutline);
-        // this.map.addLayer(this.indianOutline);
       }
     }
   },
@@ -141,7 +134,7 @@ const openLayerMap = {
     }
   },
 
-  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
+  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer) {
     this.map.addLayer(layer);
   },
 
@@ -208,7 +201,7 @@ const openLayerMap = {
       side: 'middle',
     });
     this.addSwipeFuncToLayer(layer);
-    this.map.addLayer(layer);
+    this.addLayer(layer);
     this.removeDrawInteraction();
     this.latestLayer = newLayer;
     return newLayer;
@@ -270,25 +263,28 @@ const openLayerMap = {
       format: new MVT(),
       mediaType: 'application/vnd.mapbox-vector-tile',
       projection: 'EPSG:4326',
+      zDirection: 1,
     });
     vectorSource.setTileLoadFunction(function (tile, url) {
       console.log(url);
       //uncomment to convert url to positive values
 
-      const urlSplit = url.split('/');
-      urlSplit[urlSplit.length - 1] =
-        `${0 - Number(urlSplit[urlSplit.length - 1])}`;
-      urlSplit[urlSplit.length - 2] =
-        `${0 - Number(urlSplit[urlSplit.length - 2])}`;
-      url = urlSplit.join('/');
+      // const urlSplit = url.split('/');
+      // console.log(urlSplit);
+      // const temp = urlSplit[urlSplit.length - 2];
+      // urlSplit[urlSplit.length - 2] = urlSplit[urlSplit.length - 1];
+      // urlSplit[urlSplit.length - 1] = temp;
+      // url = urlSplit.join('/');
+      // console.log(url);
+
       //@ts-expect-error ignore for now
       tile.setLoader(function (extent, resolution, projection) {
         console.log(extent, resolution, projection);
         fetch(url, {
           headers: {
             Accept: 'application/vnd.mapbox-vector-tile',
-            token:
-              'eyJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsInR5cCI6IkpXVCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJjYmQ0OGIzOS01MWUzLTQ2ZDUtYWVhMS1iZTQwMTFjYjUyYzIiLCJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsImF1ZCI6Imdlb3NlcnZlci5keC51Z2l4Lm9yZy5pbiIsImV4cCI6MTcyNDI1NjcwNSwiaWF0IjoxNzI0MjEzNTA1LCJpaWQiOiJyczpnZW9zZXJ2ZXIuZHgudWdpeC5vcmcuaW4iLCJyb2xlIjoiY29uc3VtZXIiLCJjb25zIjp7fX0.cbEYW9XmQqDocxlA_FXZgZIZ8MyKJ8RlMVLH1N6FAe0cKyE_rQH4rczXhQLbNCLl_HlbAD3kq62MwXWnA871Ig',
+            Authorization:
+              'Bearer eyJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsInR5cCI6IkpXVCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJjYmQ0OGIzOS01MWUzLTQ2ZDUtYWVhMS1iZTQwMTFjYjUyYzIiLCJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsImF1ZCI6Imdlb3NlcnZlci5keC51Z2l4Lm9yZy5pbiIsImV4cCI6MTcyNDQ1MzU5NCwiaWF0IjoxNzI0NDEwMzk0LCJpaWQiOiJyczpnZW9zZXJ2ZXIuZHgudWdpeC5vcmcuaW4iLCJyb2xlIjoiY29uc3VtZXIiLCJjb25zIjp7fX0.0ZfAOiU30ZSOP93VBiAqfayUBTQmFc7hmB7N99QiZFUhAB0fgw4mab7R0AW9k2zF7O7tggIJvpYiZRUzbfHGaQ',
           },
         }).then(function (response) {
           if (!response.ok) {
@@ -632,8 +628,6 @@ const openLayerMap = {
   },
 
   zoomToFit(layerId: string) {
-    console.log('zoom to fit is called');
-
     const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
     if (extent) {
@@ -980,12 +974,6 @@ const openLayerMap = {
         bl = getRenderPixel(event, [width, mapSize[1]]);
         br = getRenderPixel(event, mapSize);
       }
-      // else {
-      //   tl = getRenderPixel(event, [0, 0]);
-      //   tr = getRenderPixel(event, [mapSize[0], 0]);
-      //   bl = getRenderPixel(event, [0, mapSize[1]]);
-      //   br = getRenderPixel(event, mapSize);
-      // }
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(tl[0], tl[1]);

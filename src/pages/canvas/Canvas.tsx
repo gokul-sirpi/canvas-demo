@@ -26,8 +26,8 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const resourcesFromCatalogue: string[] = [];
-  // const limit = 5;
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (singleRender.current) return;
     singleRender.current = true;
@@ -68,7 +68,6 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       resource.ogcResourceInfo.geometryType
     );
     const queryParams: QueryParams = {
-      // limit: limit,
       offset: 1,
     };
     getAllUgixFeatures(

@@ -46,13 +46,12 @@ function BaseMaps() {
   const [mapType, setMapType] = useState<baseLayerTypes>('standard');
   const singleRender = useRef(false);
   const dispatch = useDispatch();
-  const ogcLayerLight = useRef<VectorImageLayer<VectorSource> | undefined>();
+  const ogcLayerLight = useRef<VectorImageLayer | undefined>();
   const ogcLayerDark = useRef<VectorLayer<VectorSource> | undefined>();
 
   const standardLayer = new TileLayer({
     source: new OSM({}),
   });
-
   const humanitarianLayer = new TileLayer({
     source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',

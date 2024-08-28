@@ -1,4 +1,4 @@
-import { Feature, Map as OlMap, Overlay, View } from 'ol';
+import { Feature, Map as OlMap, Overlay, VectorTile, View } from 'ol';
 import { Pixel } from 'ol/pixel';
 import { CanvasLayer, DrawType } from '../types/UserLayer';
 import {
@@ -31,6 +31,7 @@ import {
   drawingStyle,
   hoverStyle,
   markerIcons,
+  tileStyleFunction,
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
@@ -39,11 +40,11 @@ import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
-import { FeatureLike } from 'ol/Feature';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
+import envurls from '../utils/config';
 type baseLayerTypes =
   | 'terrain'
   | 'openseriesmap'
@@ -66,30 +67,36 @@ const openLayerMap = {
   draw: new Draw({ type: 'Circle' }),
   drawing: false,
   swipePercentage: 1,
+  hoveredTileId: undefined as string | number | undefined,
   canvasLayers: new Map<string, CanvasLayer>(),
   latestLayer: null as UserLayer | UgixLayer | null,
-  indianOutline: null as VectorImageLayer<VectorSource> | null,
+  indianOutline: null as VectorImageLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
   map: new OlMap({
     view: new View({
-      // center: transform([78.9629, 22.5397], 'EPSG:4326', 'EPSG:3857'),
       center: [78.9629, 22.5397],
       projection: 'EPSG:4326',
-      // projection: 'EPSG:3857',
       zoom: 4.5,
-      // minZoom: 4,
     }),
     controls: newControls,
     layers: [],
   }),
+  insertBaseMap(
+    baseMapType: baseLayerTypes,
+    baseLayer: TileLayer<OSM> | VectorImageLayer
+  ) {
+    this.map.getLayers().insertAt(0, baseLayer);
+    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
+      if (this.indianOutline) {
+        this.map.getLayers().insertAt(1, this.indianOutline);
+      }
+    }
+  },
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayer:
-      | VectorLayer<VectorSource>
-      | TileLayer<OSM>
-      | VectorImageLayer<VectorSource>
+    newLayer: VectorLayer<VectorSource> | TileLayer<OSM> | VectorImageLayer
   ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get(BASE_LAYER_KEY)) {
@@ -105,18 +112,6 @@ const openLayerMap = {
         } else {
           layers.insertAt(1, this.indianOutline);
         }
-      }
-    }
-  },
-  insertBaseMap(
-    baseMapType: baseLayerTypes,
-    baseLayer: TileLayer<OSM> | VectorImageLayer<VectorSource>
-  ) {
-    this.map.getLayers().insertAt(0, baseLayer);
-    if (baseMapType !== 'ogc_layer_dark' && baseMapType !== 'ogc_layer_light') {
-      if (this.indianOutline) {
-        this.map.getLayers().insertAt(1, this.indianOutline);
-        // this.map.addLayer(this.indianOutline);
       }
     }
   },
@@ -141,7 +136,7 @@ const openLayerMap = {
     }
   },
 
-  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer<VectorSource>) {
+  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer) {
     this.map.addLayer(layer);
   },
 
@@ -208,7 +203,7 @@ const openLayerMap = {
       side: 'middle',
     });
     this.addSwipeFuncToLayer(layer);
-    this.map.addLayer(layer);
+    this.addLayer(layer);
     this.removeDrawInteraction();
     this.latestLayer = newLayer;
     return newLayer;
@@ -229,6 +224,7 @@ const openLayerMap = {
     newVectorLayer.set('layer-id', layerId);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
+      sourceType: "json",
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
@@ -260,35 +256,24 @@ const openLayerMap = {
     layerName: string,
     ugixId: string,
     ugixGroupId: string,
-    type: GeometryType
+    type: GeometryType,
+    token: string
   ) {
     const layerColor = getRandomColor();
     const layerId = createUniqueId();
-
     const vectorSource = new OGCVectorTile({
-      url: `https://geoserver.dx.ugix.org.in/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
-      format: new MVT(),
+      url: envurls.ugixOgcServer + `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      format: new MVT({ idProperty: "iso_a3" }),
       mediaType: 'application/vnd.mapbox-vector-tile',
-      projection: 'EPSG:4326',
+      // projection: 'EPSG:4326',
     });
-    vectorSource.setTileLoadFunction(function (tile, url) {
-      console.log(url);
-      //uncomment to convert url to positive values
-
-      const urlSplit = url.split('/');
-      urlSplit[urlSplit.length - 1] =
-        `${0 - Number(urlSplit[urlSplit.length - 1])}`;
-      urlSplit[urlSplit.length - 2] =
-        `${0 - Number(urlSplit[urlSplit.length - 2])}`;
-      url = urlSplit.join('/');
-      //@ts-expect-error ignore for now
-      tile.setLoader(function (extent, resolution, projection) {
-        console.log(extent, resolution, projection);
+    //@ts-expect-error tile problem
+    vectorSource.setTileLoadFunction(function (tile: VectorTile<Feature>, url: string) {
+      tile.setLoader(function (extent, _, projection) {
         fetch(url, {
           headers: {
             Accept: 'application/vnd.mapbox-vector-tile',
-            token:
-              'eyJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsInR5cCI6IkpXVCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJjYmQ0OGIzOS01MWUzLTQ2ZDUtYWVhMS1iZTQwMTFjYjUyYzIiLCJpc3MiOiJkeC51Z2l4Lm9yZy5pbiIsImF1ZCI6Imdlb3NlcnZlci5keC51Z2l4Lm9yZy5pbiIsImV4cCI6MTcyNDI1NjcwNSwiaWF0IjoxNzI0MjEzNTA1LCJpaWQiOiJyczpnZW9zZXJ2ZXIuZHgudWdpeC5vcmcuaW4iLCJyb2xlIjoiY29uc3VtZXIiLCJjb25zIjp7fX0.cbEYW9XmQqDocxlA_FXZgZIZ8MyKJ8RlMVLH1N6FAe0cKyE_rQH4rczXhQLbNCLl_HlbAD3kq62MwXWnA871Ig',
+            Authorization: `Bearer ${token}`
           },
         }).then(function (response) {
           if (!response.ok) {
@@ -298,14 +283,12 @@ const openLayerMap = {
             return;
           }
           response.arrayBuffer().then(function (data) {
-            //@ts-expect-error tile problem
             const format = tile.getFormat(); // ol/format/MVT configured as source format
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
-              //@ts-expect-error another tile
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);
@@ -316,11 +299,13 @@ const openLayerMap = {
     });
     const newVectorLayer = new VectorTileLayer({
       source: vectorSource,
-      style: (feature) => styleFunction(feature, layerColor),
+      style: (feature) => tileStyleFunction(feature, layerColor, this.hoveredTileId),
     });
     newVectorLayer.set('layer-id', layerId);
+    newVectorLayer.set("tile-layer", true)
     const newLayer: UgixLayer = {
-      layerType: 'UgixLayer',
+      layerType: "UgixLayer",
+      sourceType: "tile",
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
@@ -336,19 +321,15 @@ const openLayerMap = {
       side: 'middle',
     };
     this.canvasLayers.set(layerId, {
-      //@ts-expect-error for now
       layer: newVectorLayer,
       layerId,
       layerName,
-      layerType: 'UgixLayer',
+      layerType: "UgixLayer",
       style: createFeatureStyle(layerColor),
       side: 'middle',
     });
-    //@ts-expect-error for now
     this.addLayer(newVectorLayer);
-    //@ts-expect-error for now
     this.addSwipeFuncToLayer(newVectorLayer);
-    this.latestLayer = newLayer;
     return newLayer;
   },
 
@@ -358,6 +339,13 @@ const openLayerMap = {
       layer.setStyle((feature) => styleFunction(feature, color));
     }
     const featureStyle = createFeatureStyle(color);
+    if (this.canvasLayers.has(layerId)) {
+      //@ts-expect-error map ts
+      this.canvasLayers.get(layerId).style = featureStyle
+    }
+    if (layer?.get("tile-layer")) {
+      return featureStyle
+    }
     const source = layer?.getSource();
     if (source) {
       source.getFeatures().forEach((feature) => {
@@ -632,8 +620,6 @@ const openLayerMap = {
   },
 
   zoomToFit(layerId: string) {
-    console.log('zoom to fit is called');
-
     const extent = this.getLayer(layerId)?.getSource()?.getExtent();
     const view = this.map.getView();
     if (extent) {
@@ -896,10 +882,10 @@ const openLayerMap = {
     this.map.addOverlay(this.popupOverLay);
     this.map.on('click', (evt) => {
       if (this.drawing) return;
-      const selectedFeature = this.getFeatureAtPixel(evt.pixel) as Feature;
-      if (selectedFeature) {
+      const { feature } = this.getFeatureAtPixel(evt.pixel)
+      if (feature) {
         this.popupOverLay.setPosition(evt.coordinate);
-        callback(selectedFeature);
+        callback(feature);
       } else {
         this.closePopupOverLay();
       }
@@ -909,10 +895,11 @@ const openLayerMap = {
     this.popupOverLay.setPosition(undefined);
   },
   getFeatureAtPixel(pixel: Pixel) {
-    let feature: FeatureLike | undefined;
+    let feature: Feature | undefined;
+    let layerId: string | undefined
     this.map.forEachFeatureAtPixel(
       pixel,
-      (selected) => {
+      (selected, layer) => {
         if (feature) return;
         const side = this.getMouseSideStatus(pixel);
         if (side !== null) {
@@ -920,16 +907,17 @@ const openLayerMap = {
           const layer = this.canvasLayers.get(layerID);
           if (layer) {
             if (side === layer.side) {
-              feature = selected;
+              feature = selected as Feature;
             }
           }
         } else {
-          feature = selected;
+          feature = selected as Feature;
+          layerId = layer.get("layer-id")
         }
       },
       { hitTolerance: 3 }
     );
-    return feature;
+    return { feature, layerId };
   },
   getMouseSideStatus(pixel: Pixel) {
     let side = null;
@@ -959,7 +947,7 @@ const openLayerMap = {
       });
     }
   },
-  addSwipeFuncToLayer(layer: VectorLayer<VectorSource>) {
+  addSwipeFuncToLayer(layer: VectorLayer<VectorSource> | VectorTileLayer) {
     layer.on('prerender', (event) => {
       const ctx = event.context as CanvasRenderingContext2D;
       const mapSize = this.map.getSize();
@@ -980,12 +968,6 @@ const openLayerMap = {
         bl = getRenderPixel(event, [width, mapSize[1]]);
         br = getRenderPixel(event, mapSize);
       }
-      // else {
-      //   tl = getRenderPixel(event, [0, 0]);
-      //   tr = getRenderPixel(event, [mapSize[0], 0]);
-      //   bl = getRenderPixel(event, [0, mapSize[1]]);
-      //   br = getRenderPixel(event, mapSize);
-      // }
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(tl[0], tl[1]);
@@ -1048,21 +1030,24 @@ openLayerMap.map.on('pointermove', (event) => {
     selected.setStyle(prevStyle);
     selected = undefined;
   }
-  const feature = openLayerMap.getFeatureAtPixel(event.pixel) as
-    | Feature
-    | undefined;
+  const { feature, layerId } = openLayerMap.getFeatureAtPixel(event.pixel)
   if (feature) {
+    if (layerId) {
+      const currlayer = openLayerMap.getLayer(layerId)
+      if (currlayer?.get("tile-layer")) {
+        // console.log(feature.getId(), "id");
+        // openLayerMap.hoveredTileId = feature.getId()
+        return;
+      }
+    }
     const { layer, ...style } = feature.getProperties();
     if (!layer) return;
     prevStyle = feature.getStyle() as Style;
-    // console.log(style);
     feature.setStyle(hoverStyle(style as FeatureStyle));
     selected = feature;
   }
 });
-// openLayerMap.map.on('pointerdrag', (event) => {
-//   console.log(event);
-// });
+
 
 // Utility functions
 function circleGeometryFunction(

@@ -17,7 +17,7 @@ export type Resource = {
   crs: string;
   datum: string;
   ogcResourceInfo: {
-    ogcResourceType: string;
+    ogcResourceAPIs: string[];
     geometryType: Type;
   };
   location: JsonFeature;

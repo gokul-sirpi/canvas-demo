@@ -275,7 +275,7 @@ const openLayerMap = {
     });
 
     // Initialize an empty extent
-    let newExtent = createEmpty();
+    let tileExtent = createEmpty();
     let tilesLoading = 0;
     let tilesLoaded = 0;
 
@@ -310,7 +310,11 @@ const openLayerMap = {
               tile.setFeatures(features);
 
               features.forEach((feature) => {
-                extendExtent(newExtent, feature.getGeometry()!.getExtent());
+                const newExtent = feature.getGeometry()!.getExtent();
+
+                if (!newExtent.includes(Infinity)) {
+                  extendExtent(tileExtent, newExtent);
+                }
               });
 
               tilesLoaded++;
@@ -325,25 +329,8 @@ const openLayerMap = {
 
     function checkAllTilesLoaded() {
       if (tilesLoaded === tilesLoading) {
-        console.log('final extent:', newExtent);
-
-        const extent = JSON.parse(sessionStorage.getItem(layerId + '-extent')!);
-
-        if (!extent) {
-          sessionStorage.setItem(
-            layerId + '-extent',
-            JSON.stringify(newExtent)
-          );
-        }
-
-        resetTileLoadingState();
+        sessionStorage.setItem(layerId + '-extent', JSON.stringify(tileExtent));
       }
-    }
-
-    function resetTileLoadingState() {
-      newExtent = createEmpty();
-      tilesLoading = 0;
-      tilesLoaded = 0;
     }
 
     const newVectorLayer = new VectorTileLayer({

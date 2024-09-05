@@ -41,6 +41,7 @@ import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { Type as GeometryType } from 'ol/geom/Geometry';
+// @ts-ignore
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
@@ -666,7 +667,7 @@ const openLayerMap = {
     if (extent) {
       view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     } else {
-      const extent = this.getLayer(layerId)?.getSource()?.getExtent();
+      const extent = this.getLayer(layerId)?.getSource()?.getExtent()!;
       view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     }
   },
@@ -897,7 +898,7 @@ const openLayerMap = {
         this.canvasLayers.get(layerId)?.layerName || `layer_${layerId}`;
       }
     });
-    zip.generateAsync({ type: 'blob' }).then((content) => {
+    zip.generateAsync({ type: 'blob' }).then((content: any) => {
       anchor.href = URL.createObjectURL(content);
       anchor.download = `${exportName}.zip`;
       anchor.click();

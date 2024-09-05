@@ -54,6 +54,7 @@ export default function PropertyTable({
       if (!layerData) return;
       const layerJsonData = openLayerMap.createGeojsonFromLayer(
         canvasLayer.layerId,
+        // @ts-ignore
         layerData.layer
       );
       if (layerJsonData) {

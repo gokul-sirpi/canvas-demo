@@ -173,6 +173,7 @@ function UgixFeatureTile({
           `/collections/${resource.id}/map/tiles/WorldCRS84Quad`
       );
       console.log(response);
+
       if (token && response.status === 200) {
         const newLayer = openLayerMap.createNewUgixTileLayer(
           resource.label,
@@ -181,6 +182,8 @@ function UgixFeatureTile({
           resource.ogcResourceInfo.geometryType,
           token
         );
+
+        console.log(newLayer);
         dispatch(addCanvasLayer(newLayer));
         cleanUpSideEffects();
         dialogCloseTrigger(false);

@@ -3,7 +3,7 @@ import { FeatureStyle } from './FeatureStyle';
 
 export type UgixLayer = {
   layerType: 'UgixLayer';
-  sourceType: "tile" | "raster" | "json"
+  sourceType: 'tile' | 'raster' | 'json';
   layerName: string;
   layerId: string;
   ugixLayerId: string;

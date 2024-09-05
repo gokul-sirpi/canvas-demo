@@ -41,10 +41,13 @@ import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import { FeatureStyle } from '../types/FeatureStyle';
 import { Type as GeometryType } from 'ol/geom/Geometry';
+// @ts-ignore
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 import envurls from '../utils/config';
+import { extend as extendExtent, createEmpty } from 'ol/extent';
+
 type baseLayerTypes =
   | 'terrain'
   | 'openseriesmap'
@@ -136,7 +139,9 @@ const openLayerMap = {
     }
   },
 
-  addLayer(layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer) {
+  addLayer(
+    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer
+  ) {
     this.map.addLayer(layer);
   },
 
@@ -224,7 +229,7 @@ const openLayerMap = {
     newVectorLayer.set('layer-id', layerId);
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
-      sourceType: "json",
+      sourceType: 'json',
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
@@ -262,24 +267,38 @@ const openLayerMap = {
     const layerColor = getRandomColor();
     const layerId = createUniqueId();
     const vectorSource = new OGCVectorTile({
-      url: envurls.ugixOgcServer + `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
-      format: new MVT({ idProperty: "iso_a3" }),
+      url:
+        envurls.ugixOgcServer +
+        `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
       // projection: 'EPSG:4326',
     });
+
+    // Initialize an empty extent
+    let tileExtent = createEmpty();
+    let tilesLoading = 0;
+    let tilesLoaded = 0;
+
     //@ts-expect-error tile problem
-    vectorSource.setTileLoadFunction(function (tile: VectorTile<Feature>, url: string) {
+    vectorSource.setTileLoadFunction(function (
+      tile: VectorTile<Feature>,
+      url: string
+    ) {
+      tilesLoading++;
       tile.setLoader(function (extent, _, projection) {
         fetch(url, {
           headers: {
             Accept: 'application/vnd.mapbox-vector-tile',
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
         }).then(function (response) {
           if (!response.ok) {
             // if failed, then set tile state to error
             // https://github.com/openlayers/openlayers/issues/8404
             tile.setState(3);
+            tilesLoading--;
+            checkAllTilesLoaded();
             return;
           }
           response.arrayBuffer().then(function (data) {
@@ -290,6 +309,17 @@ const openLayerMap = {
                 featureProjection: projection,
               });
               tile.setFeatures(features);
+
+              features.forEach((feature) => {
+                const newExtent = feature.getGeometry()!.getExtent();
+
+                if (!newExtent.includes(Infinity)) {
+                  extendExtent(tileExtent, newExtent);
+                }
+              });
+
+              tilesLoaded++;
+              checkAllTilesLoaded();
             } catch (err) {
               console.log(url, err);
             }
@@ -297,15 +327,25 @@ const openLayerMap = {
         });
       });
     });
+
+    function checkAllTilesLoaded() {
+      if (tilesLoaded === tilesLoading) {
+        sessionStorage.setItem(layerId + '-extent', JSON.stringify(tileExtent));
+      }
+    }
+
     const newVectorLayer = new VectorTileLayer({
       source: vectorSource,
-      style: (feature) => tileStyleFunction(feature, layerColor, this.hoveredTileId),
+      style: (feature) =>
+        tileStyleFunction(feature, layerColor, this.hoveredTileId),
     });
+
     newVectorLayer.set('layer-id', layerId);
-    newVectorLayer.set("tile-layer", true)
+    newVectorLayer.set('tile-layer', true);
+
     const newLayer: UgixLayer = {
-      layerType: "UgixLayer",
-      sourceType: "tile",
+      layerType: 'UgixLayer',
+      sourceType: 'tile',
       layerName: layerName,
       layerId,
       ugixLayerId: ugixId,
@@ -320,16 +360,18 @@ const openLayerMap = {
       editable: true,
       side: 'middle',
     };
+
     this.canvasLayers.set(layerId, {
       layer: newVectorLayer,
       layerId,
       layerName,
-      layerType: "UgixLayer",
+      layerType: 'UgixLayer',
       style: createFeatureStyle(layerColor),
       side: 'middle',
     });
     this.addLayer(newVectorLayer);
     this.addSwipeFuncToLayer(newVectorLayer);
+
     return newLayer;
   },
 
@@ -341,10 +383,10 @@ const openLayerMap = {
     const featureStyle = createFeatureStyle(color);
     if (this.canvasLayers.has(layerId)) {
       //@ts-expect-error map ts
-      this.canvasLayers.get(layerId).style = featureStyle
+      this.canvasLayers.get(layerId).style = featureStyle;
     }
-    if (layer?.get("tile-layer")) {
-      return featureStyle
+    if (layer?.get('tile-layer')) {
+      return featureStyle;
     }
     const source = layer?.getSource();
     if (source) {
@@ -619,10 +661,13 @@ const openLayerMap = {
     });
   },
 
-  zoomToFit(layerId: string) {
-    const extent = this.getLayer(layerId)?.getSource()?.getExtent();
+  zoomToFit(layerId: string, extent?: any) {
     const view = this.map.getView();
+
     if (extent) {
+      view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
+    } else {
+      const extent = this.getLayer(layerId)?.getSource()?.getExtent()!;
       view.fit(extent, { padding: [100, 100, 100, 100], duration: 500 });
     }
   },
@@ -853,7 +898,7 @@ const openLayerMap = {
         this.canvasLayers.get(layerId)?.layerName || `layer_${layerId}`;
       }
     });
-    zip.generateAsync({ type: 'blob' }).then((content) => {
+    zip.generateAsync({ type: 'blob' }).then((content: any) => {
       anchor.href = URL.createObjectURL(content);
       anchor.download = `${exportName}.zip`;
       anchor.click();
@@ -882,7 +927,7 @@ const openLayerMap = {
     this.map.addOverlay(this.popupOverLay);
     this.map.on('click', (evt) => {
       if (this.drawing) return;
-      const { feature } = this.getFeatureAtPixel(evt.pixel)
+      const { feature } = this.getFeatureAtPixel(evt.pixel);
       if (feature) {
         this.popupOverLay.setPosition(evt.coordinate);
         callback(feature);
@@ -896,7 +941,7 @@ const openLayerMap = {
   },
   getFeatureAtPixel(pixel: Pixel) {
     let feature: Feature | undefined;
-    let layerId: string | undefined
+    let layerId: string | undefined;
     this.map.forEachFeatureAtPixel(
       pixel,
       (selected, layer) => {
@@ -912,7 +957,7 @@ const openLayerMap = {
           }
         } else {
           feature = selected as Feature;
-          layerId = layer.get("layer-id")
+          layerId = layer.get('layer-id');
         }
       },
       { hitTolerance: 3 }
@@ -1030,11 +1075,11 @@ openLayerMap.map.on('pointermove', (event) => {
     selected.setStyle(prevStyle);
     selected = undefined;
   }
-  const { feature, layerId } = openLayerMap.getFeatureAtPixel(event.pixel)
+  const { feature, layerId } = openLayerMap.getFeatureAtPixel(event.pixel);
   if (feature) {
     if (layerId) {
-      const currlayer = openLayerMap.getLayer(layerId)
-      if (currlayer?.get("tile-layer")) {
+      const currlayer = openLayerMap.getLayer(layerId);
+      if (currlayer?.get('tile-layer')) {
         // console.log(feature.getId(), "id");
         // openLayerMap.hoveredTileId = feature.getId()
         return;
@@ -1047,7 +1092,6 @@ openLayerMap.map.on('pointermove', (event) => {
     selected = feature;
   }
 });
-
 
 // Utility functions
 function circleGeometryFunction(

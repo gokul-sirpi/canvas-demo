@@ -134,7 +134,7 @@ function UgixFeatureTile({
     if (token) {
       try {
         const response = await axios.get(href, {
-          headers: { Authorization: token },
+          headers: { Authorization: 'Bearer ' + token },
           responseType: 'blob',
         });
         if (anchorRef.current) {

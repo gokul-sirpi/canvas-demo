@@ -54,6 +54,58 @@ export function styleFunction(feature: FeatureLike, stroke: string) {
   }
   return style;
 }
+// for tiles. under development
+export function tileStyleFunction(feature: FeatureLike, stroke: string, hoveredId: string | number | undefined) {
+  const type = feature.getGeometry()?.getType();
+  let style: Style;
+  if (type === 'LineString' || type === 'MultiLineString') {
+    style = new Style({
+      stroke: new Stroke({
+        color: stroke,
+        width: 2,
+      }),
+    });
+  } else if (
+    type === 'Circle' ||
+    type === 'Polygon' ||
+    type === 'MultiPolygon'
+  ) {
+    style = new Style({
+      fill: new Fill({
+        color: stroke + whiteFillOpacity,
+      }),
+      stroke: new Stroke({
+        color: stroke,
+        width: 1,
+      }),
+    });
+    const featureId = feature.getId()
+    if (featureId && hoveredId === featureId) {
+      style = new Style({
+        fill: new Fill({
+          color: stroke + '77',
+        }),
+        stroke: new Stroke({
+          color: stroke,
+          width: 1,
+        }),
+      });
+    }
+  } else if (type === 'Point' || type === 'MultiPoint') {
+    style = markerStyleFunction(0);
+  } else {
+    style = new Style({
+      fill: new Fill({
+        color: whiteFill + whiteFillOpacity,
+      }),
+      stroke: new Stroke({
+        color: stroke,
+      }),
+      image: image,
+    });
+  }
+  return style;
+}
 
 export function hoverStyle(style: FeatureStyle) {
   return new Style({

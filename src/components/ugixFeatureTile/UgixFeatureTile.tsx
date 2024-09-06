@@ -160,25 +160,40 @@ function UgixFeatureTile({
   function toggleExtraButtonDrawer() {
     setIsExtraBtnVisible(!isExtraBtnVisible);
   }
-  // function plotTiles() {
-  //   console.log('tiles');
-  //   const newLayer = openLayerMap.createNewUgixTileLayer(
-  //     resource.label,
-  //     resource.id,
-  //     resource.resourceGroup,
-  //     resource.ogcResourceInfo.geometryType
-  //   );
-  //   dispatch(addCanvasLayer(newLayer));
-  //   cleanUpSideEffects();
-  //   dialogCloseTrigger(false);
-  //   // dispatch(updateLayerFetchingStatus(newLayer.layerId));
-  //   // const newLayer = openLayerMap.createNewUgixRasterLayer(
-  //   //   resource.label,
-  //   //   resource.id,
-  //   //   resource.resourceGroup,
-  //   //   resource.ogcResourceInfo.geometryType
-  //   // );
-  // }
+  async function plotTiles() {
+    console.log('tiles');
+    try {
+      const { error, token } = await getAccessToken(resource);
+      if (error) {
+        emitToast('error', 'No acces to data');
+        return;
+      }
+      const response = await axios.get(
+        envurls.ugixOgcServer +
+          `/collections/${resource.id}/map/tiles/WorldCRS84Quad`
+      );
+      console.log(response);
+
+      if (token && response.status === 200) {
+        const newLayer = openLayerMap.createNewUgixTileLayer(
+          resource.label,
+          resource.id,
+          resource.resourceGroup,
+          resource.ogcResourceInfo.geometryType,
+          token
+        );
+
+        console.log(newLayer);
+        dispatch(addCanvasLayer(newLayer));
+        cleanUpSideEffects();
+        dialogCloseTrigger(false);
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
+      emitToast('error', 'Unable to plot tiles, please try again later');
+    }
+  }
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>
@@ -215,6 +230,17 @@ function UgixFeatureTile({
             >
               BBOX search
             </button>
+            {resource.ogcResourceInfo.ogcResourceAPIs.includes(
+              'VECTOR_TILES'
+            ) && (
+              <button
+                disabled={adding}
+                className={styles.extra_button}
+                onClick={plotTiles}
+              >
+                Plot tiles
+              </button>
+            )}
           </div>
         </div>
         <TooltipWrapper content="add">

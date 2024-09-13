@@ -56,6 +56,12 @@ function UgixFeatureTile({
   }
 
   async function handleUgixLayerAddition(bbox?: Extent) {
+    // store the resource data in session storage
+    sessionStorage.setItem(
+      `${resource.id}-ugix-resource`,
+      JSON.stringify(resource)
+    );
+
     if (resource.ogcResourceInfo.ogcResourceAPIs.includes('VECTOR_TILES')) {
       plotTiles();
     } else {

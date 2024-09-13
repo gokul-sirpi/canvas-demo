@@ -12,6 +12,7 @@ import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
 import { RootState } from '../../context/store';
+import { getUgixFeatureById } from '../../lib/getUgixFeatureById';
 // import {
 //   updateFooterLayerState,
 //   updateFooterShownState,
@@ -45,7 +46,35 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       window.open(path, '_blank');
     }
   }
-  function handleLayerExport() {
+  async function handleLayerExport() {
+    let l: UgixLayer = layer as UgixLayer;
+
+    if (l.sourceType === 'tile') {
+      try {
+        const data = await getUgixFeatureById(l.ugixLayerId);
+        console.log('data', data);
+
+        const file = new Blob([JSON.stringify(data)], {
+          type: 'application/geo+json;charset=utf-8',
+        });
+
+        const tempAnchor = document.createElement('a');
+        const url = URL.createObjectURL(file);
+        tempAnchor.href = url;
+        tempAnchor.download = `${l.layerName}.geojson`;
+        document.body.appendChild(tempAnchor);
+        tempAnchor.click();
+        document.body.removeChild(tempAnchor);
+
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (err) {
+        console.log(err);
+      }
+      return;
+    }
+
     const geojsonData = openLayerMap.createGeojsonFromLayer(layer.layerId);
     const file = new Blob([JSON.stringify(geojsonData)], {
       type: 'text/json;charset=utf-8',

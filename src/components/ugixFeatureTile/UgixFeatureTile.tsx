@@ -56,44 +56,54 @@ function UgixFeatureTile({
   }
 
   async function handleUgixLayerAddition(bbox?: Extent) {
-    setAdding(true);
-    dispatch(updateLoadingState(true));
-    const newLayer = openLayerMap.createNewUgixLayer(
-      resource.label,
-      resource.id,
-      resource.resourceGroup,
-      resource.ogcResourceInfo.geometryType
+    // store the resource data in session storage
+    sessionStorage.setItem(
+      `${resource.id}-ugix-resource`,
+      JSON.stringify(resource)
     );
-    const queryParams: QueryParams = {};
-    if (bbox) {
-      queryParams.bbox = bbox.join();
-    }
-    getAllUgixFeatures(
-      resource,
-      newLayer,
-      queryParams,
-      () => {
-        dispatch(addCanvasLayer(newLayer));
-        ugixResources.push(newLayer.layerId);
-        cleanUpSideEffects();
-        dialogCloseTrigger(false);
-      },
-      (type, message) => {
-        if (type === 'no-access') {
-          showNoAccessText();
-        }
-        if (type === 'empty') {
-          openLayerMap.removeLayer(newLayer.layerId);
-        }
-        dispatch(updateLayerFetchingStatus(newLayer.layerId));
-        emitToast('error', message);
-        cleanUpSideEffects();
-      },
-      () => {
-        cleanUpSideEffects();
-        dispatch(updateLayerFetchingStatus(newLayer.layerId));
+
+    if (resource.ogcResourceInfo.ogcResourceAPIs.includes('VECTOR_TILES')) {
+      plotTiles();
+    } else {
+      setAdding(true);
+      dispatch(updateLoadingState(true));
+      const newLayer = openLayerMap.createNewUgixLayer(
+        resource.label,
+        resource.id,
+        resource.resourceGroup,
+        resource.ogcResourceInfo.geometryType
+      );
+      const queryParams: QueryParams = {};
+      if (bbox) {
+        queryParams.bbox = bbox.join();
       }
-    );
+      getAllUgixFeatures(
+        resource,
+        newLayer,
+        queryParams,
+        () => {
+          dispatch(addCanvasLayer(newLayer));
+          ugixResources.push(newLayer.layerId);
+          cleanUpSideEffects();
+          dialogCloseTrigger(false);
+        },
+        (type, message) => {
+          if (type === 'no-access') {
+            showNoAccessText();
+          }
+          if (type === 'empty') {
+            openLayerMap.removeLayer(newLayer.layerId);
+          }
+          dispatch(updateLayerFetchingStatus(newLayer.layerId));
+          emitToast('error', message);
+          cleanUpSideEffects();
+        },
+        () => {
+          cleanUpSideEffects();
+          dispatch(updateLayerFetchingStatus(newLayer.layerId));
+        }
+      );
+    }
   }
   function handleBboxSearch() {
     dialogCloseTrigger(false);
@@ -230,17 +240,6 @@ function UgixFeatureTile({
             >
               BBOX search
             </button>
-            {resource.ogcResourceInfo.ogcResourceAPIs.includes(
-              'VECTOR_TILES'
-            ) && (
-              <button
-                disabled={adding}
-                className={styles.extra_button}
-                onClick={plotTiles}
-              >
-                Plot tiles
-              </button>
-            )}
           </div>
         </div>
         <TooltipWrapper content="add">

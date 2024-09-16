@@ -13,6 +13,8 @@ import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
 import { RootState } from '../../context/store';
 import { getUgixFeatureById } from '../../lib/getUgixFeatureById';
+import { emitToast } from '../../lib/toastEmitter';
+import { toast } from 'react-toastify';
 // import {
 //   updateFooterLayerState,
 //   updateFooterShownState,
@@ -70,7 +72,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
           URL.revokeObjectURL(url);
         }, 100);
       } catch (err) {
+        emitToast('error', 'Failed to export data');
         console.log(err);
+      } finally {
+        toast.dismiss('exporting-data');
       }
       return;
     }

@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { GeoJsonObj } from '../types/GeojsonType';
 import { Resource } from '../types/resource';
 import envurls from '../utils/config';
@@ -44,6 +45,12 @@ export async function getUgixFeatureById(
     },
     features: [],
   };
+
+  toast.loading('Exporting data...', {
+    toastId: 'exporting-data',
+    position: 'bottom-right',
+    theme: 'dark',
+  });
 
   do {
     try {

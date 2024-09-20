@@ -12,7 +12,8 @@ type UgixLinks = {
 };
 
 export async function getUgixFeatureById(
-  ugixId: string
+  ugixId: string,
+  toastMessage?: string
 ): Promise<GeoJsonObj[]> {
   const resource: Resource = JSON.parse(
     sessionStorage.getItem(`${ugixId}-ugix-resource`)!
@@ -46,7 +47,7 @@ export async function getUgixFeatureById(
     features: [],
   };
 
-  toast.loading('Exporting data...', {
+  toast.loading(toastMessage || 'Exporting data...', {
     toastId: 'exporting-data',
     position: 'bottom-right',
     theme: 'dark',

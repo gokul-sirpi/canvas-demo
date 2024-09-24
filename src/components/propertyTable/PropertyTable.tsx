@@ -8,8 +8,11 @@ import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { emitToast } from '../../lib/toastEmitter';
 import { RootState } from '../../context/store';
-import { GenericObject } from '../../types/GeojsonType';
+import { GenericObject, GeoJsonObj } from '../../types/GeojsonType';
 import { LuSearchX } from 'react-icons/lu';
+import { getUgixFeatureById } from '../../lib/getUgixFeatureById';
+import { UgixLayer } from '../../types/UgixLayers';
+import { toast } from 'react-toastify';
 
 export default function PropertyTable({
   footerStatus,
@@ -29,6 +32,9 @@ export default function PropertyTable({
   const canvasLayer = useSelector((state: RootState) => {
     return state.footerState.canvasLayer;
   });
+
+  const [fetchingData, setFetchingData] = useState(false);
+
   useEffect(() => {
     if (canvasLayer) {
       getLayerProperties();
@@ -48,36 +54,92 @@ export default function PropertyTable({
       inputRef.current?.focus();
     }
   }, [footerStatus]);
-  function getLayerProperties() {
-    if (canvasLayer) {
-      const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
-      if (!layerData) return;
-      const layerJsonData = openLayerMap.createGeojsonFromLayer(
-        canvasLayer.layerId,
-        // @ts-ignore
-        layerData.layer
-      );
-      if (layerJsonData) {
-        const layerProperties = layerJsonData.features.map((feature) => {
-          const { properties } = feature;
-          delete properties.geometry;
-          delete properties.fill;
-          delete properties.stroke;
-          delete properties['fill-opacity'];
-          delete properties['stroke-width'];
-          delete properties['stroke-opacity'];
-          delete properties['marker-id'];
-          delete properties.layerGeom;
-          delete properties.layerId;
-          delete properties.layer;
-          return properties;
-        });
-        createSearchableData(layerProperties);
-        setLayerProp(layerProperties);
-        setFilteredProps(layerProperties);
-      } else {
-        emitToast('error', 'unable to get layer properties');
+  async function getLayerProperties() {
+    setLayerProp([]);
+    setFilteredProps([]);
+    try {
+      if (canvasLayer) {
+        let l: UgixLayer = canvasLayer as UgixLayer;
+        if (l.sourceType === 'tile') {
+          const data = JSON.parse(
+            sessionStorage.getItem(l.ugixLayerId + '-properties')!
+          );
+          if (data) {
+            createSearchableData(data);
+            setLayerProp(data);
+            setFilteredProps(data);
+          } else {
+            setFetchingData(true);
+            // @ts-ignore
+            const data: GeoJsonObj = await getUgixFeatureById(
+              l.ugixLayerId,
+              'Fetching data...'
+            );
+            console.log('data', data);
+
+            const layerProperties = data.features.map((feature) => {
+              const { properties } = feature;
+              delete properties.geometry;
+              delete properties.fill;
+              delete properties.stroke;
+              delete properties['fill-opacity'];
+              delete properties['stroke-width'];
+              delete properties['stroke-opacity'];
+              delete properties['marker-id'];
+              delete properties.layerGeom;
+              delete properties.layerId;
+              delete properties.layer;
+              return properties;
+            });
+
+            sessionStorage.setItem(
+              l.ugixLayerId + '-properties',
+              JSON.stringify(layerProperties)
+            );
+
+            createSearchableData(layerProperties);
+            setLayerProp(layerProperties);
+            setFilteredProps(layerProperties);
+            setFetchingData(false);
+          }
+        } else {
+          const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
+          if (!layerData) return;
+          const layerJsonData = openLayerMap.createGeojsonFromLayer(
+            canvasLayer.layerId,
+            // @ts-ignore
+            layerData.layer
+          );
+          if (layerJsonData) {
+            const layerProperties = layerJsonData.features.map((feature) => {
+              const { properties } = feature;
+              delete properties.geometry;
+              delete properties.fill;
+              delete properties.stroke;
+              delete properties['fill-opacity'];
+              delete properties['stroke-width'];
+              delete properties['stroke-opacity'];
+              delete properties['marker-id'];
+              delete properties.layerGeom;
+              delete properties.layerId;
+              delete properties.layer;
+              return properties;
+            });
+
+            createSearchableData(layerProperties);
+            setLayerProp(layerProperties);
+            setFilteredProps(layerProperties);
+          } else {
+            emitToast('error', 'unable to get layer properties');
+          }
+        }
       }
+    } catch (err) {
+      console.log(err);
+      emitToast('error', 'Unable to fetch data');
+    } finally {
+      setFetchingData(false);
+      toast.dismiss('exporting-data');
     }
   }
   function createSearchableData(properties: GenericObject[]) {
@@ -267,8 +329,14 @@ export default function PropertyTable({
         </div>
       ) : (
         <div className={styles.no_data}>
-          <LuSearchX size={30} />
-          <p>No Results</p>
+          {fetchingData ? (
+            <p>Please wait for the results</p>
+          ) : (
+            <>
+              <LuSearchX size={30} />
+              <p>No Results</p>
+            </>
+          )}
         </div>
       )}
     </section>

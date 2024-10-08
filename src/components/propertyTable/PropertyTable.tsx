@@ -8,20 +8,34 @@ import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { emitToast } from '../../lib/toastEmitter';
 import { RootState } from '../../context/store';
-import { GenericObject } from '../../types/GeojsonType';
+import { GenericObject, GeoJsonObj } from '../../types/GeojsonType';
 import { LuSearchX } from 'react-icons/lu';
+import { UgixLayer } from '../../types/UgixLayers';
+import { toast } from 'react-toastify';
+import { getAccessToken } from '../../lib/getAllUgixFeatures';
+import envurls from '../../utils/config';
+import axios, { AxiosError } from 'axios';
+import { Resource } from '../../types/resource';
+
+type UgixLinks = {
+  href: string;
+  rel: 'alternate' | 'next' | 'self';
+  type: string;
+};
 
 export default function PropertyTable({
   footerStatus,
+  controller,
 }: {
   footerStatus: boolean;
+  controller: AbortController;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const keywordMap = useRef<Map<string, Set<number>>>(new Map());
   const fuseOperator = useRef<Fuse<{ key: string }>>();
   const debounceTimer = useRef<number>();
-  //
+
   const [layerProp, setLayerProp] = useState<GenericObject[]>([]);
   const [filteredProps, setFilteredProps] = useState<GenericObject[]>([]);
   const [currSortKey, setCurrSortKey] = useState('');
@@ -29,6 +43,9 @@ export default function PropertyTable({
   const canvasLayer = useSelector((state: RootState) => {
     return state.footerState.canvasLayer;
   });
+
+  const [fetchingData, setFetchingData] = useState(false);
+
   useEffect(() => {
     if (canvasLayer) {
       getLayerProperties();
@@ -39,6 +56,7 @@ export default function PropertyTable({
       setCurrSortKey('');
     }
   }, [canvasLayer]);
+
   useEffect(() => {
     if (!footerStatus && inputRef.current) {
       inputRef.current.value = '';
@@ -48,38 +66,188 @@ export default function PropertyTable({
       inputRef.current?.focus();
     }
   }, [footerStatus]);
-  function getLayerProperties() {
-    if (canvasLayer) {
-      const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
-      if (!layerData) return;
-      const layerJsonData = openLayerMap.createGeojsonFromLayer(
-        canvasLayer.layerId,
-        // @ts-ignore
-        layerData.layer
-      );
-      if (layerJsonData) {
-        const layerProperties = layerJsonData.features.map((feature) => {
-          const { properties } = feature;
-          delete properties.geometry;
-          delete properties.fill;
-          delete properties.stroke;
-          delete properties['fill-opacity'];
-          delete properties['stroke-width'];
-          delete properties['stroke-opacity'];
-          delete properties['marker-id'];
-          delete properties.layerGeom;
-          delete properties.layerId;
-          delete properties.layer;
-          return properties;
+
+  const [loadedFeatures, setLoadedFeatures] = useState<GeoJsonObj>({
+    type: 'FeatureCollection',
+    crs: {
+      type: 'name',
+      properties: {
+        name: 'EPSG:4326',
+      },
+    },
+    features: [],
+  });
+
+  useEffect(() => {
+    if (loadedFeatures.features.length > 0) {
+      const layerProperties = loadedFeatures.features.map((feature) => {
+        const { properties } = feature;
+        delete properties.geometry;
+        delete properties.fill;
+        delete properties.stroke;
+        delete properties['fill-opacity'];
+        delete properties['stroke-width'];
+        delete properties['stroke-opacity'];
+        delete properties['marker-id'];
+        delete properties.layerGeom;
+        delete properties.layerId;
+        delete properties.layer;
+        return properties;
+      });
+
+      setLayerProp((prev) => [...prev, ...layerProperties]);
+      setFilteredProps((prev) => [...prev, ...layerProperties]);
+      setFetchingData(false);
+    }
+    console.log(loadedFeatures);
+  }, [loadedFeatures]);
+
+  useEffect(() => {
+    if (layerProp.length > 0) {
+      createSearchableData(layerProp);
+    }
+  }, [layerProp]);
+
+  async function getUgixFeatureById(ugixId: string, toastMessage?: string) {
+    const resource: Resource = JSON.parse(
+      sessionStorage.getItem(`${ugixId}-ugix-resource`)!
+    );
+
+    if (!resource) {
+      throw new Error('No resource found');
+    }
+
+    const { error, token } = await getAccessToken(resource);
+    if (error) {
+      throw new Error(`no-access: ${error}`);
+    }
+
+    if (!token) {
+      throw new Error('Unable to get access token');
+    }
+
+    let totalFeaturesReturned = 0;
+    let totalFeatures = Infinity;
+    let currFeaturesReturned = Infinity;
+    let url = `${envurls.ugixOgcServer}collections/${ugixId}/items?offset=1`;
+
+    toast.loading(toastMessage, {
+      toastId: 'fetching-data',
+      position: 'bottom-right',
+      theme: 'dark',
+    });
+
+    do {
+      try {
+        const response = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
         });
-        createSearchableData(layerProperties);
-        setLayerProp(layerProperties);
-        setFilteredProps(layerProperties);
-      } else {
-        emitToast('error', 'unable to get layer properties');
+
+        if (response.status === 200) {
+          const geojsonData = response.data;
+
+          if (geojsonData.numberMatched === 0) {
+            throw new Error('empty');
+          }
+
+          setLoadedFeatures((prev) => {
+            return {
+              ...prev,
+              features: geojsonData.features,
+            };
+          });
+
+          const links: UgixLinks[] = geojsonData.links;
+          const nextLink = links.find((link) => link.rel === 'next');
+          if (nextLink) {
+            url = nextLink.href;
+          } else {
+            break;
+          }
+
+          totalFeatures = Math.min(totalFeatures, geojsonData.numberMatched);
+          totalFeaturesReturned += geojsonData.numberReturned;
+          currFeaturesReturned = geojsonData.numberReturned;
+        } else {
+          throw new Error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error(error);
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 403) {
+            throw new Error(`no-access: ${error.message}`);
+          } else {
+            throw new Error(`${error.message}`);
+          }
+        } else {
+          throw new Error(
+            `${error instanceof Error ? error.message : 'Something went wrong'}`
+          );
+        }
       }
+    } while (totalFeaturesReturned < totalFeatures && currFeaturesReturned > 0);
+  }
+
+  async function getLayerProperties() {
+    setLayerProp([]);
+    setFilteredProps([]);
+    try {
+      if (canvasLayer) {
+        let l: UgixLayer = canvasLayer as UgixLayer;
+        if (l.sourceType === 'tile') {
+          if (!footerStatus || !controller) return;
+
+          setFetchingData(true);
+          await getUgixFeatureById(
+            l.ugixLayerId,
+            'Fetching layer properties...'
+          );
+        } else {
+          const layerData = openLayerMap.canvasLayers.get(canvasLayer.layerId);
+          if (!layerData) return;
+          const layerJsonData = openLayerMap.createGeojsonFromLayer(
+            canvasLayer.layerId,
+            // @ts-ignore
+            layerData.layer
+          );
+          if (layerJsonData) {
+            const layerProperties = layerJsonData.features.map((feature) => {
+              const { properties } = feature;
+              delete properties.geometry;
+              delete properties.fill;
+              delete properties.stroke;
+              delete properties['fill-opacity'];
+              delete properties['stroke-width'];
+              delete properties['stroke-opacity'];
+              delete properties['marker-id'];
+              delete properties.layerGeom;
+              delete properties.layerId;
+              delete properties.layer;
+              return properties;
+            });
+
+            createSearchableData(layerProperties);
+            setLayerProp(layerProperties);
+            setFilteredProps(layerProperties);
+          } else {
+            emitToast('error', 'unable to get layer properties');
+          }
+        }
+      }
+    } catch (err: any) {
+      console.log(err.message);
+      if (err.message === 'canceled') {
+        console.log('request canceled');
+      } else {
+        emitToast('error', 'Unable to fetch data');
+      }
+    } finally {
+      setFetchingData(false);
+      toast.dismiss('fetching-data');
     }
   }
+
   function createSearchableData(properties: GenericObject[]) {
     const wordToRowMap = new Map<string, Set<number>>();
     const keyList: { key: string }[] = [];
@@ -104,6 +272,7 @@ export default function PropertyTable({
       includeScore: true,
     });
   }
+
   function handleFuzzySearch(event: ChangeEvent<HTMLInputElement>) {
     const text = event.target.value;
     if (text === '') {
@@ -130,6 +299,7 @@ export default function PropertyTable({
       }
     }, 500);
   }
+
   function fuzzySearch(input: string) {
     const unionSet = new Set<number>();
     if (fuseOperator.current) {
@@ -144,6 +314,7 @@ export default function PropertyTable({
     }
     return unionSet;
   }
+
   function handleSort(key: string) {
     setCurrSortKey(key);
     let sortBy: 'ASC' | 'DSC' = 'ASC';
@@ -157,6 +328,7 @@ export default function PropertyTable({
     setCurrSortBy(sortBy);
     columnBasedSort(key, sortBy, filteredProps);
   }
+
   function columnBasedSort(
     sortKey: string,
     sortBy: 'ASC' | 'DSC',
@@ -190,6 +362,7 @@ export default function PropertyTable({
     });
     setFilteredProps([...notNull, ...onlyNull]);
   }
+
   return (
     <section className={styles.container}>
       <header className={styles.header}>
@@ -267,8 +440,14 @@ export default function PropertyTable({
         </div>
       ) : (
         <div className={styles.no_data}>
-          <LuSearchX size={30} />
-          <p>No Results</p>
+          {fetchingData ? (
+            <p>Please wait for the results</p>
+          ) : (
+            <>
+              <LuSearchX size={30} />
+              <p>No Results</p>
+            </>
+          )}
         </div>
       )}
     </section>

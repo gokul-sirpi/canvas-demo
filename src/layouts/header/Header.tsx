@@ -40,7 +40,7 @@ function Header({
       <header className={styles.container}>
         <img src={ugix_logo} className={styles.logo_img} alt="" />
         <div data-intro="header" className={styles.tools_container}>
-          <TooltipWrapper content="Browse GSX  resources">
+          <TooltipWrapper content="Browse GDI  resources">
             <span data-intro="browse">
               <BrowseDataDialog resourceList={resourceList} />
             </span>

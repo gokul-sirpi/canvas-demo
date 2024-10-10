@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
-import openLayerMap from '../../lib/openLayers.ts';
+import openLayerMap from '../../lib/openLayers';
 import Header from '../../layouts/header/Header';
 import LayerCard from '../../layouts/layerCard/LayerCard';
-import { UserProfile } from '../../types/UserProfile.ts';
+import { UserProfile } from '../../types/UserProfile';
 import { useDispatch } from 'react-redux';
-import { updateLoadingState } from '../../context/loading/LoaderSlice.ts';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import axios from 'axios';
-import envurls from '../../utils/config.ts';
-import { GeoJsonObj } from '../../types/GeojsonType.ts';
-import { QueryParams, Resource } from '../../types/resource.ts';
+import envurls from '../../utils/config';
+import { GeoJsonObj } from '../../types/GeojsonType';
+import { QueryParams, Resource } from '../../types/resource';
 import {
   addCanvasLayer,
   updateLayerFetchingStatus,
-} from '../../context/canvasLayers/canvasLayerSlice.ts';
-import { emitToast } from '../../lib/toastEmitter.ts';
-import Popup from '../../components/popup/Popup.tsx';
-import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures.ts';
-import { getCookieValue } from '../../lib/cookieManger.ts';
-import Intro from '../../layouts/Intro/Intro.tsx';
-import SwipeLine from '../../layouts/swipeLine/SwipeLine.tsx';
-import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter.tsx';
+} from '../../context/canvasLayers/canvasLayerSlice';
+import { emitToast } from '../../lib/toastEmitter';
+import { getAllUgixFeatures } from '../../lib/getAllUgixFeatures';
+import { getCookieValue } from '../../lib/cookieManger';
+import Intro from '../../layouts/Intro/Intro';
+import SwipeLine from '../../layouts/swipeLine/SwipeLine';
+import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter';
+import { Sidebar } from '../../components/sidebar/Sidebar';
 
 function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   const singleRender = useRef(false);
@@ -149,9 +149,19 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
       dispatch(updateLoadingState(false));
     }
   }
+
   function handleDragOver(event: React.DragEvent) {
     event.preventDefault();
   }
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarContent, setSidebarContent] = useState<any>(null);
+
+  useEffect(() => {
+    // Initialize the map click event and pass setSidebarOpen, setSidebarContent
+    openLayerMap.initialiseMapClickEvent(setIsSidebarOpen, setSidebarContent);
+  }, []);
+
   return (
     <section className={styles.container}>
       <div className={styles.ol_map_container}>
@@ -163,10 +173,15 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         ></div>
         <>
           <SwipeLine />
-          <Popup />
+          {/* <Popup /> */}
           <Header profileData={profileData} resourceList={allResrources} />
           <LayerCard />
           <Intro />
+          <Sidebar
+            open={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            content={sidebarContent}
+          />
         </>
       </div>
       <AdjustableFooter />

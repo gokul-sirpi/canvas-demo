@@ -920,19 +920,21 @@ const openLayerMap = {
     return geojsonData;
   },
   initialiseMapClickEvent(
-    container: HTMLDivElement,
-    callback: (feature: Feature) => void
+    setSidebarOpen: (open: boolean) => void,
+    setSidebarContent: (content: any) => void
   ) {
-    this.popupOverLay.setElement(container);
-    this.map.addOverlay(this.popupOverLay);
     this.map.on('click', (evt) => {
       if (this.drawing) return;
+
       const { feature } = this.getFeatureAtPixel(evt.pixel);
-      if (feature) {
-        this.popupOverLay.setPosition(evt.coordinate);
-        callback(feature);
+
+      if (feature && Object.keys(feature?.getProperties()).length > 1) {
+        setSidebarContent(feature?.getProperties());
+
+        setSidebarOpen(true);
+        console.log('Properties', Object.keys(feature?.getProperties()));
       } else {
-        this.closePopupOverLay();
+        setSidebarOpen(false);
       }
     });
   },

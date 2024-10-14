@@ -1,0 +1,43 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background-color: #f8f9fa;
+    transition: right 0.3s ease-in-out;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebarOpen {
+    right: 0;
+}
+
+.sidebarHeader {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0px;
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
+.closeButton {
+    left: 10px;
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.sidebarContent {
+    padding: 20px;
+}
+
+.key {
+    color: #161616;
+    font-weight: 600;
+}

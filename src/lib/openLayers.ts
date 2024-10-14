@@ -279,7 +279,7 @@ const openLayerMap = {
     let tileExtent = createEmpty();
     let tilesLoading = 0;
     let tilesLoaded = 0;
-
+    let view = this.map.getView()
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
       tile: VectorTile<Feature>,
@@ -315,6 +315,7 @@ const openLayerMap = {
 
                 if (!newExtent.includes(Infinity)) {
                   extendExtent(tileExtent, newExtent);
+                  view.fit(tileExtent, { padding: [100, 100, 100, 100], duration: 500 });
                 }
               });
 

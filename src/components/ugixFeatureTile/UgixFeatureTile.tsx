@@ -219,7 +219,7 @@ function UgixFeatureTile({
             </div>
           ) : (
             <div className={`${styles.badge} ${styles.badge_private}`}>
-              <FaLock /> Private
+              <FaLock /> Restricted
             </div>
           )}
           <div

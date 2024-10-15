@@ -279,7 +279,17 @@ const openLayerMap = {
     let tileExtent = createEmpty();
     let tilesLoading = 0;
     let tilesLoaded = 0;
-    let view = this.map.getView()
+    let view = this.map.getView();
+
+    // in case of plotting vector tiles, fit the map view to entire india
+    view.fit(
+      [68.1756591796875, 6.7510986328125, 97.41302490234375, 37.08984375],
+      {
+        padding: [100, 100, 100, 100],
+        duration: 500,
+      }
+    );
+
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
       tile: VectorTile<Feature>,
@@ -315,7 +325,11 @@ const openLayerMap = {
 
                 if (!newExtent.includes(Infinity)) {
                   extendExtent(tileExtent, newExtent);
-                  view.fit(tileExtent, { padding: [100, 100, 100, 100], duration: 500 });
+
+                  view.fit(tileExtent, {
+                    padding: [100, 100, 100, 100],
+                    duration: 500,
+                  });
                 }
               });
 

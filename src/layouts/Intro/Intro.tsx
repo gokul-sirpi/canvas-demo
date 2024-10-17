@@ -13,7 +13,7 @@ function Intro() {
   const steps: Partial<IntroStep>[] = [
     {
       title: 'Welcome',
-      intro: 'Welcome to GSX canvas playground',
+      intro: 'Welcome to GDI canvas playground',
     },
     {
       element: getElementWithDataSelector('header'),
@@ -43,7 +43,7 @@ function Intro() {
     {
       element: getElementWithDataSelector('user_layers'),
       intro:
-        'Similar to Ugix layer, a user layer will be created upon using any of the drawing tools or the marker tool',
+        'Similar to GDI layer, a user layer will be created upon using any of the drawing tools or the marker tool',
     },
     {
       element: getElementWithDataSelector('measure'),

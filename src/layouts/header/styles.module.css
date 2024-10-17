@@ -13,6 +13,16 @@
 .logo_img {
   width: 9rem;
 }
+.button_container {
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+}
+.button_container > div > button {
+  font-size: 22px;
+  display: flex;
+  align-items: end;
+}
 
 .tools_container {
   position: absolute;

@@ -1,29 +1,27 @@
 //
-import DrawingTool from '../../components/drawingTool/DrawingTool';
 import ugix_logo from '../../assets/images/ugix-logo.png';
 import styles from './styles.module.css';
-import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
-import BaseMaps from '../../components/basemaps/BaseMaps';
-import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
-import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
-import { Resource } from '../../types/resource';
-import ImportDataInput from '../../components/importDataInput/ImportDataInput';
-import DrawingTools from '../drawingTools/DrawingTools';
 import * as Popover from '@radix-ui/react-popover';
 import { IoMdMail } from 'react-icons/io';
 import { HiUser } from 'react-icons/hi2';
 import { LuLogOut } from 'react-icons/lu';
 import keycloak from '../../lib/keycloak';
-import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
 
 function Header({
   profileData,
-  resourceList,
+  changePage,
+  currentPage,
 }: {
-  profileData: UserProfile | undefined;
-  resourceList: Resource[];
+  profileData?: UserProfile | undefined;
+  changePage: Function;
+  currentPage: string;
 }) {
+  const tabStyle =
+    currentPage === 'canvas' || currentPage === 'plots'
+      ? { color: 'blue' }
+      : { color: 'blue' };
+
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
     const secondLetter = profileData?.name.lastName[0] || '';
@@ -35,11 +33,26 @@ function Header({
   function handleLogout() {
     keycloak.logout();
   }
+
   return (
     <>
       <header className={styles.container}>
-        <img src={ugix_logo} className={styles.logo_img} alt="" />
-        <div data-intro="header" className={styles.tools_container}>
+        <div className={styles.button_container}>
+          <img src={ugix_logo} className={styles.logo_img} alt="" />
+          <div style={{ display: 'flex' }}>
+            <button
+              // style={{ ...tabStyle }}
+              onClick={() => changePage('canvas')}
+            >
+              Maps
+            </button>
+            <span
+              style={{ borderLeft: '4px solid black', height: '25px' }}
+            ></span>
+            <button onClick={() => changePage('plots')}>Plots</button>
+          </div>
+        </div>
+        {/* <div data-intro="header" className={styles.tools_container}>
           <TooltipWrapper content="Browse Ugix  resources">
             <span data-intro="browse">
               <BrowseDataDialog resourceList={resourceList} />
@@ -69,7 +82,7 @@ function Header({
               <SwipeDialog />
             </span>
           </TooltipWrapper>
-        </div>
+        </div> */}
         <div className={styles.profile_container}>
           <Popover.Root>
             <Popover.Trigger asChild>

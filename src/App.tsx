@@ -10,6 +10,7 @@ import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
 import { AxiosError } from 'axios';
 import { emitToast } from './lib/toastEmitter';
 import { getCookieValue, setCookie } from './lib/cookieManger';
+import Plots from './pages/plots/Plots';
 
 function App() {
   const isRun = useRef(false);
@@ -17,12 +18,13 @@ function App() {
   const intervalId = useRef<number>();
   const [loggedIn, setLoggedIn] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile>();
+  const [currentPage, setCurrentPage] = useState<string>('canvas');
 
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
-    // setLoggedIn(true);
-    initialiseKeycloak();
+    setLoggedIn(true);
+    // initialiseKeycloak();
   }, []);
 
   function initialiseKeycloak() {
@@ -49,7 +51,7 @@ function App() {
       checkLoginStatus();
     }, 500);
   }
-
+  console.log(currentPage);
   function checkLoginStatus() {
     const cookieResponse = getCookieValue(envurls.authCookie);
     if (cookieResponse === 'logged-in') {
@@ -81,9 +83,30 @@ function App() {
       }
     }
   }
+  function changePage(newPage: string) {
+    setCurrentPage(newPage);
+  }
   return (
     <LoadingWrapper>
-      {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
+      <>
+        {loggedIn && currentPage === 'canvas' && (
+          <Canvas
+            profileData={profileData}
+            changePage={changePage}
+            currentPage={currentPage}
+          />
+        )}
+
+        {loggedIn && currentPage === 'plots' && (
+          <Plots
+            changePage={changePage}
+            profileData={profileData}
+            currentPage={currentPage}
+          />
+        )}
+
+        {!loggedIn && <Home />}
+      </>
     </LoadingWrapper>
   );
 }

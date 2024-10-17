@@ -1,0 +1,27 @@
+.container {
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+.tabContianer {
+  margin-top: 3rem;
+  padding: 0.8rem;
+}
+.tabContianer > button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 18px;
+  border: 1px solid black;
+  border-radius: var(--radius-sm);
+}
+
+.tab_content {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

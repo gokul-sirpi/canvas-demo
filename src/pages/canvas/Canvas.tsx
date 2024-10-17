@@ -21,8 +21,17 @@ import { getCookieValue } from '../../lib/cookieManger.ts';
 import Intro from '../../layouts/Intro/Intro.tsx';
 import SwipeLine from '../../layouts/swipeLine/SwipeLine.tsx';
 import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter.tsx';
+import Toolbar from '../../layouts/toolbar/Toolbar.tsx';
 
-function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
+function Canvas({
+  profileData,
+  changePage,
+  currentPage,
+}: {
+  profileData: UserProfile | undefined;
+  changePage: (page: string) => void;
+  currentPage: string;
+}) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const resourcesFromCatalogue: string[] = [];
@@ -34,6 +43,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
     openLayerMap.setOlTarget('ol-map');
     getResourceData();
   }, []);
+
   async function getResourceData() {
     const response = await axios.get(
       envurls.ugixServer +
@@ -152,6 +162,7 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
   function handleDragOver(event: React.DragEvent) {
     event.preventDefault();
   }
+
   return (
     <section className={styles.container}>
       <div className={styles.ol_map_container}>
@@ -164,7 +175,12 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         <>
           <SwipeLine />
           <Popup />
-          <Header profileData={profileData} resourceList={allResrources} />
+          <Toolbar resourceList={allResrources} />
+          <Header
+            profileData={profileData}
+            changePage={changePage}
+            currentPage={currentPage}
+          />
           <LayerCard />
           <Intro />
         </>

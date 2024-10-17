@@ -4,7 +4,7 @@ export function emitToast(type: TypeOptions, message: string) {
   toast(message, {
     type,
     position: 'bottom-right',
-    autoClose: 1500,
+    autoClose: 3000,
     hideProgressBar: true,
     pauseOnHover: true,
     transition: Slide,

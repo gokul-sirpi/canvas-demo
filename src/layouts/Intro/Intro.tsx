@@ -13,7 +13,7 @@ function Intro() {
   const steps: Partial<IntroStep>[] = [
     {
       title: 'Welcome',
-      intro: 'Welcome to Ugix canvas playground',
+      intro: 'Welcome to GSX canvas playground',
     },
     {
       element: getElementWithDataSelector('header'),

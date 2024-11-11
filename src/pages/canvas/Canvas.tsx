@@ -7,7 +7,7 @@ import { UserProfile } from '../../types/UserProfile';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import axios from 'axios';
-import envurls from '../../utils/config';
+import envurls, { keycloakEnv } from '../../utils/config';
 import { GeoJsonObj } from '../../types/GeojsonType';
 import { QueryParams, Resource } from '../../types/resource';
 import {
@@ -21,7 +21,6 @@ import Intro from '../../layouts/Intro/Intro';
 import SwipeLine from '../../layouts/swipeLine/SwipeLine';
 import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter';
 import { Sidebar } from '../../components/sidebar/Sidebar';
-import Toolbar from '../../layouts/toolbar/Toolbar';
 
 function Canvas({
   profileData,
@@ -43,15 +42,19 @@ function Canvas({
     openLayerMap.setOlTarget('ol-map');
     getResourceData();
   }, []);
-
   async function getResourceData() {
-    const response = await axios.get(
-      envurls.ugixServer +
-        'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
-    );
+    const url =
+      keycloakEnv.realm === 'ugix'
+        ? 'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
+        : 'cat/v1/search?property=[plot]&value=[[true]]';
+
+    const response = await axios.get(`${envurls.ugixServer}${url}`);
+
     if (response.status === 200 && response.data.results.length > 0) {
       setAllResources(response.data.results);
       renderWishListItems(response.data.results);
+    } else {
+      console.log('empty');
     }
   }
 
@@ -184,11 +187,12 @@ function Canvas({
         <>
           <SwipeLine />
           {/* <Popup /> */}
-          <Toolbar resourceList={allResrources} />
+          {/* <Toolbar resourceList={allResrources} /> */}
           <Header
             profileData={profileData}
             changePage={changePage}
             currentPage={currentPage}
+            resourceList={allResrources}
           />
           <LayerCard />
           <Intro />

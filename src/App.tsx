@@ -18,13 +18,13 @@ function App() {
   const intervalId = useRef<number>();
   const [loggedIn, setLoggedIn] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile>();
-  const [currentPage, setCurrentPage] = useState<string>('canvas');
+  const [currentPage, setCurrentPage] = useState<string>('plots');
 
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
-    setLoggedIn(true);
-    // initialiseKeycloak();
+    // setLoggedIn(true);
+    initialiseKeycloak();
   }, []);
 
   function initialiseKeycloak() {
@@ -51,7 +51,6 @@ function App() {
       checkLoginStatus();
     }, 500);
   }
-  console.log(currentPage);
   function checkLoginStatus() {
     const cookieResponse = getCookieValue(envurls.authCookie);
     if (cookieResponse === 'logged-in') {

@@ -1,19 +1,19 @@
 .container {
   padding: 1rem;
 }
-.tab_manager {
+.container {
   display: flex;
   gap: 0.5rem;
   padding: 1.5rem;
   border-bottom: 1px solid #48484859;
   align-items: center;
 }
-.tab_manager > button {
+.container > button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 18px;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-radius: var(--radius-sm);
   padding: 0.5rem 1rem;
 }

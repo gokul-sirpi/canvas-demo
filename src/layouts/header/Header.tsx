@@ -7,20 +7,31 @@ import { IoMdMail } from 'react-icons/io';
 import { HiUser } from 'react-icons/hi2';
 import { LuLogOut } from 'react-icons/lu';
 import keycloak from '../../lib/keycloak';
+import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
+import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
+import DrawingTool from '../../components/drawingTool/DrawingTool';
+import DrawingTools from '../drawingTools/DrawingTools';
+import BaseMaps from '../../components/basemaps/BaseMaps';
+import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
+import ImportDataInput from '../../components/importDataInput/ImportDataInput';
+import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
+import { Resource } from '../../types/resource';
 
 function Header({
   profileData,
   changePage,
   currentPage,
+  resourceList,
 }: {
   profileData?: UserProfile | undefined;
   changePage: Function;
   currentPage: string;
+  resourceList: Resource[];
 }) {
-  const tabStyle =
-    currentPage === 'canvas' || currentPage === 'plots'
-      ? { color: 'blue' }
-      : { color: 'blue' };
+  // const tabStyle =
+  //   currentPage === 'canvas' || currentPage === 'plots'
+  //     ? { color: 'blue' }
+  //     : { color: 'blue' };
 
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
@@ -39,7 +50,7 @@ function Header({
       <header className={styles.container}>
         <div className={styles.button_container}>
           <img src={ugix_logo} className={styles.logo_img} alt="" />
-          <div style={{ display: 'flex' }}>
+          <div className={styles.category_container}>
             <button
               // style={{ ...tabStyle }}
               onClick={() => changePage('canvas')}
@@ -47,42 +58,44 @@ function Header({
               Maps
             </button>
             <span
-              style={{ borderLeft: '4px solid black', height: '25px' }}
+              style={{ borderLeft: '2px solid black', height: '30px' }}
             ></span>
             <button onClick={() => changePage('plots')}>Plots</button>
           </div>
         </div>
-        {/* <div data-intro="header" className={styles.tools_container}>
-          <TooltipWrapper content="Browse Ugix  resources">
-            <span data-intro="browse">
-              <BrowseDataDialog resourceList={resourceList} />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Select">
-            <span data-intro="select">
-              <DrawingTool toolType="Cursor" />
-            </span>
-          </TooltipWrapper>
-          <DrawingTools />
-          <TooltipWrapper content="Add marker">
-            <span data-intro="add_marker">
-              <DrawingTool toolType="Point" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Measure distance">
-            <span data-intro="measure">
-              <DrawingTool toolType="Measure" />
-            </span>
-          </TooltipWrapper>
-          <BaseMaps />
-          <ExportDataDialog />
-          <ImportDataInput />
-          <TooltipWrapper content="Add swipe layer">
-            <span data-intro="measure">
-              <SwipeDialog />
-            </span>
-          </TooltipWrapper>
-        </div> */}
+        {currentPage === 'canvas' && (
+          <div data-intro="header" className={styles.tools_container}>
+            <TooltipWrapper content="Browse Ugix  resources">
+              <span data-intro="browse">
+                <BrowseDataDialog resourceList={resourceList} />
+              </span>
+            </TooltipWrapper>
+            <TooltipWrapper content="Select">
+              <span data-intro="select">
+                <DrawingTool toolType="Cursor" />
+              </span>
+            </TooltipWrapper>
+            <DrawingTools />
+            <TooltipWrapper content="Add marker">
+              <span data-intro="add_marker">
+                <DrawingTool toolType="Point" />
+              </span>
+            </TooltipWrapper>
+            <TooltipWrapper content="Measure distance">
+              <span data-intro="measure">
+                <DrawingTool toolType="Measure" />
+              </span>
+            </TooltipWrapper>
+            <BaseMaps />
+            <ExportDataDialog />
+            <ImportDataInput />
+            <TooltipWrapper content="Add swipe layer">
+              <span data-intro="measure">
+                <SwipeDialog />
+              </span>
+            </TooltipWrapper>
+          </div>
+        )}
         <div className={styles.profile_container}>
           <Popover.Root>
             <Popover.Trigger asChild>

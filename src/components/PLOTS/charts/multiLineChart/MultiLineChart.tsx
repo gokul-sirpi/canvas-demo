@@ -1,0 +1,76 @@
+import * as echarts from 'echarts';
+import { EchatrColors } from '../../../../utils/EchartColors';
+
+function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
+  let chartDom = document.getElementById('line-chart');
+  let myChart = echarts.init(chartDom);
+  let option = {
+    color: EchatrColors(),
+
+    title: {
+      text: 'MultiLine Plot',
+    },
+    tooltip: {
+      trigger: 'axis',
+    },
+    legend: {
+      data: yAxis,
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true,
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {},
+      },
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: data.map((item) => item[xAxis]),
+    },
+    yAxis: {
+      type: 'value',
+    },
+    series: yAxis.map((key) => ({
+      name: key,
+      type: 'line',
+      stack: 'Total',
+      data: data.map((item) => item[key]),
+    })),
+  };
+
+  option && myChart.setOption(option);
+}
+
+function MultiLineChart({
+  dataforPlot,
+  xAxis,
+  yAxis,
+}: {
+  dataforPlot: object[];
+  xAxis: string[];
+  yAxis: string[];
+}) {
+  setTimeout(() => {
+    generateGraph(dataforPlot, xAxis, yAxis);
+  }, 1000);
+
+  return (
+    <>
+      <div
+        id="line-chart"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          top: '1.5rem',
+        }}
+      ></div>
+    </>
+  );
+}
+
+export default MultiLineChart;

@@ -1,14 +1,19 @@
+import axios from 'axios';
+import AreaChart from '../../components/PLOTS/charts/areaChart/AreaChart';
+import MultiLineChart from '../../components/PLOTS/charts/multiLineChart/MultiLineChart';
+import PlotsTab from '../../components/PLOTS/plotsTab/PlotsTab';
 import Header from '../../layouts/header/Header';
+import { plotResource } from '../../types/plotResource';
 import { UserProfile } from '../../types/UserProfile';
 import styles from './styles.module.css';
-import PlotsTab from '../../components/plotsTab/PlotsTab';
-import { useState } from 'react';
-
-type tabValue = {
-  label: string;
-  description: string;
-  value: number;
-};
+import { Fragment, useEffect, useState } from 'react';
+import envurls from '../../utils/config';
+import { getDateRange } from '../../utils/getDateRange';
+import FilterInputs from '../../components/PLOTS/filterInputs/FilterInputs';
+import { emitToast } from '../../lib/toastEmitter';
+import { getAccessToken } from '../../lib/getAllUgixFeatures';
+import { updateLoadingState } from '../../context/loading/LoaderSlice';
+import { useDispatch } from 'react-redux';
 
 export default function Plots({
   changePage,
@@ -19,24 +24,175 @@ export default function Plots({
   profileData?: UserProfile | undefined;
   currentPage: string;
 }) {
-  const [tabs, setTabs] = useState<tabValue[]>([]);
-  const [activeTab, setActiveTab] = useState<number | null>(null);
+  const dispatch = useDispatch();
+  const { startDate, endDate } = getDateRange();
+  const [tabs, setTabs] = useState<plotResource[]>([]);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [dataforPlot, setDataForPlot] = useState<[]>([]);
+  const [filteredDataForPlot, setFilteredDataForPlot] = useState<[]>([]);
 
-  const removeTab = (tabValue: number) => {
-    const filteredTabs = tabs.filter((tab) => tab.value !== tabValue);
+  const [filterDates, SetFilterDates] = useState({
+    startDate: startDate,
+    endDate: endDate,
+  });
+  const [allResources, setAllResources] = useState<plotResource[]>([]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeResource, setActiveResource] = useState<plotResource | null>(
+    null
+  );
+
+  const toggleDialog = () => setIsDialogOpen((prev) => !prev);
+
+  useEffect(() => {
+    getAllResourceData();
+  }, []);
+
+  // gets all the resource data
+  async function getAllResourceData() {
+    try {
+      const response = await axios.get(
+        `${envurls.ugixServer}cat/v1/search?property=[plot]&value=[[true]]`
+      );
+      if (response.status === 200 && response.data.results.length > 0) {
+        setAllResources(response.data.results);
+      }
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+      emitToast('error', 'Failed to fetch resources');
+    }
+  }
+
+  // runs when user clicks add button in the dialog
+
+  async function handleAdd(resource: plotResource) {
+    setActiveResource(resource);
+    console.log(resource.id);
+    const { error, token } = await getAccessToken(resource);
+    if (error) {
+      emitToast('error', `Unable to get access token`);
+      throw new Error(`no-access: ${error}`);
+    }
+    if (!token) {
+      throw new Error('Unable to get access token');
+    }
+    try {
+      dispatch(updateLoadingState(true));
+      let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(resource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
+      const res = await axios.get(url, { headers: { token } });
+
+      if (res.status === 200 && res.data.results) {
+        addTab(resource);
+        plotData(res.data.results);
+        setIsDialogOpen(false);
+      } else if (res.status === 204) {
+        emitToast('info', 'No content available');
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      emitToast('error', 'No access to data');
+      console.log(error);
+      setIsDialogOpen(false);
+    } finally {
+      dispatch(updateLoadingState(false));
+    }
+  }
+  // console.log(activeResource);
+
+  useEffect(() => {
+    if (activeResource) {
+      handleOnFilterChange();
+    }
+  }, [filterDates.startDate, filterDates.endDate]);
+
+  async function handleOnFilterChange() {
+    if (activeResource) {
+      try {
+        dispatch(updateLoadingState(true));
+
+        const { error, token } = await getAccessToken(activeResource);
+        if (error) {
+          emitToast('error', `Unable to get access token`);
+          throw new Error(`no-access: ${error}`);
+        }
+        if (!token) {
+          throw new Error('Unable to get access token');
+        }
+        let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(activeResource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
+        const res = await axios.get(url, { headers: { token } });
+
+        if (res.status === 200 && res.data.results) {
+          plotData(res.data.results);
+        } else if (res.status === 204) {
+          emitToast('info', 'No content available');
+        }
+      } catch (error) {
+        emitToast('error', 'No access to data');
+        console.log(error);
+      } finally {
+        dispatch(updateLoadingState(false));
+      }
+    }
+  }
+
+  async function onTabSwitching(resourceId: plotResource) {
+    if (activeResource) {
+      try {
+        dispatch(updateLoadingState(true));
+
+        const { error, token } = await getAccessToken(resourceId);
+        if (error) {
+          emitToast('error', `Unable to get access token`);
+          throw new Error(`no-access: ${error}`);
+        }
+        if (!token) {
+          throw new Error('Unable to get access token');
+        }
+        let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(resourceId.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
+        const res = await axios.get(url, { headers: { token } });
+
+        if (res.status === 200 && res.data.results) {
+          plotData(res.data.results);
+        } else if (res.status === 204) {
+          emitToast('info', 'No content available');
+        }
+      } catch (error) {
+        emitToast('error', 'No access to data');
+        console.log(error);
+      } finally {
+        dispatch(updateLoadingState(false));
+      }
+    }
+  }
+
+  // functon adds the added plot-resource data to state named "tab" and make the tab active tab
+  const addTab = (newTab: plotResource) => {
+    setTabs((prevTabs) => [...prevTabs, newTab]);
+    setActiveTab(newTab.id);
+  };
+
+  // removes the resource from the "tab" state
+  const removeTab = (tabValue: string) => {
+    const filteredTabs = tabs.filter((tab) => tab.id !== tabValue);
+
     setTabs(filteredTabs);
-
     if (activeTab === tabValue && filteredTabs.length > 0) {
-      setActiveTab(filteredTabs[filteredTabs.length - 1].value);
+      setActiveTab(filteredTabs[filteredTabs.length - 1].id);
     } else if (filteredTabs.length === 0) {
       setActiveTab(null);
     }
   };
 
-  const addTab = (newTab: tabValue) => {
-    setTabs((prevTabs) => [...prevTabs, newTab]);
-    setActiveTab(newTab.value);
+  // get data returned for the selected resource which is array of initial data
+  const plotData = (data: []) => {
+    setDataForPlot(data);
+    setFilteredDataForPlot(data);
   };
+
+  // array of displayed resources
+  const plotTypes =
+    (tabs.length > 0 && tabs.map((reso) => reso).map((item) => item)) || [];
+  // console.log(plotTypes, filterDates.startDate, dataforPlot, 'plot types');
 
   return (
     <div className={styles.container}>
@@ -44,6 +200,7 @@ export default function Plots({
         profileData={profileData}
         changePage={changePage}
         currentPage={currentPage}
+        resourceList={[]}
       />
       <div className={styles.tabContianer}>
         <div>
@@ -52,14 +209,77 @@ export default function Plots({
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             removeTab={removeTab}
-            addTab={addTab}
+            allResources={allResources}
+            isOpen={isDialogOpen}
+            toggleDialog={toggleDialog}
+            onAddResource={handleAdd}
+            onTabSwitching={onTabSwitching}
+            setAllResources={setAllResources}
           />
+
           <div className={styles.tab_content}>
             {tabs.length > 0 && activeTab !== null ? (
               <>
-                <h3>
-                  {tabs.find((tab) => tab.value === activeTab)?.description}
-                </h3>
+                <h3>{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
+
+                {plotTypes.map((item, ind) => {
+                  if (item.id === activeTab && item.plotSchema?.length > 0) {
+                    const dynamicValues = item.plotSchema[0].dynamic;
+                    return (
+                      <Fragment key={ind}>
+                        <FilterInputs
+                          dynamicValues={dynamicValues}
+                          filterDates={filterDates}
+                          SetFilterDates={SetFilterDates}
+                          dataforPlot={dataforPlot}
+                          setDataForPlot={setDataForPlot}
+                          setFilteredDataForPlot={setFilteredDataForPlot}
+                        />
+                      </Fragment>
+                    );
+                  }
+                })}
+
+                {/* charts */}
+                {plotTypes.map(
+                  (item, ind) =>
+                    item.id === activeTab &&
+                    item.plotSchema.length > 0 && (
+                      <Fragment key={ind}>
+                        {item.plotSchema.map((plotItem, plotIndex) => {
+                          const xAxis = plotItem.xAxis;
+                          const yAxis = plotItem.yAxis;
+
+                          return (
+                            <div key={plotIndex}>
+                              {
+                                // @ts-expect-error
+                                plotItem[`plotType_${plotIndex + 1}`] ===
+                                  'multiLinePlot' && (
+                                  <MultiLineChart
+                                    dataforPlot={filteredDataForPlot}
+                                    xAxis={xAxis}
+                                    yAxis={yAxis}
+                                  />
+                                )
+                              }
+                              {
+                                // @ts-expect-error
+                                plotItem[`plotType_${plotIndex + 1}`] ===
+                                  'areaChart' && (
+                                  <AreaChart
+                                    dataforPlot={filteredDataForPlot}
+                                    xAxis={xAxis}
+                                    yAxis={yAxis}
+                                  />
+                                )
+                              }
+                            </div>
+                          );
+                        })}
+                      </Fragment>
+                    )
+                )}
               </>
             ) : (
               <div>No tabs available</div>

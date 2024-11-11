@@ -128,3 +128,8 @@
   align-items: center;
   gap: 0.3rem;
 }
+
+.category_container {
+  display: flex;
+  justify-content: center;
+}

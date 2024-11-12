@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import AreaChart from '../../components/PLOTS/charts/areaChart/AreaChart';
 import MultiLineChart from '../../components/PLOTS/charts/multiLineChart/MultiLineChart';
 import PlotsTab from '../../components/PLOTS/plotsTab/PlotsTab';
@@ -55,7 +55,8 @@ export default function Plots({
         `${envurls.ugixServer}cat/v1/search?property=[plot]&value=[[true]]`
       );
       if (response.status === 200 && response.data.results.length > 0) {
-        setAllResources(response.data.results);
+        const sortedData = sortResources(response.data.results);
+        setAllResources(sortedData);
       }
     } catch (error) {
       console.error('Error fetching resources:', error);
@@ -63,6 +64,16 @@ export default function Plots({
     }
   }
 
+  function sortResources(allResrources: plotResource[]) {
+    return allResrources.sort((a, b) => {
+      if (a.label < b.label) {
+        return -1;
+      } else if (a.label > b.label) {
+        return 1;
+      }
+      return 0;
+    });
+  }
   // runs when user clicks add button in the dialog
 
   async function handleAdd(resource: plotResource) {
@@ -90,9 +101,21 @@ export default function Plots({
         setIsDialogOpen(false);
       }
     } catch (error) {
-      emitToast('error', 'No access to data');
-      console.log(error);
-      setIsDialogOpen(false);
+      console.error(error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 413) {
+          emitToast(
+            'error',
+            `${error.response.data.detail || `Payload too large`}`
+          );
+        } else {
+          emitToast('error', `Payload too large`);
+          console.log(error);
+        }
+      } else {
+        emitToast('error', 'No access to data');
+        console.log(error);
+      }
     } finally {
       dispatch(updateLoadingState(false));
     }
@@ -127,8 +150,21 @@ export default function Plots({
           emitToast('info', 'No content available');
         }
       } catch (error) {
-        emitToast('error', 'No access to data');
-        console.log(error);
+        console.error(error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 413) {
+            emitToast(
+              'error',
+              `${error.response.data.detail || `Payload too large`}`
+            );
+          } else {
+            emitToast('error', `Payload too large`);
+            console.log(error);
+          }
+        } else {
+          emitToast('error', 'No access to data');
+          console.log(error);
+        }
       } finally {
         dispatch(updateLoadingState(false));
       }
@@ -157,8 +193,21 @@ export default function Plots({
           emitToast('info', 'No content available');
         }
       } catch (error) {
-        emitToast('error', 'No access to data');
-        console.log(error);
+        console.error(error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 413) {
+            emitToast(
+              'error',
+              `${error.response.data.detail || `Payload too large`}`
+            );
+          } else {
+            emitToast('error', `Payload too large`);
+            console.log(error);
+          }
+        } else {
+          emitToast('error', 'No access to data');
+          console.log(error);
+        }
       } finally {
         dispatch(updateLoadingState(false));
       }

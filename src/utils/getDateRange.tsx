@@ -4,7 +4,7 @@ export function getDateRange(): { startDate: string; endDate: string } {
 
   // Calculate start date as 30 days before current date
   const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 5);
+  startDate.setDate(endDate.getDate() - 30);
 
   // Helper function to format date in YYYY-MM-DDTHH:mm:ss±hh:mm
   const formatDate = (date: Date): string => {

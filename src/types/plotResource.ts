@@ -6,7 +6,7 @@ export type plotResource = {
     apdURL: string
     dataDescriptor: object
     plotSchema: plotSchema[]
-    label?: string
+    label: string
 };
 
 export type plotSchema = {

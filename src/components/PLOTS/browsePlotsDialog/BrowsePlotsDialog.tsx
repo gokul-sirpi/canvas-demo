@@ -56,11 +56,13 @@ export default function BrowsePlotsDialog({
         <Dialog.Overlay className={styles.dialog_overlay} />
         <Dialog.Content className={styles.dialog_content}>
           <Dialog.Title className={styles.dialog_title}>
-            <button className={styles.close_btn}>
-              <div className={styles.btn_icon_container}>
-                <IoMdClose size={20} />
-              </div>
-            </button>
+            <Dialog.Close>
+              <button className={styles.close_btn}>
+                <div className={styles.btn_icon_container}>
+                  <IoMdClose size={20} />
+                </div>
+              </button>
+            </Dialog.Close>
           </Dialog.Title>
           <section className={styles.dialog_description}>
             <div className={styles.input_container}>

@@ -37,11 +37,21 @@ function Canvas({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (singleRender.current) return;
-    singleRender.current = true;
-    openLayerMap.setOlTarget('ol-map');
-    getResourceData();
-  }, []);
+    if (currentPage === 'canvas') {
+      if (singleRender.current) {
+        openLayerMap.clearMap();
+      }
+
+      singleRender.current = true;
+      openLayerMap.setOlTarget('ol-map');
+      getResourceData();
+
+      return () => {
+        openLayerMap.clearMap();
+      };
+    }
+  }, [currentPage]);
+
   async function getResourceData() {
     const url =
       keycloakEnv.realm === 'ugix'

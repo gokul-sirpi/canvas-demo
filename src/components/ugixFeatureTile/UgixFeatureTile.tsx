@@ -86,7 +86,13 @@ function UgixFeatureTile({
           ugixResources.push(newLayer.layerId);
           cleanUpSideEffects();
           dialogCloseTrigger(false);
+          if (bbox) {
+            openLayerMap.zoomToFit(newLayer.layerId, bbox);
+          } else {
+            openLayerMap.zoomToFit(newLayer.layerId);
+          }
         },
+
         (type, message) => {
           if (type === 'no-access') {
             showNoAccessText();

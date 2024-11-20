@@ -16,6 +16,7 @@ ul {
 }
 body {
   --color-primary: #05aa99;
+  --color-adex-primary: #05aa99;
   --color-secondary: #058d05;
   --color-accent: #d6d6d6;
   --radius-sm: 0.3rem;

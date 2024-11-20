@@ -54,9 +54,9 @@ function Canvas({
 
   async function getResourceData() {
     const url =
-      keycloakEnv.realm === 'ugix'
-        ? 'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
-        : 'cat/v1/search?property=[plot]&value=[[true]]';
+      // keycloakEnv.realm === 'ugix'?
+      'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
+    // : 'cat/v1/search?property=[plot]&value=[[true]]';
 
     const response = await axios.get(`${envurls.ugixServer}${url}`);
 

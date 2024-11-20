@@ -1,6 +1,6 @@
 .container {
   height: 100vh;
-  height: 100dvh;
+  height: 100vh;
   position: relative;
   overflow: auto;
   display: flex;
@@ -25,4 +25,23 @@
   justify-content: center;
   flex-direction: column;
   margin-top: 1rem;
+}
+.no_tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 20rem);
+  font-size: var(--font-md);
+}
+.dynamic_select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+.title_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

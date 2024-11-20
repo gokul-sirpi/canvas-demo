@@ -10,6 +10,7 @@ import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { RiInformationFill } from 'react-icons/ri';
 import { useState } from 'react';
+import envurls from '../../../utils/config';
 
 export default function BrowsePlotsDialog({
   allResources,
@@ -43,13 +44,20 @@ export default function BrowsePlotsDialog({
   //     setAllResources(allResources);
   //   }
   // }
+  function getinfoLink(resource: plotResource) {
+    const groupId = resource.resourceGroup;
+    const path = envurls.ugixCatalogue + 'dataset/' + groupId;
+    window.open(path, '_blank');
+  }
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={toggleDialog}>
       <Dialog.Trigger asChild>
         <button className={styles.header_button} autoFocus>
-          <TbWorldSearch size={25} />
-          Browse ADEX
+          <span>
+            <TbWorldSearch size={25} />
+          </span>
+          <span>Browse ADEX</span>
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -71,7 +79,7 @@ export default function BrowsePlotsDialog({
                 type="text"
                 autoFocus
                 placeholder="Explore data sets"
-                value={searchInput}
+                // value={searchInput}
                 // onChange={(e) => handleChange(e.target.value)}
               />
               <button>
@@ -127,7 +135,7 @@ export default function BrowsePlotsDialog({
                         </button>
                       </TooltipWrapper>
                       <TooltipWrapper content="Resource info">
-                        <button>
+                        <button onClick={() => getinfoLink(item)}>
                           <div className={styles.icon_wrapper}>
                             <RiInformationFill />
                           </div>

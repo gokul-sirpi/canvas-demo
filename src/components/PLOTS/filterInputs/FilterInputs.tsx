@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
+import { plotResource } from '../../../types/plotResource';
+import { camelCaseToSpaceSeparated } from '../../../utils/CamelCaseToSpaceSeparated';
 
 export default function FilterInputs({
   dynamicValues,
   SetFilterDates,
   filterDates,
   dataforPlot,
-  // setDataForPlot,
   setFilteredDataForPlot,
+  allResources,
+  activeResource,
 }: {
   dynamicValues: string[];
   SetFilterDates: React.Dispatch<
@@ -20,9 +23,11 @@ export default function FilterInputs({
     startDate: string;
     endDate: string;
   };
-  dataforPlot: [];
-  setDataForPlot: React.Dispatch<React.SetStateAction<[]>>;
-  setFilteredDataForPlot: React.Dispatch<React.SetStateAction<[]>>;
+  dataforPlot: Object[];
+  setDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
+  setFilteredDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
+  allResources: plotResource[];
+  activeResource: plotResource | null;
 }) {
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
     {}
@@ -61,7 +66,7 @@ export default function FilterInputs({
   };
 
   // Function to update options for the dropdown based on current selections
-  const updateFilteredOptions = (currentData: []) => {
+  const updateFilteredOptions = (currentData: Object[]) => {
     const newOptions: Record<string, string[]> = {};
     dynamicValues.forEach((key) => {
       newOptions[key] = Array.from(
@@ -93,56 +98,72 @@ export default function FilterInputs({
 
   console.log(filteredOptions);
 
+  // let datarecpKey = dataforPlot.length > 0 && dataforPlot;
+  // const dataDescriptor = activeResource && activeResource.dataDescriptor;
+
+  // console.log(datarecpKey);
+
   return (
     <div className={styles.container}>
-      <div className={styles.input_container}>
-        <label>Start date</label>
-        <input
-          className={styles.dynamic_select}
-          type="date"
-          defaultValue={formatDate(filterDates.startDate)}
-          onChange={handleStartDateChange}
-        />
-      </div>
-      <div className={styles.input_container}>
-        <label>End date</label>
-        <input
-          className={styles.dynamic_select}
-          type="date"
-          defaultValue={formatDate(filterDates.endDate)}
-          onChange={handleEndDateChange}
-        />
-      </div>
-      {dynamicValues.map((key) => (
-        <div key={key} className={styles.input_container}>
-          <label>{key}</label>
-          <select
+      <div className={styles.date_container}>
+        <div className={styles.input_container}>
+          <label>Start date</label>
+          <input
             className={styles.dynamic_select}
-            value={selectedValues[key] || ''}
-            onChange={(e) => handleSelectChange(key, e.target.value)}
-          >
-            <option value="" onClick={() => updateFilteredOptions(dataforPlot)}>
-              All
-            </option>
-            {filteredOptions[key]?.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
+            type="date"
+            defaultValue={formatDate(filterDates.startDate)}
+            onChange={handleStartDateChange}
+          />
         </div>
-      ))}
+        <div className={styles.input_container}>
+          <label>End date</label>
+          <input
+            className={styles.dynamic_select}
+            type="date"
+            defaultValue={formatDate(filterDates.endDate)}
+            onChange={handleEndDateChange}
+          />
+        </div>
+      </div>
+      <div className={styles.dynamic_container}>
+        {dynamicValues.map((key) => (
+          <div key={key} className={styles.input_container}>
+            <label>{camelCaseToSpaceSeparated(key)}</label>
+            <select
+              className={styles.dynamic_select}
+              value={selectedValues[key] || ''}
+              onChange={(e) => handleSelectChange(key, e.target.value)}
+            >
+              <option
+                value=""
+                onClick={() => updateFilteredOptions(dataforPlot)}
+              >
+                All
+              </option>
+              {filteredOptions[key]?.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
 
-      <button
-        onClick={() => {
-          setFilteredDataForPlot(dataforPlot);
-          setSelectedValues({});
-          updateFilteredOptions(dataforPlot);
-        }}
-        className={styles.reset_button}
-      >
-        Reset Filters
-      </button>
+        <div className={styles.reset_button_container}>
+          <button
+            onClick={() => {
+              setFilteredDataForPlot(dataforPlot);
+              setSelectedValues({});
+              updateFilteredOptions(dataforPlot);
+            }}
+            className={styles.reset_button}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* <button>Info</button> */}
     </div>
   );
 }

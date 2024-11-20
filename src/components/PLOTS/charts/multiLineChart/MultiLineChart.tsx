@@ -1,4 +1,7 @@
 import * as echarts from 'echarts';
+
+import { formatDate } from '../../../../utils/FormatDate';
+import { camelCaseToSpaceSeparated } from '../../../../utils/CamelCaseToSpaceSeparated';
 import { EchatrColors } from '../../../../utils/EchartColors';
 
 function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
@@ -7,6 +10,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let option = {
     color: EchatrColors(),
 
+    height: '80%',
     title: {
       text: 'MultiLine Plot',
     },
@@ -15,6 +19,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     },
     legend: {
       data: yAxis,
+      formatter: (name: string) => camelCaseToSpaceSeparated(name),
     },
     grid: {
       left: '3%',
@@ -31,6 +36,9 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
       type: 'category',
       boundaryGap: false,
       data: data.map((item) => item[xAxis]),
+      axisLabel: {
+        formatter: (value: string) => formatDate(value),
+      },
     },
     yAxis: {
       type: 'value',
@@ -64,8 +72,8 @@ function MultiLineChart({
       <div
         id="line-chart"
         style={{
-          width: '100vw',
-          height: '100vh',
+          width: '95vw',
+          height: '55vh',
           top: '1.5rem',
         }}
       ></div>

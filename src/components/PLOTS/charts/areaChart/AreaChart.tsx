@@ -1,4 +1,7 @@
 import * as echarts from 'echarts';
+
+import { formatDate } from '../../../../utils/FormatDate';
+import { camelCaseToSpaceSeparated } from '../../../../utils/CamelCaseToSpaceSeparated';
 import { EchatrColors } from '../../../../utils/EchartColors';
 
 function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
@@ -12,22 +15,33 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
       trigger: 'axis',
     },
     color: EchatrColors(),
+    height: '50%',
+    legend: {
+      data: yAxis,
+      formatter: (name: string) => camelCaseToSpaceSeparated(name),
+    },
+
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: data.map((item) => item[xAxis]),
+      axisLabel: {
+        formatter: (value: string) => formatDate(value),
+      },
     },
     yAxis: {
       type: 'value',
     },
-    series: [
-      {
-        name: 'arrivalQuantity',
-        type: 'line',
-        stack: 'Total',
-        data: data.map((item) => item[yAxis]),
+    series: yAxis.map((key) => ({
+      name: key,
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {
+        color: EchatrColors(),
+        opacity: 0.5,
       },
-    ],
+      data: data.map((item) => item[key]),
+    })),
   };
 
   option && myChart.setOption(option);
@@ -52,7 +66,7 @@ function AreaChart({
     <div
       id="area-chart"
       style={{
-        width: '90vw',
+        width: '100vw',
         height: '100vh',
         top: '1.5rem',
         overflow: 'auto',

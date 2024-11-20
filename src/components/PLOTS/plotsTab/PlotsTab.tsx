@@ -1,4 +1,5 @@
 import { plotResource } from '../../../types/plotResource';
+import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
 import BrowsePlotsDialog from '../browsePlotsDialog/BrowsePlotsDialog';
 import styles from './styles.module.css';
 import { MdClose } from 'react-icons/md';
@@ -42,24 +43,33 @@ export default function PlotsTab({
       />
       {tabs.length > 0 ? (
         tabs.map((item: plotResource) => (
-          <button
-            key={item.id}
-            className={
-              item.id === activeTab ? styles.selected_tab : styles.tab_box
-            }
-            onClick={() => handleTabSwitching(item)}
-            type="button"
-          >
-            {item.label}
-            <MdClose
-              size={25}
-              onClick={(e) => {
-                e.stopPropagation();
-                removeTab(item.id);
-              }}
-              type="button"
-            />
-          </button>
+          <TooltipWrapper content={item.label}>
+            <div
+              className={
+                item.id === activeTab ? styles.selected_tab : styles.tab_box
+              }
+            >
+              <button
+                key={item.id}
+                className={
+                  item.id === activeTab ? styles.active : styles.not_active
+                }
+                onClick={() => handleTabSwitching(item)}
+                type="button"
+              >
+                {item.label}
+              </button>
+              <MdClose
+                size={25}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeTab(item.id);
+                }}
+                type="button"
+                cursor={'pointer'}
+              />
+            </div>
+          </TooltipWrapper>
         ))
       ) : (
         <div>No tabs available</div>

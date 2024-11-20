@@ -4,14 +4,21 @@ export type plotResource = {
     description: string
     accessPolicy: string
     apdURL: string
-    dataDescriptor: object
+    dataDescriptor: dataDescriptor
     plotSchema: plotSchema[]
     label: string
+    resourceGroup: string
 };
 
 export type plotSchema = {
     dynamic: string[]
-    plotType: string
     xAxis: string[]
     yAxis: string[]
+
+};
+
+export type dataDescriptor = {
+    key: {
+        [key: string]: string
+    }
 }

@@ -16,6 +16,7 @@ import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog
 import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
 import { Resource } from '../../types/resource';
+import { keycloakEnv } from '../../utils/config';
 
 function Header({
   profileData,
@@ -28,10 +29,14 @@ function Header({
   currentPage: string;
   resourceList: Resource[];
 }) {
-  // const tabStyle =
-  //   currentPage === 'canvas' || currentPage === 'plots'
-  //     ? { color: 'blue' }
-  //     : { color: 'blue' };
+  const mapActiveStyle =
+    currentPage === 'canvas'
+      ? { color: '#05aa99', fontWeight: 'bold' }
+      : { color: 'black' };
+  const plotsActiveStyle =
+    currentPage === 'plots'
+      ? { color: '#05aa99', fontWeight: 'bold' }
+      : { color: 'black' };
 
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
@@ -50,18 +55,25 @@ function Header({
       <header className={styles.container}>
         <div className={styles.button_container}>
           <img src={ugix_logo} className={styles.logo_img} alt="" />
-          <div className={styles.category_container}>
-            <button
-              // style={{ ...tabStyle }}
-              onClick={() => changePage('canvas')}
-            >
-              Maps
-            </button>
-            <span
-              style={{ borderLeft: '2px solid black', height: '30px' }}
-            ></span>
-            <button onClick={() => changePage('plots')}>Plots</button>
-          </div>
+          {keycloakEnv.realm === 'adex' && (
+            <div className={styles.category_container}>
+              <button
+                style={mapActiveStyle}
+                onClick={() => changePage('canvas')}
+              >
+                Maps
+              </button>
+              <span
+                style={{ borderLeft: '2px solid black', height: '30px' }}
+              ></span>
+              <button
+                style={plotsActiveStyle}
+                onClick={() => changePage('plots')}
+              >
+                Plots
+              </button>
+            </div>
+          )}
         </div>
         {currentPage === 'canvas' && (
           <div data-intro="header" className={styles.tools_container}>

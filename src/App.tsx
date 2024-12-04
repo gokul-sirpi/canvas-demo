@@ -29,8 +29,8 @@ function App() {
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
-    setLoggedIn(true);
-    // initialiseKeycloak();
+    // setLoggedIn(true);
+    initialiseKeycloak();
   }, []);
 
   function initialiseKeycloak() {
@@ -53,6 +53,7 @@ function App() {
 
   function handleLogin() {
     windowref.current = window.open(envurls.authReduirectUrl, '_blank');
+    //@ts-ignore
     intervalId.current = setInterval(() => {
       checkLoginStatus();
     }, 500);

@@ -5,6 +5,7 @@ import envurls from '../utils/config';
 import { UgixLayer } from '../types/UgixLayers';
 import { GeoJsonObj } from '../types/GeojsonType';
 import openLayerMap from './openLayers';
+import { plotResource } from '../types/plotResource';
 
 type onSucess = () => void;
 type onError = (
@@ -102,13 +103,14 @@ export async function getAllUgixFeatures(
   }
 }
 
-export async function getAccessToken(resource: Resource) {
+export async function getAccessToken(resource: Resource | plotResource) {
   try {
     const body = {
       itemId: resource.id,
       itemType: 'resource',
       role: 'consumer',
     };
+
     if (resource.accessPolicy === 'OPEN') {
       body.itemId = 'geoserver.dx.ugix.org.in';
       body.itemType = 'resource_server';
@@ -123,8 +125,10 @@ export async function getAccessToken(resource: Resource) {
     return { error: 'Unable to get token', token: null };
   } catch (error) {
     if (error instanceof AxiosError) {
-      return { error: error.message, token: null };
-    } else {
+
+      return { error: error.message, token: null, status: error.response?.status };
+    }
+    else {
       return { error: 'Error', token: null };
     }
   }

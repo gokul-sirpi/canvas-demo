@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import Home from './pages/home/Home';
 import Canvas from './pages/canvas/Canvas';
 import keycloak from './lib/keycloak';
-import envurls from './utils/config';
+import envurls, { keycloakEnv } from './utils/config';
 import { axiosAuthClient } from './lib/axiosConfig';
 import { UserProfile } from './types/UserProfile';
 import LoadingWrapper from './layouts/LoadingWrapper/LoadingWrapper';
 import { AxiosError } from 'axios';
 import { emitToast } from './lib/toastEmitter';
 import { getCookieValue, setCookie } from './lib/cookieManger';
+import Plots from './pages/plots/Plots';
 
 function App() {
   const isRun = useRef(false);
@@ -17,6 +18,13 @@ function App() {
   const intervalId = useRef<number>();
   const [loggedIn, setLoggedIn] = useState(false);
   const [profileData, setProfileData] = useState<UserProfile>();
+  const [currentPage, setCurrentPage] = useState<string>(
+    keycloakEnv.realm === 'adex' ? 'plots' : 'canvas'
+  );
+
+  const primaryColor = keycloakEnv.realm === 'adex' ? '#05aa99' : '#108bb0';
+
+  document.documentElement.style.setProperty('--color-primary', primaryColor);
 
   useEffect(() => {
     if (isRun.current) return;
@@ -45,11 +53,11 @@ function App() {
 
   function handleLogin() {
     windowref.current = window.open(envurls.authReduirectUrl, '_blank');
+    //@ts-ignore
     intervalId.current = setInterval(() => {
       checkLoginStatus();
     }, 500);
   }
-
   function checkLoginStatus() {
     const cookieResponse = getCookieValue(envurls.authCookie);
     if (cookieResponse === 'logged-in') {
@@ -81,9 +89,30 @@ function App() {
       }
     }
   }
+  function changePage(newPage: string) {
+    setCurrentPage(newPage);
+  }
   return (
     <LoadingWrapper>
-      {loggedIn ? <Canvas profileData={profileData} /> : <Home />}
+      <>
+        {loggedIn && currentPage === 'canvas' && (
+          <Canvas
+            profileData={profileData}
+            changePage={changePage}
+            currentPage={currentPage}
+          />
+        )}
+
+        {loggedIn && currentPage === 'plots' && (
+          <Plots
+            changePage={changePage}
+            profileData={profileData}
+            currentPage={currentPage}
+          />
+        )}
+
+        {!loggedIn && <Home />}
+      </>
     </LoadingWrapper>
   );
 }

@@ -22,26 +22,49 @@ import SwipeLine from '../../layouts/swipeLine/SwipeLine';
 import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter';
 import { Sidebar } from '../../components/sidebar/Sidebar';
 
-function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
+function Canvas({
+  profileData,
+  changePage,
+  currentPage,
+}: {
+  profileData: UserProfile | undefined;
+  changePage: (page: string) => void;
+  currentPage: string;
+}) {
   const singleRender = useRef(false);
   const [allResrources, setAllResources] = useState<Resource[]>([]);
   const resourcesFromCatalogue: string[] = [];
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (singleRender.current) return;
-    singleRender.current = true;
-    openLayerMap.setOlTarget('ol-map');
-    getResourceData();
-  }, []);
+    if (currentPage === 'canvas') {
+      if (singleRender.current) {
+        openLayerMap.clearMap();
+      }
+
+      singleRender.current = true;
+      openLayerMap.setOlTarget('ol-map');
+      getResourceData();
+
+      return () => {
+        openLayerMap.clearMap();
+      };
+    }
+  }, [currentPage]);
+
   async function getResourceData() {
-    const response = await axios.get(
-      envurls.ugixServer +
-        'cat/v1/search?property=[type]&value=[[iudx:Resource]]'
-    );
+    const url =
+      // keycloakEnv.realm === 'ugix'?
+      'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
+    // : 'cat/v1/search?property=[plot]&value=[[true]]';
+
+    const response = await axios.get(`${envurls.ugixServer}${url}`);
+
     if (response.status === 200 && response.data.results.length > 0) {
       setAllResources(response.data.results);
       renderWishListItems(response.data.results);
+    } else {
+      console.log('empty');
     }
   }
 
@@ -174,7 +197,13 @@ function Canvas({ profileData }: { profileData: UserProfile | undefined }) {
         <>
           <SwipeLine />
           {/* <Popup /> */}
-          <Header profileData={profileData} resourceList={allResrources} />
+          {/* <Toolbar resourceList={allResrources} /> */}
+          <Header
+            profileData={profileData}
+            changePage={changePage}
+            currentPage={currentPage}
+            resourceList={allResrources}
+          />
           <LayerCard />
           <Intro />
           <Sidebar

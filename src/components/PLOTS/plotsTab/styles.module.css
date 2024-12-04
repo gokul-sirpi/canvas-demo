@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem 0rem;
+  border-bottom: 1px solid #48484859;
+  align-items: center;
+  overflow: auto;
+}
+.container > button {
+  gap: 0.5rem;
+  font-size: 18px;
+  /* border: 1px solid black; */
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  color: white;
+}
+.selected_tab {
+  background-color: #002b49;
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  max-width: 20%;
+}
+.tab_box {
+  border: 1px solid grey;
+  background-color: rgb(242, 242, 242);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  max-width: 20%;
+}
+.not_active {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: normal;
+}
+.active {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: normal;
+  color: white;
+}
+/* .tile_title {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: normal;
+  font-size: var(--font-md);
+} */

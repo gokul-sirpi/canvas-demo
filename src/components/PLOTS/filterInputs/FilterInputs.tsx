@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
-import { plotResource } from '../../../types/plotResource';
+// import { plotResource } from '../../../types/plotResource';
 import { camelCaseToSpaceSeparated } from '../../../utils/CamelCaseToSpaceSeparated';
 
 export default function FilterInputs({
@@ -9,8 +9,8 @@ export default function FilterInputs({
   filterDates,
   dataforPlot,
   setFilteredDataForPlot,
-  allResources,
-  activeResource,
+  // allResources,
+  // activeResource,
 }: {
   dynamicValues: string[];
   SetFilterDates: React.Dispatch<
@@ -26,8 +26,8 @@ export default function FilterInputs({
   dataforPlot: Object[];
   setDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
   setFilteredDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
-  allResources: plotResource[];
-  activeResource: plotResource | null;
+  // allResources: plotResource[];
+  // activeResource: plotResource | null;
 }) {
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
     {}
@@ -70,6 +70,7 @@ export default function FilterInputs({
     const newOptions: Record<string, string[]> = {};
     dynamicValues.forEach((key) => {
       newOptions[key] = Array.from(
+        // @ts-ignore
         new Set(currentData.map((item) => item[key]))
       );
     });
@@ -83,6 +84,7 @@ export default function FilterInputs({
     const filteredData = dataforPlot.filter((item) =>
       Object.entries(updatedSelectedValues).every(
         ([selectedKey, selectedValue]) =>
+          // @ts-ignore
           selectedValue === '' || item[selectedKey] === selectedValue
       )
     );

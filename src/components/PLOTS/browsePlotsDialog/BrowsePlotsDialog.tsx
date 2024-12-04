@@ -17,15 +17,18 @@ export default function BrowsePlotsDialog({
   isOpen,
   toggleDialog,
   onAddResource,
-  setAllResources,
+  // setAllResources,
+  noAccess,
 }: {
   allResources: plotResource[];
   isOpen: boolean;
   toggleDialog: () => void;
   onAddResource: (resource: plotResource) => void;
-  setAllResources: React.Dispatch<React.SetStateAction<plotResource[]>>;
+  // setAllResources: React.Dispatch<React.SetStateAction<plotResource[]>>;
+  noAccess: boolean;
 }) {
-  const [searchInput, setSearchInput] = useState<string>('');
+  // const [searchInput, setSearchInput] = useState<string>('');
+  const [selectedId, setSelectedId] = useState('');
 
   // function handleChange(text: string) {
   //   setSearchInput(text);
@@ -49,7 +52,10 @@ export default function BrowsePlotsDialog({
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
     window.open(path, '_blank');
   }
-
+  const handleAddresource = (item: plotResource) => {
+    onAddResource(item);
+    setSelectedId(item.id);
+  };
   return (
     <Dialog.Root open={isOpen} onOpenChange={toggleDialog}>
       <Dialog.Trigger asChild>
@@ -113,11 +119,19 @@ export default function BrowsePlotsDialog({
                             </div>
                           )}
                         </div>
+                        {noAccess && item.id === selectedId && (
+                          <div className={styles.warn_text}>
+                            You do not have access to view this data, please
+                            visit{' '}
+                            <a onClick={() => getinfoLink(item)}>ADEX page</a>{' '}
+                            to request access
+                          </div>
+                        )}
                       </div>
                       <TooltipWrapper content="add">
                         <button
                           className={styles.add_button}
-                          onClick={() => onAddResource(item)}
+                          onClick={() => handleAddresource(item)}
                         >
                           <div className={styles.add_icon}>
                             <FaPlus size={23} />
@@ -125,7 +139,6 @@ export default function BrowsePlotsDialog({
                         </button>
                       </TooltipWrapper>
                     </div>
-
                     <div className={styles.icon_container}>
                       <TooltipWrapper content="Download complete resources">
                         <button>

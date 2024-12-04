@@ -1,8 +1,12 @@
 import * as echarts from 'echarts';
-
 import { formatDate } from '../../../../utils/FormatDate';
 import { camelCaseToSpaceSeparated } from '../../../../utils/CamelCaseToSpaceSeparated';
 import { EchatrColors } from '../../../../utils/EchartColors';
+
+function getNestedValue(obj: Object, path: string) {
+  // @ts-ignore
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
 
 function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let chartDom = document.getElementById('line-chart');
@@ -35,6 +39,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     xAxis: {
       type: 'category',
       boundaryGap: false,
+      // @ts-ignore
       data: data.map((item) => item[xAxis]),
       axisLabel: {
         formatter: (value: string) => formatDate(value),
@@ -47,7 +52,8 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
       name: key,
       type: 'line',
       stack: 'Total',
-      data: data.map((item) => item[key]),
+      // data: data.map((item) => item[key]),
+      data: data.map((item) => getNestedValue(item, key)),
     })),
   };
 

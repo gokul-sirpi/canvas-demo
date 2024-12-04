@@ -7,7 +7,7 @@ import { UserProfile } from '../../types/UserProfile';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import axios from 'axios';
-import envurls, { keycloakEnv } from '../../utils/config';
+import envurls from '../../utils/config';
 import { GeoJsonObj } from '../../types/GeojsonType';
 import { QueryParams, Resource } from '../../types/resource';
 import {

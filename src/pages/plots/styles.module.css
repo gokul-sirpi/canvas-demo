@@ -45,3 +45,28 @@
   justify-content: space-between;
   align-items: center;
 }
+.chart_tab_container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem 0rem;
+  align-items: center;
+  overflow: auto;
+}
+.chart_tab {
+  gap: 0.5rem;
+  font-size: 18px;
+  border: 1px solid black;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  color: black;
+}
+.active_chart_tab {
+  background-color: #002b49;
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  max-width: 20%;
+}

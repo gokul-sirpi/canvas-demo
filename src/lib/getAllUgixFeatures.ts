@@ -125,8 +125,10 @@ export async function getAccessToken(resource: Resource | plotResource) {
     return { error: 'Unable to get token', token: null };
   } catch (error) {
     if (error instanceof AxiosError) {
-      return { error: error.message, token: null };
-    } else {
+
+      return { error: error.message, token: null, status: error.response?.status };
+    }
+    else {
       return { error: 'Error', token: null };
     }
   }

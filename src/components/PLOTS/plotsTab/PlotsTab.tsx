@@ -15,6 +15,7 @@ export default function PlotsTab({
   onAddResource,
   onTabSwitching,
   setAllResources,
+  noAccess,
 }: {
   tabs: plotResource[];
   activeTab: string | null;
@@ -26,6 +27,7 @@ export default function PlotsTab({
   onAddResource: (resource: plotResource) => void;
   onTabSwitching: (id: plotResource) => void;
   setAllResources: React.Dispatch<React.SetStateAction<plotResource[]>>;
+  noAccess: boolean;
 }) {
   function handleTabSwitching(resource: plotResource) {
     setActiveTab(resource.id);
@@ -39,11 +41,13 @@ export default function PlotsTab({
         isOpen={isOpen}
         toggleDialog={toggleDialog}
         onAddResource={onAddResource}
+        // @ts-ignore
         setAllResources={setAllResources}
+        noAccess={noAccess}
       />
       {tabs.length > 0 ? (
-        tabs.map((item: plotResource) => (
-          <TooltipWrapper content={item.label}>
+        tabs.map((item: plotResource, ind) => (
+          <TooltipWrapper key={ind} content={item.label}>
             <div
               className={
                 item.id === activeTab ? styles.selected_tab : styles.tab_box

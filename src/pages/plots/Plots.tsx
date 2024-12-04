@@ -1,6 +1,4 @@
 import axios from 'axios';
-import AreaChart from '../../components/PLOTS/charts/areaChart/AreaChart';
-import MultiLineChart from '../../components/PLOTS/charts/multiLineChart/MultiLineChart';
 import PlotsTab from '../../components/PLOTS/plotsTab/PlotsTab';
 import Header from '../../layouts/header/Header';
 import { plotResource } from '../../types/plotResource';
@@ -14,6 +12,8 @@ import { getAccessToken } from '../../lib/getAllUgixFeatures';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import { useDispatch } from 'react-redux';
 import { getDateRange } from '../../utils/getDateRange';
+import { progressiveFetch } from '../../utils/Plots/progressiveFetch';
+import ChartRenderer from '../../layouts/Plots/ChartRenderer';
 
 export default function Plots({
   changePage,
@@ -39,15 +39,11 @@ export default function Plots({
   const [activeResource, setActiveResource] = useState<plotResource | null>(
     null
   );
-  const [selectedPlotType, setSelectedPlotType] = useState<string | null>(
-    `plotType_1`
-  );
 
-  const handlePlotTypeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedPlotType(event.target.value);
-  };
+  const [noAccess, setNoAccess] = useState(false);
+  const [activeChartTab, setActiveChartTab] = useState<string | null>(
+    'plotType_1'
+  );
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -71,6 +67,13 @@ export default function Plots({
     }
   }
 
+  function showNoAccessText() {
+    setNoAccess(true);
+    setTimeout(() => {
+      setNoAccess(false);
+    }, 5000);
+  }
+
   function sortResources(allResrources: plotResource[]) {
     return allResrources.sort((a, b) => {
       if (a.label < b.label) {
@@ -81,57 +84,38 @@ export default function Plots({
       return 0;
     });
   }
-  // runs when user clicks add button in the dialog
+
   async function handleAdd(resource: plotResource) {
     setActiveResource(resource);
-    setSelectedPlotType(`plotType_1`);
+    // setSelectedPlotType(`plotType_1`);
+    setActiveChartTab(`plotType_1`);
+    const dataAccumulator: Object[] = [];
+    const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
+      resource.id
+    )}`;
 
-    console.log(resource.id);
-    const { error, token } = await getAccessToken(resource);
-    if (error) {
-      emitToast('error', `Unable to get access token`);
-      throw new Error(`no-access: ${error}`);
-    }
-    if (!token) {
-      throw new Error('Unable to get access token');
-    }
     try {
       dispatch(updateLoadingState(true));
-      // let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(resource.id)}&timerel=during&time=${encodeURIComponent('2024-10-30T00:00:00+05:30')}&endtime=${encodeURIComponent('2024-11-14T12:15:45+05:30')}`;
-      let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(resource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
-      const res = await axios.get(url, { headers: { token } });
+      await progressiveFetch(
+        baseUrl,
+        resource,
+        new Date(filterDates.startDate),
+        new Date(filterDates.endDate),
+        30,
+        dataAccumulator,
+        showNoAccessText
+      );
 
-      if (res.status === 200 && res.data.results) {
-        addTab(resource);
-        plotData(res.data.results);
-        setIsDialogOpen(false);
-      } else if (res.status === 204) {
-        addTab(resource);
-        plotData([]);
-        setSelectedPlotType(`plotType_1`);
-        emitToast('info', 'No content available');
-        setIsDialogOpen(false);
-      }
+      plotData(dataAccumulator);
+      addTab(resource);
+      setIsDialogOpen(false);
     } catch (error) {
-      console.error(error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 413) {
-          emitToast(
-            'error',
-            `${error.response.data.detail || `Payload too large`}`
-          );
-        } else {
-          emitToast('error', `Payload too large`);
-          console.log(error);
-        }
-      } else {
-        emitToast('error', 'No access to data');
-        console.log(error);
-      }
+      console.log(error);
     } finally {
       dispatch(updateLoadingState(false));
     }
   }
+
   // console.log(activeResource);
 
   useEffect(() => {
@@ -168,55 +152,15 @@ export default function Plots({
           if (error.response?.status === 413) {
             emitToast(
               'error',
-              `${error.response.data.detail || `Payload too large`}`
+              `${`A large amount of data was found. Please try changing the date range.
+`}`
             );
           } else {
-            emitToast('error', `Payload too large`);
-            console.log(error);
-          }
-        } else {
-          emitToast('error', 'No access to data');
-          console.log(error);
-        }
-      } finally {
-        dispatch(updateLoadingState(false));
-      }
-    }
-  }
-
-  async function onTabSwitching(resourceId: plotResource) {
-    if (activeResource) {
-      try {
-        setSelectedPlotType(`plotType_1`);
-        dispatch(updateLoadingState(true));
-
-        const { error, token } = await getAccessToken(resourceId);
-        if (error) {
-          emitToast('error', `Unable to get access token`);
-          throw new Error(`no-access: ${error}`);
-        }
-        if (!token) {
-          throw new Error('Unable to get access token');
-        }
-        let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(resourceId.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
-        const res = await axios.get(url, { headers: { token } });
-
-        if (res.status === 200 && res.data.results) {
-          plotData(res.data.results);
-        } else if (res.status === 204) {
-          plotData([]);
-          emitToast('info', 'No content available');
-        }
-      } catch (error) {
-        console.error(error);
-        if (axios.isAxiosError(error)) {
-          if (error.response?.status === 413) {
             emitToast(
               'error',
-              `${error.response.data.detail || `Payload too large`}`
+              `A large amount of data was found. Please try changing the date range.
+`
             );
-          } else {
-            emitToast('error', `Payload too large`);
             console.log(error);
           }
         } else {
@@ -229,13 +173,43 @@ export default function Plots({
     }
   }
 
-  // functon adds the added plot-resource data to state named "tab" and make the tab active tab
+  async function onTabSwitching(resource: plotResource) {
+    if (activeResource) {
+      SetFilterDates({ startDate, endDate });
+      // setSelectedPlotType('plotType_1');
+      setActiveChartTab(`plotType_1`);
+
+      const dataAccumulator: Object[] = [];
+      const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
+        resource.id
+      )}`;
+
+      try {
+        dispatch(updateLoadingState(true));
+        await progressiveFetch(
+          baseUrl,
+          resource,
+          new Date(filterDates.startDate),
+          new Date(filterDates.endDate),
+          30,
+          dataAccumulator,
+          showNoAccessText
+        );
+
+        plotData(dataAccumulator);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        dispatch(updateLoadingState(false));
+      }
+    }
+  }
+
   const addTab = (newTab: plotResource) => {
     setTabs((prevTabs) => [...prevTabs, newTab]);
     setActiveTab(newTab.id);
   };
 
-  // removes the resource from the "tab" state
   const removeTab = (tabValue: string) => {
     const filteredTabs = tabs.filter((tab) => tab.id !== tabValue);
     setTabs(filteredTabs);
@@ -280,6 +254,7 @@ export default function Plots({
             onAddResource={handleAdd}
             onTabSwitching={onTabSwitching}
             setAllResources={setAllResources}
+            noAccess={noAccess}
           />
 
           <div className={styles.tab_content}>
@@ -287,39 +262,39 @@ export default function Plots({
               <>
                 <div className={styles.title_container}>
                   <h3>{tabs.find((tab) => tab.id === activeTab)?.label}</h3>{' '}
-                  <div className={styles.dropdownContainer}>
-                    <label htmlFor="plotTypeDropdown">Select Plot: </label>
-                    <select
-                      id="plotTypeDropdown"
-                      onChange={handlePlotTypeChange}
-                      value={selectedPlotType || ''}
-                      className={styles.dynamic_select}
-                    >
-                      <option disabled value="">
-                        Select Plot{' '}
-                      </option>
-
-                      {plotTypes.map(
-                        (schema) =>
-                          schema.id === activeTab &&
-                          schema.plotSchema.map((_, index) => (
-                            <option
-                              key={`${schema.id}-${index}`}
-                              value={`plotType_${index + 1}`}
-                            >
-                              Plot {index + 1}
-                            </option>
-                          ))
-                      )}
-                    </select>
-                  </div>
                 </div>
-                {dataforPlot.length === 0 && (
-                  <span style={{ color: 'red' }}>
-                    No content is available for the selected date range. Please
-                    try changing the date range.
-                  </span>
-                )}
+
+                <div>
+                  {plotTypes.map((item) => {
+                    if (item.id === activeTab) {
+                      return (
+                        <div
+                          key={item.id}
+                          className={styles.chart_tab_container}
+                        >
+                          {item.plotSchema.map((_, index) => {
+                            const plotKey = `plotType_${index + 1}`;
+                            return (
+                              <button
+                                key={plotKey}
+                                className={`${styles.chart_tab} ${
+                                  activeChartTab === plotKey
+                                    ? styles.active_chart_tab
+                                    : ''
+                                }`}
+                                onClick={() => setActiveChartTab(plotKey)}
+                              >
+                                Plot {index + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
                 {plotTypes.map((item, ind) => {
                   if (item.id === activeTab) {
                     const dynamicValues = item.plotSchema[0].dynamic || [];
@@ -332,8 +307,8 @@ export default function Plots({
                           dataforPlot={dataforPlot}
                           setDataForPlot={setDataForPlot}
                           setFilteredDataForPlot={setFilteredDataForPlot}
-                          allResources={tabs}
-                          activeResource={activeResource}
+                          // allResources={tabs}
+                          // activeResource={activeResource}
                         />
                       </Fragment>
                     );
@@ -341,43 +316,46 @@ export default function Plots({
                 })}
 
                 {/* charts */}
-                {plotTypes.map(
-                  (item, ind) =>
-                    item.id === activeTab &&
-                    item.plotSchema.length > 0 && (
-                      <Fragment key={ind}>
-                        {item.plotSchema.map((plotItem, plotIndex) => {
-                          const plotKey = `plotType_${plotIndex + 1}`;
-                          if (
-                            selectedPlotType === plotKey ||
-                            !selectedPlotType
-                          ) {
-                            const xAxis = plotItem.xAxis;
-                            const yAxis = plotItem.yAxis;
-
-                            return (
-                              <div key={plotIndex}>
-                                {plotItem[plotKey] === 'multiLinePlot' && (
-                                  <MultiLineChart
-                                    dataforPlot={filteredDataForPlot}
-                                    xAxis={xAxis}
-                                    yAxis={yAxis}
-                                  />
-                                )}
-                                {plotItem[plotKey] === 'areaChart' && (
-                                  <AreaChart
-                                    dataforPlot={filteredDataForPlot}
-                                    xAxis={xAxis}
-                                    yAxis={yAxis}
-                                  />
-                                )}
-                              </div>
-                            );
-                          }
-                          return null;
-                        })}
-                      </Fragment>
-                    )
+                {plotTypes.map((item) =>
+                  item.id === activeTab && item.plotSchema.length > 0
+                    ? item.plotSchema.map((plotItem, plotIndex) => {
+                        const plotKey = `plotType_${plotIndex + 1}`;
+                        if (activeChartTab === plotKey) {
+                          const xAxis = plotItem.xAxis;
+                          const yAxis = plotItem.yAxis;
+                          return (
+                            <>
+                              {dataforPlot.length === 0 ? (
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    height: '50vh',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <span style={{ color: 'red' }}>
+                                    No content is available for the selected
+                                    date range. Please try changing the date
+                                    range above.
+                                  </span>
+                                </div>
+                              ) : (
+                                <ChartRenderer
+                                  key={plotIndex}
+                                  // @ts-ignore
+                                  plotType={plotItem[plotKey]}
+                                  data={filteredDataForPlot}
+                                  xAxis={xAxis}
+                                  yAxis={yAxis}
+                                />
+                              )}
+                            </>
+                          );
+                        }
+                        return null;
+                      })
+                    : null
                 )}
               </>
             ) : (

@@ -185,3 +185,11 @@
 .icon_container {
   display: flex;
 }
+.warn_text {
+  position: absolute;
+  bottom: 0.1rem;
+  left: 1rem;
+  font-size: var(--font-xsm);
+  color: red;
+  width: calc(100% - 12rem);
+}

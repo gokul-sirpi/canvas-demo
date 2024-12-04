@@ -22,11 +22,15 @@ function App() {
     keycloakEnv.realm === 'adex' ? 'plots' : 'canvas'
   );
 
+  const primaryColor = keycloakEnv.realm === 'adex' ? '#05aa99' : '#108bb0';
+
+  document.documentElement.style.setProperty('--color-primary', primaryColor);
+
   useEffect(() => {
     if (isRun.current) return;
     isRun.current = true;
-    // setLoggedIn(true);
-    initialiseKeycloak();
+    setLoggedIn(true);
+    // initialiseKeycloak();
   }, []);
 
   function initialiseKeycloak() {

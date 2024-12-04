@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { emitToast } from '../../lib/toastEmitter';
 
-export async function fetchDataChunk(
+export async function fetchData(
     url: string,
     token: string,
     dataAccumulator: Object[]

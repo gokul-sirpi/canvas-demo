@@ -1,7 +1,8 @@
 import { getAccessToken } from '../../lib/getAllUgixFeatures';
 import { emitToast } from '../../lib/toastEmitter';
 import { plotResource } from '../../types/plotResource';
-import { fetchDataChunk } from './fetchData';
+import { fetchData } from './fetchData';
+
 
 export async function progressiveFetch(
     baseUrl: string,
@@ -37,7 +38,7 @@ export async function progressiveFetch(
         const formattedStartDate = rangeStart.toISOString();
         const formattedEndDate = rangeEnd.toISOString();
 
-        const success = await fetchDataChunk(
+        const success = await fetchData(
             `${baseUrl}&timerel=during&time=${formattedStartDate}&endtime=${formattedEndDate}`,
             token,
             dataAccumulator,
@@ -64,7 +65,7 @@ export async function progressiveFetch(
         const formattedLastEndDate = lastEndDate.toISOString();
         const formattedNextEndDate = nextEndDate.toISOString();
 
-        const success = await fetchDataChunk(
+        const success = await fetchData(
             `${baseUrl}&timerel=during&time=${formattedLastEndDate}&endtime=${formattedNextEndDate}`,
             token,
             dataAccumulator,

@@ -20,7 +20,7 @@ function ExportDataDialog() {
   }
   function handleDataExport() {
     if (exportAnchor.current) {
-      let name = 'Ugix_Map';
+      let name = 'GDI_Map';
       if (exportName) {
         name = exportName;
       }
@@ -63,7 +63,7 @@ function ExportDataDialog() {
                 className={styles.dialog_input}
                 type="text"
                 id="download-name"
-                placeholder="default: Ugix_Map"
+                placeholder="default: GDI_Map"
               />
             </div>
             <div>

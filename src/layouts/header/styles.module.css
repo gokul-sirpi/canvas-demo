@@ -13,6 +13,16 @@
 .logo_img {
   width: 9rem;
 }
+.button_container {
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+}
+.button_container > div > button {
+  font-size: 22px;
+  display: flex;
+  align-items: end;
+}
 
 .tools_container {
   position: absolute;
@@ -117,4 +127,9 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+.category_container {
+  display: flex;
+  justify-content: center;
 }

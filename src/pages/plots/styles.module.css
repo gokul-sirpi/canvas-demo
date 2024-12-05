@@ -1,0 +1,72 @@
+.container {
+  height: 100vh;
+  height: 100vh;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+.tabContianer {
+  margin-top: 3rem;
+  padding: 0.8rem;
+}
+.tabContianer > button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 18px;
+  border: 1px solid black;
+  border-radius: var(--radius-sm);
+}
+
+.tab_content {
+  /* display: flex; */
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 1rem;
+}
+.no_tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 20rem);
+  font-size: var(--font-md);
+}
+.dynamic_select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+.title_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chart_tab_container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem 0rem;
+  align-items: center;
+  overflow: auto;
+}
+.chart_tab {
+  gap: 0.5rem;
+  font-size: 18px;
+  border: 1px solid black;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  color: black;
+}
+.active_chart_tab {
+  background-color: #002b49;
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  max-width: 20%;
+}

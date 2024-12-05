@@ -283,6 +283,7 @@ export default function PropertyTable({
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
+    // @ts-ignore
     debounceTimer.current = setTimeout(() => {
       const filteredRows = fuzzySearch(text);
       //

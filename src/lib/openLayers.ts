@@ -139,6 +139,11 @@ const openLayerMap = {
     }
   },
 
+  clearMap() {
+    // @ts-ignore
+    this.map.setTarget(null);
+  },
+
   addLayer(
     layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer
   ) {

@@ -1,29 +1,43 @@
 //
-import DrawingTool from '../../components/drawingTool/DrawingTool';
 import ugix_logo from '../../assets/images/ugix-logo.png';
 import styles from './styles.module.css';
-import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
-import BaseMaps from '../../components/basemaps/BaseMaps';
-import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
-import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
 import { UserProfile } from '../../types/UserProfile';
-import { Resource } from '../../types/resource';
-import ImportDataInput from '../../components/importDataInput/ImportDataInput';
-import DrawingTools from '../drawingTools/DrawingTools';
 import * as Popover from '@radix-ui/react-popover';
 import { IoMdMail } from 'react-icons/io';
 import { HiUser } from 'react-icons/hi2';
 import { LuLogOut } from 'react-icons/lu';
 import keycloak from '../../lib/keycloak';
+import TooltipWrapper from '../../components/tooltipWrapper/TooltipWrapper';
+import BrowseDataDialog from '../browseDataDialog/BrowseDataDialog';
+import DrawingTool from '../../components/drawingTool/DrawingTool';
+import DrawingTools from '../drawingTools/DrawingTools';
+import BaseMaps from '../../components/basemaps/BaseMaps';
+import ExportDataDialog from '../../components/exportDataDialog/ExportDataDialog';
+import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
+import { Resource } from '../../types/resource';
+import { keycloakEnv } from '../../utils/config';
 
 function Header({
   profileData,
+  changePage,
+  currentPage,
   resourceList,
 }: {
-  profileData: UserProfile | undefined;
+  profileData?: UserProfile | undefined;
+  changePage: Function;
+  currentPage: string;
   resourceList: Resource[];
 }) {
+  const mapActiveStyle =
+    currentPage === 'canvas'
+      ? { color: '#05aa99', fontWeight: 'bold' }
+      : { color: 'black' };
+  const plotsActiveStyle =
+    currentPage === 'plots'
+      ? { color: '#05aa99', fontWeight: 'bold' }
+      : { color: 'black' };
+
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
     const secondLetter = profileData?.name.lastName[0] || '';
@@ -35,41 +49,65 @@ function Header({
   function handleLogout() {
     keycloak.logout();
   }
+
   return (
     <>
       <header className={styles.container}>
-        <img src={ugix_logo} className={styles.logo_img} alt="" />
-        <div data-intro="header" className={styles.tools_container}>
-          <TooltipWrapper content="Browse GDI  resources">
-            <span data-intro="browse">
-              <BrowseDataDialog resourceList={resourceList} />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Select">
-            <span data-intro="select">
-              <DrawingTool toolType="Cursor" />
-            </span>
-          </TooltipWrapper>
-          <DrawingTools />
-          <TooltipWrapper content="Add marker">
-            <span data-intro="add_marker">
-              <DrawingTool toolType="Point" />
-            </span>
-          </TooltipWrapper>
-          <TooltipWrapper content="Measure distance">
-            <span data-intro="measure">
-              <DrawingTool toolType="Measure" />
-            </span>
-          </TooltipWrapper>
-          <BaseMaps />
-          <ExportDataDialog />
-          <ImportDataInput />
-          <TooltipWrapper content="Add swipe layer">
-            <span data-intro="measure">
-              <SwipeDialog />
-            </span>
-          </TooltipWrapper>
+        <div className={styles.button_container}>
+          <img src={ugix_logo} className={styles.logo_img} alt="" />
+          {keycloakEnv.realm === 'adex' && (
+            <div className={styles.category_container}>
+              <button
+                style={mapActiveStyle}
+                onClick={() => changePage('canvas')}
+              >
+                Maps
+              </button>
+              <span
+                style={{ borderLeft: '2px solid black', height: '30px' }}
+              ></span>
+              <button
+                style={plotsActiveStyle}
+                onClick={() => changePage('plots')}
+              >
+                Plots
+              </button>
+            </div>
+          )}
         </div>
+        {currentPage === 'canvas' && (
+          <div data-intro="header" className={styles.tools_container}>
+            <TooltipWrapper content="Browse Ugix  resources">
+              <span data-intro="browse">
+                <BrowseDataDialog resourceList={resourceList} />
+              </span>
+            </TooltipWrapper>
+            <TooltipWrapper content="Select">
+              <span data-intro="select">
+                <DrawingTool toolType="Cursor" />
+              </span>
+            </TooltipWrapper>
+            <DrawingTools />
+            <TooltipWrapper content="Add marker">
+              <span data-intro="add_marker">
+                <DrawingTool toolType="Point" />
+              </span>
+            </TooltipWrapper>
+            <TooltipWrapper content="Measure distance">
+              <span data-intro="measure">
+                <DrawingTool toolType="Measure" />
+              </span>
+            </TooltipWrapper>
+            <BaseMaps />
+            <ExportDataDialog />
+            <ImportDataInput />
+            <TooltipWrapper content="Add swipe layer">
+              <span data-intro="measure">
+                <SwipeDialog />
+              </span>
+            </TooltipWrapper>
+          </div>
+        )}
         <div className={styles.profile_container}>
           <Popover.Root>
             <Popover.Trigger asChild>

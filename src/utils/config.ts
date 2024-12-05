@@ -1,4 +1,4 @@
-const envs = import.meta.env;
+const envs = process.env;
 
 const ugixServer = envs.VITE_UGIX_SERVER;
 const ugixAuthServer = envs.VITE_UGIX_AUTH_SERVER;
@@ -12,13 +12,13 @@ const keycloakUrl = envs.VITE_KEYCLOAK_URL;
 const realm = envs.VITE_REALM;
 const clientId = envs.VITE_CLIENT_ID;
 
-export const keycloakEnv = {
+export const keycloakEnv: any = {
   keycloakUrl,
   realm,
   clientId,
 };
 
-const envurls = {
+const envurls: any = {
   ugixServer,
   ugixAuthServer,
   ugixOgcServer,

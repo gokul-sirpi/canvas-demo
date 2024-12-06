@@ -23,6 +23,7 @@ export async function fetchData(
         }
         emitToast('error', 'An error occurred while fetching data');
         console.error(error);
+        return false
     }
     return false;
 }

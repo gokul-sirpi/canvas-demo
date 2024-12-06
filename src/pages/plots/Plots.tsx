@@ -44,6 +44,7 @@ export default function Plots({
   const [activeChartTab, setActiveChartTab] = useState<string | null>(
     'plotType_1'
   );
+  const [isTabSwitching, setIsTabSwitching] = useState(false);
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -87,7 +88,7 @@ export default function Plots({
 
   async function handleAdd(resource: plotResource) {
     setActiveResource(resource);
-    // setSelectedPlotType(`plotType_1`);
+
     setActiveChartTab(`plotType_1`);
     const dataAccumulator: Object[] = [];
     const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
@@ -116,10 +117,10 @@ export default function Plots({
     }
   }
 
-  // console.log(activeResource);
+  console.log(activeResource);
 
   useEffect(() => {
-    if (activeResource) {
+    if (!isTabSwitching && activeResource) {
       handleOnFilterChange();
     }
   }, [filterDates.startDate, filterDates.endDate]);
@@ -174,16 +175,16 @@ export default function Plots({
   }
 
   async function onTabSwitching(resource: plotResource) {
+    setIsTabSwitching(true);
     if (activeResource) {
       SetFilterDates({ startDate, endDate });
-      // setSelectedPlotType('plotType_1');
       setActiveChartTab(`plotType_1`);
 
-      const dataAccumulator: Object[] = [];
       const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
         resource.id
       )}`;
 
+      const dataAccumulator: Object[] = [];
       try {
         dispatch(updateLoadingState(true));
         await progressiveFetch(
@@ -200,6 +201,7 @@ export default function Plots({
       } catch (error) {
         console.log(error);
       } finally {
+        setIsTabSwitching(false);
         dispatch(updateLoadingState(false));
       }
     }

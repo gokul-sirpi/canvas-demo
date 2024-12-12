@@ -95,10 +95,6 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   //   dispatch(updateFooterLayerState(layer));
   // }
 
-  const canvasLayers = useSelector((state: RootState) => {
-    return state.canvasLayer.layers;
-  });
-
   return (
     <>
       <Popover.Root>

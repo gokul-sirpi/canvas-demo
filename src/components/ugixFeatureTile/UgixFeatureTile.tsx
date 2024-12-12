@@ -88,8 +88,6 @@ function UgixFeatureTile({
           dialogCloseTrigger(false);
           if (bbox) {
             openLayerMap.zoomToFit(newLayer.layerId, bbox);
-          } else {
-            openLayerMap.zoomToFit(newLayer.layerId);
           }
         },
 

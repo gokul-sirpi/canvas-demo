@@ -46,7 +46,7 @@ import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 import envurls from '../utils/config';
-import { extend as extendExtent, createEmpty } from 'ol/extent';
+import { createEmpty } from 'ol/extent';
 
 type baseLayerTypes =
   | 'terrain'
@@ -218,6 +218,32 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
+  initialMapFitOnGetResource(layerId: string, ugixId: string) {
+    let resourceExtent = createEmpty();
+    let view = this.map.getView();
+
+    fetch(`https://geoserver.dx.ugix.org.in/collections/${ugixId}`)
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((data) => {
+            resourceExtent = data.extent.spatial.bbox[0];
+
+            view.fit(resourceExtent, {
+              padding: [100, 100, 100, 100],
+              duration: 500,
+            });
+
+            sessionStorage.setItem(
+              layerId + '-extent',
+              JSON.stringify(resourceExtent)
+            );
+          });
+        }
+      })
+      .catch((err) => {
+        console.log('failed to get extent', err);
+      });
+  },
   createNewUgixLayer(
     layerName: string,
     ugixId: string,
@@ -232,6 +258,9 @@ const openLayerMap = {
       style: (feature) => styleFunction(feature, layerColor),
     });
     newVectorLayer.set('layer-id', layerId);
+
+    this.initialMapFitOnGetResource(layerId, ugixId);
+
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
       sourceType: 'json',
@@ -280,27 +309,13 @@ const openLayerMap = {
       // projection: 'EPSG:4326',
     });
 
-    // Initialize an empty extent
-    let tileExtent = createEmpty();
-    let tilesLoading = 0;
-    let tilesLoaded = 0;
-    let view = this.map.getView();
-
-    // in case of plotting vector tiles, fit the map view to entire india
-    view.fit(
-      [68.1756591796875, 6.7510986328125, 97.41302490234375, 37.08984375],
-      {
-        padding: [100, 100, 100, 100],
-        duration: 500,
-      }
-    );
+    this.initialMapFitOnGetResource(layerId, ugixId);
 
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
       tile: VectorTile<Feature>,
       url: string
     ) {
-      tilesLoading++;
       tile.setLoader(function (extent, _, projection) {
         fetch(url, {
           headers: {
@@ -312,8 +327,6 @@ const openLayerMap = {
             // if failed, then set tile state to error
             // https://github.com/openlayers/openlayers/issues/8404
             tile.setState(3);
-            tilesLoading--;
-            checkAllTilesLoaded();
             return;
           }
           response.arrayBuffer().then(function (data) {
@@ -324,22 +337,6 @@ const openLayerMap = {
                 featureProjection: projection,
               });
               tile.setFeatures(features);
-
-              features.forEach((feature) => {
-                const newExtent = feature.getGeometry()!.getExtent();
-
-                if (!newExtent.includes(Infinity)) {
-                  extendExtent(tileExtent, newExtent);
-
-                  view.fit(tileExtent, {
-                    padding: [100, 100, 100, 100],
-                    duration: 500,
-                  });
-                }
-              });
-
-              tilesLoaded++;
-              checkAllTilesLoaded();
             } catch (err) {
               console.log(url, err);
             }
@@ -347,12 +344,6 @@ const openLayerMap = {
         });
       });
     });
-
-    function checkAllTilesLoaded() {
-      if (tilesLoaded === tilesLoading) {
-        sessionStorage.setItem(layerId + '-extent', JSON.stringify(tileExtent));
-      }
-    }
 
     const newVectorLayer = new VectorTileLayer({
       source: vectorSource,

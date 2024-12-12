@@ -133,18 +133,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 <button
                   className={styles.popover_btn}
                   onClick={() => {
-                    const canvasLayer: UgixLayer = canvasLayers.find(
-                      (l) => l.layerId === layer.layerId
-                    ) as UgixLayer;
-
-                    if (canvasLayer.sourceType === 'tile') {
-                      const extent = JSON.parse(
-                        sessionStorage.getItem(layer.layerId + '-extent')!
-                      );
-                      openLayerMap.zoomToFit(layer.layerId, extent);
-                    } else {
-                      openLayerMap.zoomToFit(layer.layerId);
-                    }
+                    const extent = JSON.parse(
+                      sessionStorage.getItem(layer.layerId + '-extent')!
+                    );
+                    openLayerMap.zoomToFit(layer.layerId, extent);
                   }}
                 >
                   Zoom to bound

@@ -4,14 +4,13 @@ import styles from './styles.module.css';
 import { PiDotsThreeOutlineVerticalFill } from 'react-icons/pi';
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import openLayerMap from '../../lib/openLayers';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { UserLayer } from '../../types/UserLayer';
 import { UgixLayer } from '../../types/UgixLayers';
 import { deleteCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 import envurls from '../../utils/config';
 import { getCookieValue, setCookie } from '../../lib/cookieManger';
 import { useRef } from 'react';
-import { RootState } from '../../context/store';
 import { getUgixFeatureById } from '../../lib/getUgixFeatureById';
 import { emitToast } from '../../lib/toastEmitter';
 import { toast } from 'react-toastify';
@@ -95,10 +94,6 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   //   dispatch(updateFooterLayerState(layer));
   // }
 
-  const canvasLayers = useSelector((state: RootState) => {
-    return state.canvasLayer.layers;
-  });
-
   return (
     <>
       <Popover.Root>
@@ -133,18 +128,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
                 <button
                   className={styles.popover_btn}
                   onClick={() => {
-                    const canvasLayer: UgixLayer = canvasLayers.find(
-                      (l) => l.layerId === layer.layerId
-                    ) as UgixLayer;
-
-                    if (canvasLayer.sourceType === 'tile') {
-                      const extent = JSON.parse(
-                        sessionStorage.getItem(layer.layerId + '-extent')!
-                      );
-                      openLayerMap.zoomToFit(layer.layerId, extent);
-                    } else {
-                      openLayerMap.zoomToFit(layer.layerId);
-                    }
+                    const extent = JSON.parse(
+                      sessionStorage.getItem(layer.layerId + '-extent')!
+                    );
+                    openLayerMap.zoomToFit(layer.layerId, extent);
                   }}
                 >
                   Zoom to bound

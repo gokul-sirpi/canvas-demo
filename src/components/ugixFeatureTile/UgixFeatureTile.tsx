@@ -88,8 +88,6 @@ function UgixFeatureTile({
           dialogCloseTrigger(false);
           if (bbox) {
             openLayerMap.zoomToFit(newLayer.layerId, bbox);
-          } else {
-            openLayerMap.zoomToFit(newLayer.layerId);
           }
         },
 
@@ -225,7 +223,7 @@ function UgixFeatureTile({
             </div>
           ) : (
             <div className={`${styles.badge} ${styles.badge_private}`}>
-              <FaLock /> Private
+              <FaLock /> Restricted
             </div>
           )}
           <div
@@ -281,7 +279,7 @@ function UgixFeatureTile({
         <div className={styles.warn_text}>
           You do not have access to view this data, please visit{' '}
           <a href={getinfoLink()} target="_blank">
-            UGIX page
+            GDI page
           </a>{' '}
           to request access
         </div>

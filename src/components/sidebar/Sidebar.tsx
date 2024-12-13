@@ -37,14 +37,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose, content }) => {
       </div>
       <div className={styles.sidebarContent}>
         {properties && (
-          <div>
-            {Object.entries(properties).map(([key, value]) => (
-              <div key={key} style={{ marginTop: '5px' }}>
-                <b className={styles.key}>{key}</b>: {/* @ts-ignore */}
-                <span className={styles.value}>{value}</span>
-              </div>
-            ))}
-          </div>
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              marginTop: '10px',
+            }}
+          >
+            <thead>
+              <tr>
+                <th
+                  style={{
+                    borderBottom: '2px solid #ddd',
+                    borderRight: '1px solid #ddd',
+                    padding: '8px',
+                    textAlign: 'left',
+                  }}
+                >
+                  Property
+                </th>
+                <th
+                  style={{
+                    borderBottom: '2px solid #ddd',
+                    padding: '8px',
+                    textAlign: 'left',
+                  }}
+                >
+                  Value
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(properties).map(([key, value]) => (
+                <tr key={key}>
+                  <td
+                    style={{
+                      borderBottom: '1px solid #ddd',
+                      borderRight: '1px solid #ddd',
+                      padding: '8px',
+                    }}
+                  >
+                    {key}
+                  </td>
+                  <td
+                    style={{ borderBottom: '1px solid #ddd', padding: '8px' }}
+                  >
+                    {/* @ts-ignore */}
+                    {value}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

@@ -17,25 +17,30 @@
 .selected_tab {
   background-color: #002b49;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0rem 0.5rem;
+
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   border-radius: var(--radius-sm);
-  max-width: 20%;
+  max-width: 12%;
+  font-size: 1rem;
+  cursor: pointer;
 }
 .tab_box {
-  border: 1px solid grey;
+  border: 0.1px solid grey;
+  border-radius: var(--radius-sm);
   background-color: rgb(242, 242, 242);
-  padding: 0.5rem 1rem;
+  padding: 0rem 0.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  border-radius: var(--radius-sm);
-  max-width: 20%;
+  max-width: 12%;
+  font-size: 1rem;
 }
+
 .not_active {
+  text-align: center;
+  padding: 0.8rem 0rem;
   max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
@@ -43,6 +48,8 @@
   font-weight: normal;
 }
 .active {
+  text-align: center;
+  padding: 0.9rem 0rem;
   max-width: 100%;
   overflow: hidden;
   white-space: nowrap;

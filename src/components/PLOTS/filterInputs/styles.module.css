@@ -11,13 +11,14 @@
   height: fit-content;
   /* flex-wrap: wrap; */
   border-radius: var(--radius-sm);
+  color: white;
 }
 .dynamic_container {
   display: flex;
   gap: 1rem;
-  background-color: #002b49;
+  background-color: #f2f2f2;
   padding: 0.7rem;
-  color: white;
+  color: black;
   flex-wrap: wrap;
   border-radius: var(--radius-sm);
 }
@@ -43,6 +44,7 @@
   font-size: 1rem;
   text-align: center;
   color: white;
+  background-color: #002b49;
 }
 .reset_button:hover {
   border: 1px solid var(--color-accent);

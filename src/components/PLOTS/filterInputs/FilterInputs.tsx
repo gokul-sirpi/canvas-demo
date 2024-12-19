@@ -98,7 +98,7 @@ export default function FilterInputs({
     updateFilteredOptions(dataforPlot);
   }, [dataforPlot]);
 
-  console.log(filteredOptions);
+  // console.log(filteredOptions);
 
   // let datarecpKey = dataforPlot.length > 0 && dataforPlot;
   // const dataDescriptor = activeResource && activeResource.dataDescriptor;

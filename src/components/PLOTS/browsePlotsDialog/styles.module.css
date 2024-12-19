@@ -193,3 +193,10 @@
   color: red;
   width: calc(100% - 12rem);
 }
+
+.error_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}

@@ -8,6 +8,8 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let chartDom = document.getElementById('area-chart');
   let myChart = echarts.init(chartDom);
   let option = {
+    animationDuration: 2500,
+
     title: {
       text: 'Area Chart',
     },
@@ -24,7 +26,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
       trigger: 'axis',
     },
     color: EchatrColors(),
-    height: '50%',
+    height: '60%',
     legend: {
       data: yAxis,
       formatter: (name: string) => camelCaseToSpaceSeparated(name),
@@ -45,7 +47,9 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     },
     dataZoom: [
       {
-        type: 'inside',
+        type: 'slider',
+        // type: 'inside',
+        zoomOnMouseWheel: false,
         start: 0,
         end: 20,
       },
@@ -91,7 +95,7 @@ function AreaChart({
       id="area-chart"
       style={{
         width: '95vw',
-        height: '100vh',
+        height: '50vh',
         top: '1.5rem',
         overflow: 'auto',
       }}

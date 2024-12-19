@@ -13,7 +13,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let myChart = echarts.init(chartDom);
   let option = {
     color: EchatrColors(),
-
+    animationDuration: 2500,
     height: '80%',
     title: {
       text: 'MultiLine Plot',

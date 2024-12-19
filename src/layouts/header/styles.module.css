@@ -13,9 +13,13 @@
 .logo_img {
   width: 9rem;
 }
+.adex_logo_img {
+  width: 9rem;
+  height: 3rem;
+}
 .button_container {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 2rem;
 }
 .button_container > div > button {
@@ -132,4 +136,12 @@
 .category_container {
   display: flex;
   justify-content: center;
+}
+.header_button {
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.4rem 0.2rem;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: var(--font-md);
+  transition: border-radius 300ms linear;
 }

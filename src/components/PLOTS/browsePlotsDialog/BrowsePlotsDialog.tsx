@@ -9,7 +9,7 @@ import { BsArrowRight } from 'react-icons/bs';
 import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { RiInformationFill } from 'react-icons/ri';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import envurls from '../../../utils/config';
 
 export default function BrowsePlotsDialog({
@@ -27,26 +27,31 @@ export default function BrowsePlotsDialog({
   // setAllResources: React.Dispatch<React.SetStateAction<plotResource[]>>;
   noAccess: boolean;
 }) {
-  // const [searchInput, setSearchInput] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>('');
   const [selectedId, setSelectedId] = useState('');
+  const [resourcesList, setResourcesList] = useState<plotResource[]>([]);
+  useEffect(() => {
+    setResourcesList(allResources);
+  }, [allResources]);
 
-  // function handleChange(text: string) {
-  //   setSearchInput(text);
-  //   if (text != '') {
-  //     const filteredResources = allResources.filter((resource) => {
-  //       if (
-  //         resource.label &&
-  //         resource.label.toLowerCase().includes(text.toLowerCase())
-  //       ) {
-  //         return resource;
-  //       }
-  //       return;
-  //     });
-  //     setAllResources(filteredResources);
-  //   } else {
-  //     setAllResources(allResources);
-  //   }
-  // }
+  function handleChange(text: string) {
+    setSearchInput(text);
+    if (text != '') {
+      const filteredResources = allResources.filter((resource) => {
+        if (
+          resource.label &&
+          resource.label.toLowerCase().includes(text.toLowerCase())
+        ) {
+          return resource;
+        }
+        return;
+      });
+      setResourcesList(filteredResources);
+    } else {
+      setResourcesList(allResources);
+    }
+  }
+
   function getinfoLink(resource: plotResource) {
     const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
@@ -56,6 +61,7 @@ export default function BrowsePlotsDialog({
     onAddResource(item);
     setSelectedId(item.id);
   };
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={toggleDialog}>
       <Dialog.Trigger asChild>
@@ -63,7 +69,7 @@ export default function BrowsePlotsDialog({
           <span>
             <TbWorldSearch size={25} />
           </span>
-          <span>Browse ADEX</span>
+          <span>Browse ADeX</span>
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -85,8 +91,8 @@ export default function BrowsePlotsDialog({
                 type="text"
                 autoFocus
                 placeholder="Explore data sets"
-                // value={searchInput}
-                // onChange={(e) => handleChange(e.target.value)}
+                value={searchInput}
+                onChange={(e) => handleChange(e.target.value)}
               />
               <button>
                 <div className={styles.btn_icon_container}>
@@ -96,75 +102,75 @@ export default function BrowsePlotsDialog({
             </div>
           </section>
           <div className={styles.plot_btn_container}>
-            {allResources.length > 0
-              ? allResources.map((item: plotResource) => (
-                  <div key={item.id} className={styles.tile_container}>
-                    <div className={styles.tile_content}>
-                      <div className={styles.tile_description}>
-                        <TooltipWrapper
-                          content={item.label ? item.label : item.name}
-                        >
-                          <h2 className={styles.tile_title}>{item.label}</h2>
-                        </TooltipWrapper>
-                        <div className={styles.button_badge_container}>
-                          {item.accessPolicy === 'OPEN' ? (
-                            <div className={styles.badge}>
-                              <FaUnlock /> Public
-                            </div>
-                          ) : (
-                            <div
-                              className={`${styles.badge} ${styles.badge_private}`}
-                            >
-                              <FaLock /> Private
-                            </div>
-                          )}
-                        </div>
-                        {noAccess && item.id === selectedId && (
-                          <div className={styles.warn_text}>
-                            You do not have access to view this data, please
-                            visit{' '}
-                            <a onClick={() => getinfoLink(item)}>ADEX page</a>{' '}
-                            to request access
+            {resourcesList.length > 0 ? (
+              resourcesList.map((item: plotResource) => (
+                <div key={item.id} className={styles.tile_container}>
+                  <div className={styles.tile_content}>
+                    <div className={styles.tile_description}>
+                      <TooltipWrapper
+                        content={item.label ? item.label : item.name}
+                      >
+                        <h2 className={styles.tile_title}>{item.label}</h2>
+                      </TooltipWrapper>
+                      <div className={styles.button_badge_container}>
+                        {item.accessPolicy === 'OPEN' ? (
+                          <div className={styles.badge}>
+                            <FaUnlock /> Public
+                          </div>
+                        ) : (
+                          <div
+                            className={`${styles.badge} ${styles.badge_private}`}
+                          >
+                            <FaLock /> Private
                           </div>
                         )}
                       </div>
-                      <TooltipWrapper content="add">
-                        <button
-                          className={styles.add_button}
-                          onClick={() => handleAddresource(item)}
-                        >
-                          <div className={styles.add_icon}>
-                            <FaPlus size={23} />
-                          </div>
-                        </button>
-                      </TooltipWrapper>
+                      {noAccess && item.id === selectedId && (
+                        <div className={styles.warn_text}>
+                          You do not have access to view this data, please visit{' '}
+                          <a onClick={() => getinfoLink(item)}>ADEX page</a> to
+                          request access
+                        </div>
+                      )}
                     </div>
-                    <div className={styles.icon_container}>
-                      <TooltipWrapper content="Download complete resources">
-                        <button>
-                          <div className={styles.icon_wrapper}>
-                            <MdDownloadForOffline />
-                          </div>
-                        </button>
-                      </TooltipWrapper>
-                      <TooltipWrapper content="Resource info">
-                        <button onClick={() => getinfoLink(item)}>
-                          <div className={styles.icon_wrapper}>
-                            <RiInformationFill />
-                          </div>
-                        </button>
-                      </TooltipWrapper>
-                    </div>
+                    <TooltipWrapper content="add">
+                      <button
+                        className={styles.add_button}
+                        onClick={() => handleAddresource(item)}
+                      >
+                        <div className={styles.add_icon}>
+                          <FaPlus size={23} />
+                        </div>
+                      </button>
+                    </TooltipWrapper>
                   </div>
-                ))
-              : //   <div className={styles.error_container}>
-                //   {searchInput !== '' ? (
-                //     <h4>No matching projects</h4>
-                //   ) : (
-                //     <h4>No projects found!</h4>
-                //   )}
-                // </div>
-                'No data available'}
+                  <div className={styles.icon_container}>
+                    <TooltipWrapper content="Download complete resources">
+                      <button>
+                        <div className={styles.icon_wrapper}>
+                          <MdDownloadForOffline />
+                        </div>
+                      </button>
+                    </TooltipWrapper>
+                    <TooltipWrapper content="Resource info">
+                      <button onClick={() => getinfoLink(item)}>
+                        <div className={styles.icon_wrapper}>
+                          <RiInformationFill />
+                        </div>
+                      </button>
+                    </TooltipWrapper>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={styles.error_container}>
+                {searchInput !== '' ? (
+                  <h4>No matching projects</h4>
+                ) : (
+                  <h4>No projects found!</h4>
+                )}
+              </div>
+            )}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

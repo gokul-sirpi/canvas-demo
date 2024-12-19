@@ -17,6 +17,7 @@ import ImportDataInput from '../../components/importDataInput/ImportDataInput';
 import SwipeDialog from '../../components/swipeDialog/SwipeDialog';
 import { Resource } from '../../types/resource';
 import { keycloakEnv } from '../../utils/config';
+import adexLogo from '../../assets/images/adexIntroImg.png';
 
 function Header({
   profileData,
@@ -31,12 +32,12 @@ function Header({
 }) {
   const mapActiveStyle =
     currentPage === 'canvas'
-      ? { color: '#05aa99', fontWeight: 'bold' }
-      : { color: 'black' };
+      ? { color: 'white', backgroundColor: '#05aa99' }
+      : { color: 'white', backgroundColor: 'grey' };
   const plotsActiveStyle =
     currentPage === 'plots'
-      ? { color: '#05aa99', fontWeight: 'bold' }
-      : { color: 'black' };
+      ? { color: 'white', backgroundColor: '#05aa99' }
+      : { color: 'white', backgroundColor: 'grey' };
 
   const userIconName = () => {
     const firstLetter = profileData?.name.firstName[0] || '';
@@ -49,24 +50,39 @@ function Header({
   function handleLogout() {
     keycloak.logout();
   }
+  const logo = keycloakEnv.realm === 'adex' ? adexLogo : ugix_logo;
 
   return (
     <>
       <header className={styles.container}>
         <div className={styles.button_container}>
-          <img src={ugix_logo} className={styles.logo_img} alt="" />
+          <img
+            src={logo}
+            className={
+              keycloakEnv.realm === 'adex'
+                ? styles.adex_logo_img
+                : styles.logo_img
+            }
+            alt=""
+          />
           {keycloakEnv.realm === 'adex' && (
             <div className={styles.category_container}>
               <button
                 style={mapActiveStyle}
                 onClick={() => changePage('canvas')}
+                className={styles.header_button}
               >
                 Maps
               </button>
               <span
-                style={{ borderLeft: '2px solid black', height: '30px' }}
+                style={{
+                  borderLeft: '2px solid black',
+                  height: '30px',
+                  margin: '0 5px',
+                }}
               ></span>
               <button
+                className={styles.header_button}
                 style={plotsActiveStyle}
                 onClick={() => changePage('plots')}
               >

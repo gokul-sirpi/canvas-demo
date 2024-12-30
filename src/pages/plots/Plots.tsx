@@ -39,11 +39,11 @@ export default function Plots({
   const [activeResource, setActiveResource] = useState<plotResource | null>(
     null
   );
-
   const [noAccess, setNoAccess] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<string | null>(
     'plotType_1'
   );
+  const [isTabSwitching, setIsTabSwitching] = useState(false);
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -85,30 +85,49 @@ export default function Plots({
     });
   }
 
+  async function getResourceServerRegURL(resource: plotResource) {
+    try {
+      const regURL = await axios.get(
+        `${envurls.ugixServer}cat/v1/item?id=${resource.resourceServer}`
+      );
+      return regURL;
+    } catch (error) {
+      emitToast('error', 'Failed to get server ID');
+      console.log(error);
+    }
+  }
+
   async function handleAdd(resource: plotResource) {
     setActiveResource(resource);
-    // setSelectedPlotType(`plotType_1`);
     setActiveChartTab(`plotType_1`);
     const dataAccumulator: Object[] = [];
-    const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
-      resource.id
-    )}`;
+    const ServerRegURL = await getResourceServerRegURL(resource);
 
     try {
-      dispatch(updateLoadingState(true));
-      await progressiveFetch(
-        baseUrl,
-        resource,
-        new Date(filterDates.startDate),
-        new Date(filterDates.endDate),
-        30,
-        dataAccumulator,
-        showNoAccessText
-      );
+      if (
+        ServerRegURL?.status === 200 &&
+        ServerRegURL.data.results[0].resourceServerRegURL
+      ) {
+        const regBaseUrl = ServerRegURL.data.results[0].resourceServerRegURL;
+        const baseUrl = `https://${regBaseUrl}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
+          resource.id
+        )}`;
+        dispatch(updateLoadingState(true));
+        await progressiveFetch(
+          baseUrl,
+          resource,
+          new Date(filterDates.startDate),
+          new Date(filterDates.endDate),
+          30,
+          dataAccumulator,
+          showNoAccessText,
+          setIsDialogOpen
+        );
 
-      plotData(dataAccumulator);
-      addTab(resource);
-      setIsDialogOpen(false);
+        plotData(dataAccumulator);
+        addTab(resource);
+      }
+      // setIsDialogOpen(false);
     } catch (error) {
       console.log(error);
     } finally {
@@ -119,32 +138,39 @@ export default function Plots({
   // console.log(activeResource);
 
   useEffect(() => {
-    if (activeResource) {
+    if (!isTabSwitching && activeResource) {
       handleOnFilterChange();
     }
   }, [filterDates.startDate, filterDates.endDate]);
 
   async function handleOnFilterChange() {
     if (activeResource) {
+      const ServerRegURL = await getResourceServerRegURL(activeResource);
+
       try {
-        dispatch(updateLoadingState(true));
+        if (
+          ServerRegURL?.status === 200 &&
+          ServerRegURL.data.results[0].resourceServerRegURL
+        ) {
+          dispatch(updateLoadingState(true));
+          const regBaseUrl = ServerRegURL.data.results[0].resourceServerRegURL;
+          const { error, token } = await getAccessToken(activeResource);
+          if (error) {
+            emitToast('error', `Unable to get access token`);
+            throw new Error(`no-access: ${error}`);
+          }
+          if (!token) {
+            throw new Error('Unable to get access token');
+          }
+          let url = `https://${regBaseUrl}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(activeResource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
+          const res = await axios.get(url, { headers: { token } });
 
-        const { error, token } = await getAccessToken(activeResource);
-        if (error) {
-          emitToast('error', `Unable to get access token`);
-          throw new Error(`no-access: ${error}`);
-        }
-        if (!token) {
-          throw new Error('Unable to get access token');
-        }
-        let url = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(activeResource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
-        const res = await axios.get(url, { headers: { token } });
-
-        if (res.status === 200 && res.data.results) {
-          plotData(res.data.results);
-        } else if (res.status === 204) {
-          plotData([]);
-          emitToast('info', 'No content available');
+          if (res.status === 200 && res.data.results) {
+            plotData(res.data.results);
+          } else if (res.status === 204) {
+            plotData([]);
+            emitToast('info', 'No content available');
+          }
         }
       } catch (error) {
         console.error(error);
@@ -152,14 +178,12 @@ export default function Plots({
           if (error.response?.status === 413) {
             emitToast(
               'error',
-              `${`A large amount of data was found. Please try changing the date range.
-`}`
+              `${`A large amount of data was found. Please try changing the date range.`}`
             );
           } else {
             emitToast(
               'error',
-              `A large amount of data was found. Please try changing the date range.
-`
+              `A large amount of data was found. Please try changing the date range.`
             );
             console.log(error);
           }
@@ -174,49 +198,65 @@ export default function Plots({
   }
 
   async function onTabSwitching(resource: plotResource) {
+    setIsTabSwitching(true);
     if (activeResource) {
       SetFilterDates({ startDate, endDate });
-      // setSelectedPlotType('plotType_1');
       setActiveChartTab(`plotType_1`);
-
       const dataAccumulator: Object[] = [];
-      const baseUrl = `${envurls.ugixOgcServer}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
-        resource.id
-      )}`;
+
+      const ServerRegURL = await getResourceServerRegURL(resource);
 
       try {
-        dispatch(updateLoadingState(true));
-        await progressiveFetch(
-          baseUrl,
-          resource,
-          new Date(filterDates.startDate),
-          new Date(filterDates.endDate),
-          30,
-          dataAccumulator,
-          showNoAccessText
-        );
+        if (
+          ServerRegURL?.status === 200 &&
+          ServerRegURL.data.results[0].resourceServerRegURL
+        ) {
+          const regBaseUrl = ServerRegURL.data.results[0].resourceServerRegURL;
+          const baseUrl = `https://${regBaseUrl}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(
+            resource.id
+          )}`;
 
-        plotData(dataAccumulator);
+          dispatch(updateLoadingState(true));
+          await progressiveFetch(
+            baseUrl,
+            resource,
+            new Date(filterDates.startDate),
+            new Date(filterDates.endDate),
+            30,
+            dataAccumulator,
+            showNoAccessText
+          );
+
+          plotData(dataAccumulator);
+        }
       } catch (error) {
         console.log(error);
       } finally {
+        setIsTabSwitching(false);
         dispatch(updateLoadingState(false));
       }
     }
   }
 
   const addTab = (newTab: plotResource) => {
-    setTabs((prevTabs) => [...prevTabs, newTab]);
-    setActiveTab(newTab.id);
+    const uniqueResourceId = `${newTab.id}_${Date.now()}`;
+
+    setTabs((prevTabs) => [
+      ...prevTabs,
+      { ...newTab, uniqueResourceId: uniqueResourceId },
+    ]);
+    setActiveTab(uniqueResourceId);
   };
 
   const removeTab = (tabValue: string) => {
-    const filteredTabs = tabs.filter((tab) => tab.id !== tabValue);
+    const filteredTabs = tabs.filter(
+      (tab) => tab.uniqueResourceId !== tabValue
+    );
     setTabs(filteredTabs);
     if (activeTab === tabValue && filteredTabs.length > 0) {
       const neighourId = filteredTabs[filteredTabs.length - 1];
       onTabSwitching(neighourId);
-      setActiveTab(neighourId.id);
+      setActiveTab(neighourId.uniqueResourceId);
     } else if (filteredTabs.length === 0) {
       setActiveTab(null);
     }
@@ -261,15 +301,40 @@ export default function Plots({
             {tabs.length > 0 && activeTab !== null ? (
               <>
                 <div className={styles.title_container}>
-                  <h3>{tabs.find((tab) => tab.id === activeTab)?.label}</h3>{' '}
+                  <h3 className={styles.chart_title}>
+                    {' '}
+                    {
+                      tabs.find((tab) => tab.uniqueResourceId === activeTab)
+                        ?.label
+                    }
+                  </h3>{' '}
                 </div>
 
+                {plotTypes.map((item, ind) => {
+                  if (item.uniqueResourceId === activeTab) {
+                    const dynamicValues = item.plotSchema[0].dynamic || [];
+                    return (
+                      <Fragment key={ind}>
+                        <FilterInputs
+                          dynamicValues={dynamicValues}
+                          filterDates={filterDates}
+                          SetFilterDates={SetFilterDates}
+                          dataforPlot={dataforPlot}
+                          setDataForPlot={setDataForPlot}
+                          setFilteredDataForPlot={setFilteredDataForPlot}
+                          // allResources={tabs}
+                          // activeResource={activeResource}
+                        />
+                      </Fragment>
+                    );
+                  }
+                })}
                 <div>
-                  {plotTypes.map((item) => {
-                    if (item.id === activeTab) {
+                  {plotTypes.map((item, ind) => {
+                    if (item.uniqueResourceId === activeTab) {
                       return (
                         <div
-                          key={item.id}
+                          key={item.id + ind}
                           className={styles.chart_tab_container}
                         >
                           {item.plotSchema.map((_, index) => {
@@ -294,30 +359,10 @@ export default function Plots({
                     return null;
                   })}
                 </div>
-
-                {plotTypes.map((item, ind) => {
-                  if (item.id === activeTab) {
-                    const dynamicValues = item.plotSchema[0].dynamic || [];
-                    return (
-                      <Fragment key={ind}>
-                        <FilterInputs
-                          dynamicValues={dynamicValues}
-                          filterDates={filterDates}
-                          SetFilterDates={SetFilterDates}
-                          dataforPlot={dataforPlot}
-                          setDataForPlot={setDataForPlot}
-                          setFilteredDataForPlot={setFilteredDataForPlot}
-                          // allResources={tabs}
-                          // activeResource={activeResource}
-                        />
-                      </Fragment>
-                    );
-                  }
-                })}
-
                 {/* charts */}
                 {plotTypes.map((item) =>
-                  item.id === activeTab && item.plotSchema.length > 0
+                  item.uniqueResourceId === activeTab &&
+                  item.plotSchema.length > 0
                     ? item.plotSchema.map((plotItem, plotIndex) => {
                         const plotKey = `plotType_${plotIndex + 1}`;
                         if (activeChartTab === plotKey) {
@@ -360,7 +405,7 @@ export default function Plots({
               </>
             ) : (
               <div className={styles.no_tabs}>
-                Browse ADEX to add and view tabs
+                Browse datasets from ADeX catalogue
               </div>
             )}
           </div>

@@ -16,14 +16,14 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '127.0.0.1',
-      proxy: {
-        '/adex': {
-          target: 'https://rs.adex.org.in',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace('/adex', ''),
-        },
-      },
+      // proxy: {
+      //   '/adex': {
+      //     target: 'https://rs.adex.org.in',
+      //     changeOrigin: true,
+      //     secure: false,
+      //     rewrite: (path) => path.replace('/adex', ''),
+      //   },
+      // },
     },
   };
 });

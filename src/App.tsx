@@ -26,7 +26,22 @@ function App() {
 
   document.documentElement.style.setProperty('--color-primary', primaryColor);
 
+  const faviconUrl =
+    keycloakEnv.realm === 'adex'
+      ? './src/assets/images/adexFavIcon.png'
+      : './src/assets/images/favicon.png';
+
+  const favicon = document.getElementById('favicon') as HTMLLinkElement;
+  function setFavicon(url: string) {
+    if (favicon) {
+      favicon.setAttribute('href', url);
+    } else {
+      console.error('Favicon element not found.');
+    }
+  }
+
   useEffect(() => {
+    setFavicon(faviconUrl);
     if (isRun.current) return;
     isRun.current = true;
     // setLoggedIn(true);
@@ -102,7 +117,6 @@ function App() {
             currentPage={currentPage}
           />
         )}
-
         {loggedIn && currentPage === 'plots' && (
           <Plots
             changePage={changePage}

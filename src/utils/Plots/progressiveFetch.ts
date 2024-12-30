@@ -11,7 +11,8 @@ export async function progressiveFetch(
     endDate: Date,
     maxDays: number,
     dataAccumulator: Object[],
-    showNoAccessText: Function
+    showNoAccessText: Function,
+    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>
 ) {
     const { error, token, status } = await getAccessToken(resource);
     if (error && status === 401) {
@@ -42,7 +43,7 @@ export async function progressiveFetch(
             `${baseUrl}&timerel=during&time=${formattedStartDate}&endtime=${formattedEndDate}`,
             token,
             dataAccumulator,
-
+            setIsDialogOpen
         );
         if (success) break;
 
@@ -69,6 +70,7 @@ export async function progressiveFetch(
             `${baseUrl}&timerel=during&time=${formattedLastEndDate}&endtime=${formattedNextEndDate}`,
             token,
             dataAccumulator,
+            setIsDialogOpen
 
         );
         if (!success) break;

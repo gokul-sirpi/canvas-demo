@@ -1,28 +1,37 @@
-
 import axios from 'axios';
 import { emitToast } from '../../lib/toastEmitter';
 
 export async function fetchData(
     url: string,
     token: string,
-    dataAccumulator: Object[]
+    dataAccumulator: Object[],
+    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<boolean> {
     try {
-
         const res = await axios.get(url, { headers: { token } });
         if (res.status === 200 && res.data.results) {
             dataAccumulator.push(...res.data.results);
+            setIsDialogOpen && setIsDialogOpen(false)
             return true;
         } else if (res.status === 204) {
+            setIsDialogOpen && setIsDialogOpen(false)
             emitToast('info', 'No content available');
             return true;
         }
     } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 413) {
-            return false;
+
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 413) {
+                emitToast('error', 'Payload is too large.');
+                return false;
+            }
         }
         emitToast('error', 'An error occurred while fetching data');
         console.error(error);
+        throw new Error(`fetch-failed: ${error}`);
     }
+
+
     return false;
 }
+

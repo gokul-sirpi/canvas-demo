@@ -8,6 +8,8 @@ export type plotResource = {
     plotSchema: plotSchema[]
     label: string
     resourceGroup: string
+    resourceServer: string
+    uniqueResourceId: string
 };
 
 export type plotSchema = {

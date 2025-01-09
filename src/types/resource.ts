@@ -25,6 +25,9 @@ export type Resource = {
   instance: string;
   itemCreatedAt: string;
   ownerUserId: string;
+  providerName?: string;
+  resourceLabel?: string;
+  resourceDescription?: string;
 };
 
 export type QueryParams = {

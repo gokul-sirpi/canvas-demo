@@ -6,10 +6,8 @@ import { IoMdClose } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
 import UgixFeatureTile from '../../components/ugixFeatureTile/UgixFeatureTile';
 import { Resource } from '../../types/resource';
-// import openLayerMap from '../../lib/openLayers';
-import { TbWorldSearch } from 'react-icons/tb';
-// import { Extent } from 'ol/extent';
 import Loader from '../../components/loader/Loader';
+import { TbWorldSearch } from 'react-icons/tb';
 import { debounce } from 'lodash';
 
 function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
@@ -19,6 +17,8 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   //@ts-ignore
   const [loading, setLoading] = useState<boolean>(false);
+  const [visibleResources, setVisibleResources] = useState<number>(50);
+  const [showLoadMore, setShowLoadMore] = useState<boolean>(false);
 
   const sortResources = useMemo(() => {
     return [...resourceList].sort((a, b) => a.label.localeCompare(b.label));
@@ -26,19 +26,22 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
 
   useEffect(() => {
     if (isDialogOpen) {
-      // setLoading(true);
       setTimeout(() => {
         const sortedData = sortResources;
         setAllResources(sortedData);
         setResources(sortedData);
-        // setLoading(false);
       }, 1000);
     }
   }, [isDialogOpen, resourceList, sortResources]);
 
+  useEffect(() => {
+    setShowLoadMore(visibleResources < resources.length);
+  }, [visibleResources, resources]);
+
   const resetDialogState = () => {
     setSearchInput('');
     setResources(allResources);
+    setVisibleResources(50);
     setIsDialogOpen(false);
   };
 
@@ -46,7 +49,6 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
     debounce((text: string) => {
       if (text !== '') {
         const filteredResources = allResources.filter((resource) => {
-          // Check if the label, description, or any tag includes the text
           return (
             resource.label.toLowerCase().includes(text.toLowerCase()) ||
             resource.description.toLowerCase().includes(text.toLowerCase()) ||
@@ -68,12 +70,18 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
           );
         });
         setResources(filteredResources);
+        setVisibleResources(50);
       } else {
         setResources(allResources);
+        setVisibleResources(50);
       }
     }, 1000),
     [allResources]
   );
+
+  const loadMore = () => {
+    setVisibleResources((prev) => Math.min(prev + 50, resources.length));
+  };
 
   // const handleBboxSelection = () => {
   //   setIsDialogOpen(false);
@@ -117,11 +125,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger asChild>
-        <button
-          className="header_button"
-          autoFocus
-          // onClick={() => setIsDialogOpen(true)}
-        >
+        <button className="header_button" autoFocus>
           <div>
             <TbWorldSearch size={25} />
           </div>
@@ -164,13 +168,20 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
                 <Loader />
               </div>
             ) : resources.length > 0 ? (
-              resources.map((resource) => (
-                <UgixFeatureTile
-                  key={resource.id}
-                  resource={resource}
-                  dialogCloseTrigger={setIsDialogOpen}
-                />
-              ))
+              <>
+                {resources.slice(0, visibleResources).map((resource) => (
+                  <UgixFeatureTile
+                    key={resource.id}
+                    resource={resource}
+                    dialogCloseTrigger={setIsDialogOpen}
+                  />
+                ))}
+                {showLoadMore && visibleResources < resources.length && (
+                  <button className={styles.load_more_btn} onClick={loadMore}>
+                    Load More
+                  </button>
+                )}
+              </>
             ) : (
               <div className={styles.error_container}>
                 {searchInput !== '' ? (

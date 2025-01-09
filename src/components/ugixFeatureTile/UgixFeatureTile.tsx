@@ -4,7 +4,7 @@ import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
 import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
-import { SetStateAction, useRef, useState } from 'react';
+import { memo, SetStateAction, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addCanvasLayer,
@@ -22,6 +22,7 @@ import {
 import { Extent } from 'ol/extent';
 import axios from 'axios';
 import { RootState } from '../../context/store';
+import { getProviderIcon } from '../../assets/providerIcons';
 
 function UgixFeatureTile({
   resource,
@@ -226,6 +227,14 @@ function UgixFeatureTile({
               <FaLock /> Restricted
             </div>
           )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img
+              src={getProviderIcon(resource.providerName!)}
+              alt={resource.providerName}
+              style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            />
+            <span>{resource.providerName}</span>
+          </div>
           <div
             className={styles.extra_button_container}
             data-visible={isExtraBtnVisible}
@@ -288,4 +297,8 @@ function UgixFeatureTile({
   );
 }
 
-export default UgixFeatureTile;
+const areEqual = (prevProps: any, nextProps: any) => {
+  // Only rerender if resources prop has changed
+  return prevProps.resources === nextProps.resources;
+};
+export default memo(UgixFeatureTile, areEqual);

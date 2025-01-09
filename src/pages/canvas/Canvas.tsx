@@ -8,7 +8,6 @@ import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import axios from 'axios';
 import envurls from '../../utils/config';
-import { GeoJsonObj } from '../../types/GeojsonType';
 import { QueryParams, Resource } from '../../types/resource';
 import {
   addCanvasLayer,
@@ -32,8 +31,7 @@ function Canvas({
   currentPage: string;
 }) {
   const singleRender = useRef(false);
-  const [allResrources, setAllResources] = useState<Resource[]>([]);
-  const resourcesFromCatalogue: string[] = [];
+  const [allResources, setAllResources] = useState<Resource[]>([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -53,20 +51,118 @@ function Canvas({
   }, [currentPage]);
 
   async function getResourceData() {
-    const url =
-      // keycloakEnv.realm === 'ugix'?
-      'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
-    // : 'cat/v1/search?property=[plot]&value=[[true]]';
+    const url = 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
 
-    const response = await axios.get(`${envurls.ugixServer}${url}`);
+    try {
+      const response = await axios.get(`${envurls.ugixServer}${url}`);
 
-    if (response.status === 200 && response.data.results.length > 0) {
-      setAllResources(response.data.results);
-      renderWishListItems(response.data.results);
-    } else {
-      console.log('empty');
+      if (response.status === 200 && response.data.results.length > 0) {
+        const resources = response.data.results;
+
+        // Extract unique provider and resourceGroup IDs
+        const uniqueProviderIds = [
+          ...new Set(resources.map((resource: Resource) => resource.provider)),
+        ];
+        const uniqueResourceGroups = [
+          ...new Set(
+            resources.map((resource: Resource) => resource.resourceGroup)
+          ),
+        ];
+
+        // Fetch provider names
+        const providerNames = await Promise.all(
+          uniqueProviderIds.map(async (providerId) => {
+            try {
+              const providerResponse = await axios.get(
+                `${envurls.ugixServer}cat/v1/item?id=${providerId}`
+              );
+              return {
+                providerId,
+                providerName: providerResponse.data.results[0].description,
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching provider name for ID: ${providerId}`,
+                error
+              );
+              return { providerId, providerName: 'Unknown' };
+            }
+          })
+        );
+
+        // Fetch resource details
+        const resourceDetails = await Promise.all(
+          uniqueResourceGroups.map(async (resourceGroupId) => {
+            try {
+              const resourceResponse = await axios.get(
+                `${envurls.ugixServer}cat/v1/item?id=${resourceGroupId}`
+              );
+              return {
+                resourceGroupId,
+                resourceLabel: resourceResponse.data.results[0].label,
+                resourceDescription:
+                  resourceResponse.data.results[0].description,
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching resource details for ID: ${resourceGroupId}`,
+                error
+              );
+              return {
+                resourceGroupId,
+                resourceLabel: 'Unknown',
+                resourceDescription: 'Unknown',
+              };
+            }
+          })
+        );
+
+        // Map provider names and resource details to dictionaries for quick lookup
+        const providerNameMap = providerNames.reduce(
+          (acc, { providerId, providerName }) => {
+            acc[providerId as string] = providerName;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+
+        const resourceDetailMap = resourceDetails.reduce(
+          (acc, { resourceGroupId, resourceLabel, resourceDescription }) => {
+            acc[resourceGroupId as string] = {
+              resourceLabel,
+              resourceDescription,
+            };
+            return acc;
+          },
+          {} as Record<
+            string,
+            { resourceLabel: string; resourceDescription: string }
+          >
+        );
+
+        // Update allResources with providerName, resourceLabel, and resourceDescription
+        const updatedResources = resources.map((resource: Resource) => ({
+          ...resource,
+          providerName: providerNameMap[resource.provider] || 'Unknown',
+          resourceLabel:
+            resourceDetailMap[resource.resourceGroup]?.resourceLabel ||
+            'Unknown',
+          resourceDescription:
+            resourceDetailMap[resource.resourceGroup]?.resourceDescription ||
+            'Unknown',
+        }));
+
+        setAllResources(updatedResources);
+        renderWishListItems(updatedResources);
+      } else {
+        console.log('No resources found.');
+      }
+    } catch (error) {
+      console.error('Error fetching resources:', error);
     }
   }
+
+  console.log(allResources);
 
   async function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue(envurls.catalogueCookie);
@@ -74,14 +170,16 @@ function Canvas({
       const parsedList = wishList.split(',');
       if (Array.isArray(parsedList)) {
         for (const id of parsedList) {
-          for (const resource of resourceList)
+          for (const resource of resourceList) {
             if (resource.id === id) {
               handleUgixLayerAddition(resource);
             }
+          }
         }
       }
     }
   }
+
   async function handleUgixLayerAddition(resource: Resource) {
     dispatch(updateLoadingState(true));
     const newLayer = openLayerMap.createNewUgixLayer(
@@ -99,8 +197,7 @@ function Canvas({
       queryParams,
       () => {
         dispatch(addCanvasLayer(newLayer));
-        resourcesFromCatalogue.push(newLayer.layerId);
-        openLayerMap.zoomToCombinedExtend(resourcesFromCatalogue);
+        openLayerMap.zoomToCombinedExtend([newLayer.layerId]);
         cleanUpSideEffects();
       },
       (message) => {
@@ -114,67 +211,9 @@ function Canvas({
       }
     );
   }
+
   function cleanUpSideEffects() {
     dispatch(updateLoadingState(false));
-  }
-  function handleFileDrop(event: React.DragEvent) {
-    event.preventDefault();
-    if (event.dataTransfer.files.length > 0) {
-      const files = event.dataTransfer.files;
-      dispatch(updateLoadingState(true));
-      for (const file of files) {
-        const nameSplit = file.name.split('.');
-        const type = nameSplit[nameSplit.length - 1];
-        if (type === 'json' || type === 'geojson') {
-          const fr = new FileReader();
-          fr.readAsText(file);
-          fr.onload = () => {
-            try {
-              const output = fr.result as string;
-              const parsedData = JSON.parse(output) as GeoJsonObj;
-              nameSplit.pop();
-              const fileName = nameSplit.join();
-              plotGeojsonData(parsedData, fileName);
-              dispatch(updateLoadingState(false));
-            } catch (err) {
-              emitToast('error', 'Invalid file format');
-              dispatch(updateLoadingState(false));
-            }
-          };
-          fr.onerror = () => {
-            emitToast('error', 'Unable to load file');
-            dispatch(updateLoadingState(false));
-          };
-        } else {
-          emitToast('error', 'Invalid file format');
-          dispatch(updateLoadingState(false));
-        }
-      }
-    }
-  }
-  function plotGeojsonData(data: GeoJsonObj, fileName: string) {
-    const newLayer = openLayerMap.createNewUserLayer(
-      fileName,
-      'GeometryCollection'
-    );
-    newLayer.isCompleted = true;
-    newLayer.editable = false;
-    try {
-      openLayerMap.addImportedGeojsonData(
-        data,
-        newLayer.layerId,
-        newLayer.style
-      );
-      openLayerMap.zoomToFit(newLayer.layerId);
-      dispatch(addCanvasLayer(newLayer));
-    } catch (error) {
-      emitToast('error', 'Invalid file format');
-      dispatch(updateLoadingState(false));
-    }
-  }
-
-  function handleDragOver(event: React.DragEvent) {
-    event.preventDefault();
   }
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -188,21 +227,14 @@ function Canvas({
   return (
     <section className={styles.container}>
       <div className={styles.ol_map_container}>
-        <div
-          onDrop={handleFileDrop}
-          onDragOver={handleDragOver}
-          id="ol-map"
-          className={styles.ol_map}
-        ></div>
+        <div id="ol-map" className={styles.ol_map}></div>
         <>
           <SwipeLine />
-          {/* <Popup /> */}
-          {/* <Toolbar resourceList={allResrources} /> */}
           <Header
             profileData={profileData}
             changePage={changePage}
             currentPage={currentPage}
-            resourceList={allResrources}
+            resourceList={allResources}
           />
           <LayerCard />
           <Intro />
@@ -217,4 +249,5 @@ function Canvas({
     </section>
   );
 }
+
 export default Canvas;

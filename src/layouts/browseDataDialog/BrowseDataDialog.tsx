@@ -17,7 +17,8 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [allResources, setAllResources] = useState<Resource[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [loading, setLoading] = useState<boolean>(false); // Default to false
+  //@ts-ignore
+  const [loading, setLoading] = useState<boolean>(false);
 
   const sortResources = useMemo(() => {
     return [...resourceList].sort((a, b) => a.label.localeCompare(b.label));

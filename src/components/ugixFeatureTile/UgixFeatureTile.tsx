@@ -125,17 +125,21 @@ function UgixFeatureTile({
 
   async function handleResourceDownload() {
     try {
-      const url = envurls.ugixOgcServer + 'stac/collections/' + resource.id;
+      const url = envurls.ugixOgcServer + 'collections/' + resource.id;
       const response = await axios.get(url);
-      const assetData = response.data as ResourceDownload;
-      for (const asset in assetData.assets) {
-        const { role, href } = assetData.assets[asset];
-        if (role[0] === 'data') {
+      const assetData = response.data;
+      
+
+      const href = assetData.links.filter((e:any)=>{
+					return e.rel === 'enclosure';
+				})[0]?.href;
+
+        if(href){
           downloadResourceData(href);
         } else {
           emitToast('error', 'Unable to download data');
         }
-      }
+      
     } catch (err) {
       console.log(err);
       emitToast('error', 'Unable to download data');

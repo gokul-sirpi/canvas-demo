@@ -45,7 +45,7 @@ import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
-import envurls from '../utils/config';
+// import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
 
 type baseLayerTypes =
@@ -218,11 +218,11 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  initialMapFitOnGetResource(layerId: string, ugixId: string) {
+  initialMapFitOnGetResource(serverUrl: string, layerId: string, ugixId: string) {
     let resourceExtent = createEmpty();
     let view = this.map.getView();
 
-    fetch(`https://geoserver.dx.ugix.org.in/collections/${ugixId}`)
+    fetch(`https://${serverUrl}/collections/${ugixId}`)
       .then((res) => {
         if (res.ok) {
           res.json().then((data) => {
@@ -245,6 +245,7 @@ const openLayerMap = {
       });
   },
   createNewUgixLayer(
+    serverUrl: string,
     layerName: string,
     ugixId: string,
     ugixGroupId: string,
@@ -259,7 +260,7 @@ const openLayerMap = {
     });
     newVectorLayer.set('layer-id', layerId);
 
-    this.initialMapFitOnGetResource(layerId, ugixId);
+    this.initialMapFitOnGetResource(serverUrl, layerId, ugixId);
 
     const newLayer: UgixLayer = {
       layerType: 'UgixLayer',
@@ -292,6 +293,7 @@ const openLayerMap = {
     return newLayer;
   },
   createNewUgixTileLayer(
+    serverUrl: string,
     layerName: string,
     ugixId: string,
     ugixGroupId: string,
@@ -302,14 +304,15 @@ const openLayerMap = {
     const layerId = createUniqueId();
     const vectorSource = new OGCVectorTile({
       url:
-        envurls.ugixOgcServer +
-        `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+        `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      // envurls.ugixOgcServer +
+      // `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
       // projection: 'EPSG:4326',
     });
 
-    this.initialMapFitOnGetResource(layerId, ugixId);
+    this.initialMapFitOnGetResource(serverUrl, layerId, ugixId);
 
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (

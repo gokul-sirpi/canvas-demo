@@ -7,7 +7,7 @@ import { UserProfile } from '../../types/UserProfile';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import axios from 'axios';
-import envurls from '../../utils/config';
+import envurls, { keycloakEnv } from '../../utils/config';
 import { QueryParams, Resource } from '../../types/resource';
 import {
   addCanvasLayer,
@@ -20,6 +20,7 @@ import Intro from '../../layouts/Intro/Intro';
 import SwipeLine from '../../layouts/swipeLine/SwipeLine';
 import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter';
 import { Sidebar } from '../../components/sidebar/Sidebar';
+import getResourceServerRegURL from '../../utils/getResourceServerRegUrl';
 
 function Canvas({
   profileData,
@@ -51,7 +52,11 @@ function Canvas({
   }, [currentPage]);
 
   async function getResourceData() {
-    const url = 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
+    // const url = 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
+    const url =
+      keycloakEnv.realm === 'adex'
+        ? 'cat/v1/search?property=[resourceType]&value=[[OGC]]'
+        : 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
 
     try {
       const response = await axios.get(`${envurls.ugixServer}${url}`);
@@ -182,7 +187,11 @@ function Canvas({
 
   async function handleUgixLayerAddition(resource: Resource) {
     dispatch(updateLoadingState(true));
+    let serverUrl = await getResourceServerRegURL(resource);
+
+    console.log(serverUrl);
     const newLayer = openLayerMap.createNewUgixLayer(
+      serverUrl,
       resource.label,
       resource.id,
       resource.resourceGroup,
@@ -192,6 +201,7 @@ function Canvas({
       offset: 1,
     };
     getAllUgixFeatures(
+      serverUrl,
       resource,
       newLayer,
       queryParams,

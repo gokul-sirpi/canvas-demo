@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { QueryParams, Resource } from '../types/resource';
 import { axiosAuthClient } from './axiosConfig';
-import envurls from '../utils/config';
+// import envurls from '../utils/config';
 import { UgixLayer } from '../types/UgixLayers';
 import { GeoJsonObj } from '../types/GeojsonType';
 import openLayerMap from './openLayers';
@@ -116,6 +116,7 @@ export async function getAccessToken(resource: Resource | plotResource, serverUr
 
     if (resource.accessPolicy === 'OPEN') {
       // body.itemId = 'geoserver.dx.ugix.org.in';
+      // @ts-ignore
       body.itemId = serverUrl
       body.itemType = 'resource_server';
     }

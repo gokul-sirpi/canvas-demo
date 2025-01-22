@@ -23,7 +23,7 @@ import { Extent } from 'ol/extent';
 import axios from 'axios';
 import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
-import getResourceServerRegURL from '../../utils/getResourceServerRegUrl';
+import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
 
 function UgixFeatureTile({
   resource,

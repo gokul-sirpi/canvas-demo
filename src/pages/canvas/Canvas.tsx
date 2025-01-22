@@ -20,7 +20,7 @@ import Intro from '../../layouts/Intro/Intro';
 import SwipeLine from '../../layouts/swipeLine/SwipeLine';
 import AdjustableFooter from '../../layouts/adjustableFooter/AdjustableFooter';
 import { Sidebar } from '../../components/sidebar/Sidebar';
-import getResourceServerRegURL from '../../utils/getResourceServerRegUrl';
+import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
 
 function Canvas({
   profileData,

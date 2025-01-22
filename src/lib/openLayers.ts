@@ -45,7 +45,7 @@ import { Type as GeometryType } from 'ol/geom/Geometry';
 import JSZip from 'jszip';
 import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
-import envurls from '../utils/config';
+// import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
 
 type baseLayerTypes =

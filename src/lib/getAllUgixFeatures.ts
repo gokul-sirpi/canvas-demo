@@ -22,14 +22,15 @@ type UgixLinks = {
 // const limit = 5;
 
 export async function getAllUgixFeatures(
+  serverUrl: string,
   resource: Resource,
   ugixLayer: UgixLayer,
   params: QueryParams,
   onSucess: onSucess,
   onError: onError,
-  onFinished?: onFinished
+  onFinished?: onFinished,
 ) {
-  const { error, token } = await getAccessToken(resource);
+  const { error, token } = await getAccessToken(resource, serverUrl);
   if (error) {
     onError('no-access', error);
     return;
@@ -39,7 +40,9 @@ export async function getAllUgixFeatures(
     let totalFeatures = Infinity;
     let currFeaturesReturned = Infinity;
     let url =
-      envurls.ugixOgcServer + 'collections/' + resource.id + '/items?offset=1';
+      `https://${serverUrl}/collections/${resource.id}/items?offset=1`;
+    // envurls.ugixOgcServer + 'collections/' + resource.id + '/items?offset=1';
+
     do {
       try {
         const response = await axios.get(url, {
@@ -103,7 +106,7 @@ export async function getAllUgixFeatures(
   }
 }
 
-export async function getAccessToken(resource: Resource | plotResource) {
+export async function getAccessToken(resource: Resource | plotResource, serverUrl?: string) {
   try {
     const body = {
       itemId: resource.id,
@@ -112,7 +115,8 @@ export async function getAccessToken(resource: Resource | plotResource) {
     };
 
     if (resource.accessPolicy === 'OPEN') {
-      body.itemId = 'geoserver.dx.ugix.org.in';
+      // body.itemId = 'geoserver.dx.ugix.org.in';
+      body.itemId = serverUrl
       body.itemType = 'resource_server';
     }
     const response = await axiosAuthClient.post('v1/token', body);

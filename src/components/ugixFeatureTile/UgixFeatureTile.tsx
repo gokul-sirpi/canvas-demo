@@ -23,6 +23,7 @@ import { Extent } from 'ol/extent';
 import axios from 'axios';
 import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
+import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
 
 function UgixFeatureTile({
   resource,
@@ -57,18 +58,23 @@ function UgixFeatureTile({
   }
 
   async function handleUgixLayerAddition(bbox?: Extent) {
+    let serverUrl = await getResourceServerRegURL(resource);
+
+    console.log(serverUrl);
+
     // store the resource data in session storage
     sessionStorage.setItem(
       `${resource.id}-ugix-resource`,
       JSON.stringify(resource)
     );
-
-    if (resource.ogcResourceInfo.ogcResourceAPIs.includes('VECTOR_TILES')) {
+    console.log(resource);
+    if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('VECTOR_TILES')) {
       plotTiles();
     } else {
       setAdding(true);
       dispatch(updateLoadingState(true));
       const newLayer = openLayerMap.createNewUgixLayer(
+        serverUrl,
         resource.label,
         resource.id,
         resource.resourceGroup,
@@ -79,9 +85,11 @@ function UgixFeatureTile({
         queryParams.bbox = bbox.join();
       }
       getAllUgixFeatures(
+        serverUrl,
         resource,
         newLayer,
         queryParams,
+
         () => {
           dispatch(addCanvasLayer(newLayer));
           ugixResources.push(newLayer.layerId);
@@ -175,22 +183,34 @@ function UgixFeatureTile({
   function toggleExtraButtonDrawer() {
     setIsExtraBtnVisible(!isExtraBtnVisible);
   }
+
   async function plotTiles() {
     console.log('tiles');
+    let serverUrl = await getResourceServerRegURL(resource);
+    console.log(serverUrl);
     try {
-      const { error, token } = await getAccessToken(resource);
+      const { error, token } = await getAccessToken(resource, serverUrl);
+
       if (error) {
         emitToast('error', 'No acces to data');
         return;
       }
+
+      // const response = await axios.get(
+      //   envurls.ugixOgcServer +
+      //     `/collections/${resource.id}/map/tiles/WorldCRS84Quad`
+      // );
       const response = await axios.get(
-        envurls.ugixOgcServer +
-          `/collections/${resource.id}/map/tiles/WorldCRS84Quad`
+        `https://${serverUrl}/collections/${resource.id}/map/tiles/WorldCRS84Quad`
       );
       console.log(response);
 
       if (token && response.status === 200) {
+        console.log('hi');
+
+        // get server url
         const newLayer = openLayerMap.createNewUgixTileLayer(
+          serverUrl,
           resource.label,
           resource.id,
           resource.resourceGroup,

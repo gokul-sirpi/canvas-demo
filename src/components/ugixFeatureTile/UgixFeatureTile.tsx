@@ -2,7 +2,7 @@ import { FaLock, FaUnlock } from 'react-icons/fa';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
 import styles from './styles.module.css';
 import { RiInformationFill } from 'react-icons/ri';
-import { QueryParams, Resource, ResourceDownload } from '../../types/resource';
+import { QueryParams, Resource } from '../../types/resource';
 import openLayerMap from '../../lib/openLayers';
 import { memo, SetStateAction, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -136,18 +136,16 @@ function UgixFeatureTile({
       const url = envurls.ugixOgcServer + 'collections/' + resource.id;
       const response = await axios.get(url);
       const assetData = response.data;
-      
 
-      const href = assetData.links.filter((e:any)=>{
-					return e.rel === 'enclosure';
-				})[0]?.href;
+      const href = assetData.links.filter((e: any) => {
+        return e.rel === 'enclosure';
+      })[0]?.href;
 
-        if(href){
-          downloadResourceData(href);
-        } else {
-          emitToast('error', 'Unable to download data');
-        }
-      
+      if (href) {
+        downloadResourceData(href);
+      } else {
+        emitToast('error', 'Unable to download data');
+      }
     } catch (err) {
       console.log(err);
       emitToast('error', 'Unable to download data');

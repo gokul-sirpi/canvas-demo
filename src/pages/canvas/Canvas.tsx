@@ -55,14 +55,22 @@ function Canvas({
     // const url = 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
     const url =
       keycloakEnv.realm === 'adex'
-        ? 'cat/v1/search?property=[resourceType]&value=[[OGC]]'
+        ? 'cat/v1/search?property=[resourceType]&value=[[OGC]]&'
         : 'cat/v1/search?property=[type]&value=[[iudx:Resource]]';
 
     try {
       const response = await axios.get(`${envurls.ugixServer}${url}`);
 
       if (response.status === 200 && response.data.results.length > 0) {
-        const resources = response.data.results;
+        const featureResources = response.data.results.filter(
+          (resource: Resource) =>
+            resource.ogcResourceInfo.ogcResourceAPIs.includes('FEATURES')
+        );
+
+        const resources =
+          keycloakEnv.realm === 'adex'
+            ? featureResources
+            : response.data.results;
 
         // Extract unique provider and resourceGroup IDs
         const uniqueProviderIds = [

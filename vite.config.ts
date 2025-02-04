@@ -8,9 +8,9 @@ export default defineConfig(({ mode }) => {
 
   const env = loadEnv(mode, envDir);
 
-  // if (mode === 'staging') {
-  //   process.env.NODE_ENV = 'production';
-  // }
+  if (mode === 'staging') {
+    process.env.NODE_ENV = 'production';
+  }
 
   return {
     plugins: [react()],

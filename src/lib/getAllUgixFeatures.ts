@@ -115,7 +115,7 @@ export async function getAccessToken(resource: Resource | plotResource, serverUr
     };
 
     if (resource.accessPolicy === 'OPEN') {
-      // body.itemId = 'geoserver.dx.ugix.org.in';
+      body.itemId = 'geoserver.dx.ugix.org.in';
       // @ts-ignore
       body.itemId = serverUrl
       body.itemType = 'resource_server';

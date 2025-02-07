@@ -115,7 +115,7 @@ export async function getAccessToken(
 
     if (resource.accessPolicy === 'OPEN') {
       body = {
-        itemId: serverUrl,
+        itemId: 'geoserver.dx.gsx.org.in',
         itemType: 'resource',
         role: 'consumer',
       };

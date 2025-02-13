@@ -28,7 +28,7 @@ export async function getAllUgixFeatures(
   params: QueryParams,
   onSucess: onSucess,
   onError: onError,
-  onFinished?: onFinished,
+  onFinished?: onFinished
 ) {
   const { error, token } = await getAccessToken(resource, serverUrl);
   if (error) {
@@ -39,8 +39,7 @@ export async function getAllUgixFeatures(
     let totalFeaturesReturned = 0;
     let totalFeatures = Infinity;
     let currFeaturesReturned = Infinity;
-    let url =
-      `https://${serverUrl}/collections/${resource.id}/items?offset=1`;
+    let url = `https://${serverUrl}/collections/${resource.id}/items?offset=1`;
     // envurls.ugixOgcServer + 'collections/' + resource.id + '/items?offset=1';
 
     do {
@@ -106,7 +105,10 @@ export async function getAllUgixFeatures(
   }
 }
 
-export async function getAccessToken(resource: Resource | plotResource, serverUrl?: string) {
+export async function getAccessToken(
+  resource: Resource | plotResource,
+  serverUrl?: string
+) {
   try {
     let body;
     console.log("serverUrl", serverUrl);
@@ -124,6 +126,8 @@ export async function getAccessToken(resource: Resource | plotResource, serverUr
         role: 'consumer',
       };
     }
+
+    console.log(body);
     const response = await axiosAuthClient.post('v1/token', body);
     if (response.status === 200) {
       return {
@@ -134,10 +138,12 @@ export async function getAccessToken(resource: Resource | plotResource, serverUr
     return { error: 'Unable to get token', token: null };
   } catch (error) {
     if (error instanceof AxiosError) {
-
-      return { error: error.message, token: null, status: error.response?.status };
-    }
-    else {
+      return {
+        error: error.message,
+        token: null,
+        status: error.response?.status,
+      };
+    } else {
       return { error: 'Error', token: null };
     }
   }

@@ -108,17 +108,21 @@ export async function getAllUgixFeatures(
 
 export async function getAccessToken(resource: Resource | plotResource, serverUrl?: string) {
   try {
-    const body = {
-      itemId: resource.id,
-      itemType: 'resource',
-      role: 'consumer',
-    };
+    let body;
+    console.log("serverUrl", serverUrl);
 
     if (resource.accessPolicy === 'OPEN') {
-      // body.itemId = 'geoserver.dx.ugix.org.in';
-      // @ts-ignore
-      body.itemId = serverUrl
-      body.itemType = 'resource_server';
+      body = {
+        itemId: serverUrl,
+        itemType: 'resource_server',
+        role: 'consumer',
+      };
+    } else {
+      body = {
+        itemId: resource.id,
+        itemType: 'resource',
+        role: 'consumer',
+      };
     }
     const response = await axiosAuthClient.post('v1/token', body);
     if (response.status === 200) {

@@ -8,7 +8,7 @@
     "build:adex-dev": "tsc && cross-env PROJECT=adex vite build --mode production",
     "build:adex-staging": "tsc && cross-env PROJECT=adex vite build --mode staging",
     "build:adex-production": "tsc && cross-env PROJECT=adex vite build --mode production",
-    "dev:gdi": "cross-env PROJECT=gdi vite",
+    "dev:gdi": "cross-env PROJECT=gdi vite --mode production",
     "build:gdi-dev": "tsc && cross-env PROJECT=gdi vite build --mode development",
     "build:gdi-staging": "tsc && cross-env PROJECT=gdi vite build --mode staging",
     "build:gdi-production": "tsc && cross-env PROJECT=gdi vite build --mode production",

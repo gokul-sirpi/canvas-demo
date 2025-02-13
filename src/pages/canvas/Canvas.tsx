@@ -63,8 +63,13 @@ function Canvas({
 
       if (response.status === 200 && response.data.results.length > 0) {
         const featureResources = response.data.results.filter(
-          (resource: Resource) =>
-            resource.ogcResourceInfo.ogcResourceAPIs.includes('FEATURES')
+          (resource: Resource) => {
+            if (resource.ogcResourceInfo) {
+              return resource?.ogcResourceInfo?.ogcResourceAPIs?.includes(
+                'FEATURES'
+              );
+            }
+          }
         );
 
         const resources =
@@ -175,7 +180,7 @@ function Canvas({
     }
   }
 
-  console.log(allResources);
+  // console.log(allResources);
 
   async function renderWishListItems(resourceList: Resource[]) {
     const wishList = getCookieValue(envurls.catalogueCookie);

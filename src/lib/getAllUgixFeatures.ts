@@ -111,11 +111,11 @@ export async function getAccessToken(
 ) {
   try {
     let body;
-    console.log(serverUrl);
+    console.log("serverUrl", serverUrl);
 
     if (resource.accessPolicy === 'OPEN') {
       body = {
-        itemId: 'geoserver.dx.ugix.org.in',
+        itemId: serverUrl,
         itemType: 'resource_server',
         role: 'consumer',
       };

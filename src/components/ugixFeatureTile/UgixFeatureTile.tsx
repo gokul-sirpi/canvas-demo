@@ -189,7 +189,7 @@ function UgixFeatureTile({
   async function plotTiles() {
     console.log('tiles');
     let serverUrl = await getResourceServerRegURL(resource);
-    console.log(serverUrl);
+
     try {
       const { error, token } = await getAccessToken(resource, serverUrl);
 
@@ -208,8 +208,6 @@ function UgixFeatureTile({
       console.log(response);
 
       if (token && response.status === 200) {
-        console.log('hi');
-
         // get server url
         const newLayer = openLayerMap.createNewUgixTileLayer(
           serverUrl,

@@ -90,6 +90,7 @@ export default function Plots({
       const regURL = await axios.get(
         `${envurls.ugixServer}cat/v1/item?id=${resource.resourceServer}`
       );
+      // console.log(regURL);
       return regURL;
     } catch (error) {
       emitToast('error', 'Failed to get server ID');
@@ -102,7 +103,6 @@ export default function Plots({
     setActiveChartTab(`plotType_1`);
     const dataAccumulator: Object[] = [];
     const ServerRegURL = await getResourceServerRegURL(resource);
-
     try {
       if (
         ServerRegURL?.status === 200 &&
@@ -121,7 +121,8 @@ export default function Plots({
           30,
           dataAccumulator,
           showNoAccessText,
-          setIsDialogOpen
+          setIsDialogOpen,
+          regBaseUrl
         );
 
         plotData(dataAccumulator);

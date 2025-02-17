@@ -7,7 +7,7 @@ import { FaLock, FaSearch, FaUnlock } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
 import { BsArrowRight } from 'react-icons/bs';
 import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
-import { MdDownloadForOffline } from 'react-icons/md';
+// import { MdDownloadForOffline } from 'react-icons/md';
 import { RiInformationFill } from 'react-icons/ri';
 import { useEffect, useState } from 'react';
 import envurls from '../../../utils/config';
@@ -145,13 +145,13 @@ export default function BrowsePlotsDialog({
                     </TooltipWrapper>
                   </div>
                   <div className={styles.icon_container}>
-                    <TooltipWrapper content="Download complete resources">
+                    {/* <TooltipWrapper content="Download complete resources">
                       <button>
                         <div className={styles.icon_wrapper}>
                           <MdDownloadForOffline />
                         </div>
                       </button>
-                    </TooltipWrapper>
+                    </TooltipWrapper> */}
                     <TooltipWrapper content="Resource info">
                       <button onClick={() => getinfoLink(item)}>
                         <div className={styles.icon_wrapper}>

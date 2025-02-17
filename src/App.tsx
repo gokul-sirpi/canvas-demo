@@ -75,6 +75,7 @@ function App() {
   }
   function checkLoginStatus() {
     const cookieResponse = getCookieValue(envurls.authCookie);
+    console.log('cookie res', cookieResponse, envurls.authCookie);
     if (cookieResponse === 'logged-in') {
       clearInterval(intervalId.current);
       closeAuthTab();

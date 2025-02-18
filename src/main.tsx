@@ -8,6 +8,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { keycloakEnv } from './utils/config.ts';
 
+console.log('realm ---->', keycloakEnv.realm);
+
 document.title = keycloakEnv.realm === 'adex' ? 'ADeX canvas' : 'GDI canvas';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -12,9 +12,11 @@ export async function progressiveFetch(
     maxDays: number,
     dataAccumulator: Object[],
     showNoAccessText: Function,
-    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>
+    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>,
+    regBaseUrl?: string
 ) {
-    const { error, token, status } = await getAccessToken(resource);
+
+    const { error, token, status } = await getAccessToken(resource, regBaseUrl);
     if (error && status === 401) {
         emitToast('error', `Unable to get access token`);
         throw new Error(`no-access: ${error}`);

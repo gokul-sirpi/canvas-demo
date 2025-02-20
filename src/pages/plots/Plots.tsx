@@ -58,7 +58,11 @@ export default function Plots({
         `${envurls.ugixServer}cat/v1/search?property=[plot]&value=[[true]]`
       );
       if (response.status === 200 && response.data.results.length > 0) {
-        const sortedData = sortResources(response.data.results);
+        const filteredData = response.data.results.filter(
+          (item: plotResource) =>
+            item.resourceServer === '41bb4389-ebaf-4df7-a575-556ec6092a25'
+        );
+        const sortedData = sortResources(filteredData);
         setAllResources(sortedData);
       }
     } catch (error) {
@@ -155,7 +159,10 @@ export default function Plots({
         ) {
           dispatch(updateLoadingState(true));
           const regBaseUrl = ServerRegURL.data.results[0].resourceServerRegURL;
-          const { error, token } = await getAccessToken(activeResource);
+          const { error, token } = await getAccessToken(
+            activeResource,
+            regBaseUrl
+          );
           if (error) {
             emitToast('error', `Unable to get access token`);
             throw new Error(`no-access: ${error}`);
@@ -263,6 +270,14 @@ export default function Plots({
     }
   };
 
+  const switchChartTab = async (plotKey: string) => {
+    dispatch(updateLoadingState(true));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    setActiveChartTab(plotKey);
+    dispatch(updateLoadingState(false));
+  };
+
   // get data returned for the selected resource which is array of initial data
   const plotData = (data: Object[]) => {
     setDataForPlot(data);
@@ -348,7 +363,7 @@ export default function Plots({
                                     ? styles.active_chart_tab
                                     : ''
                                 }`}
-                                onClick={() => setActiveChartTab(plotKey)}
+                                onClick={() => switchChartTab(plotKey)}
                               >
                                 Plot {index + 1}
                               </button>

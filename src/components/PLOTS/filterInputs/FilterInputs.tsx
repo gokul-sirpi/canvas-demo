@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 // import { plotResource } from '../../../types/plotResource';
 import { camelCaseToSpaceSeparated } from '../../../utils/CamelCaseToSpaceSeparated';
+import { useDispatch } from 'react-redux';
+import { updateLoadingState } from '../../../context/loading/LoaderSlice';
 
 export default function FilterInputs({
   dynamicValues,
@@ -29,6 +31,8 @@ export default function FilterInputs({
   // allResources: plotResource[];
   // activeResource: plotResource | null;
 }) {
+  const dispatch = useDispatch();
+
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
     {}
   );
@@ -67,6 +71,8 @@ export default function FilterInputs({
 
   // Function to update options for the dropdown based on current selections
   const updateFilteredOptions = (currentData: Object[]) => {
+    dispatch(updateLoadingState(true));
+
     const newOptions: Record<string, string[]> = {};
     dynamicValues.forEach((key) => {
       newOptions[key] = Array.from(
@@ -75,10 +81,14 @@ export default function FilterInputs({
       );
     });
     setFilteredOptions(newOptions);
+    dispatch(updateLoadingState(false));
   };
 
   // Handle select change for any dropdown
-  const handleSelectChange = (key: string, value: string) => {
+  const handleSelectChange = async (key: string, value: string) => {
+    dispatch(updateLoadingState(true));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const updatedSelectedValues = { ...selectedValues, [key]: value };
     setSelectedValues(updatedSelectedValues);
     const filteredData = dataforPlot.filter((item) =>
@@ -92,6 +102,7 @@ export default function FilterInputs({
 
     updateFilteredOptions(filteredData as []);
     setFilteredDataForPlot(filteredData as []);
+    dispatch(updateLoadingState(false));
   };
 
   useEffect(() => {

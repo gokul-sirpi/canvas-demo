@@ -17,17 +17,20 @@ export async function progressiveFetch(
 ) {
 
     const { error, token, status } = await getAccessToken(resource, regBaseUrl);
-    if (error && status === 401) {
-        emitToast('error', `Unable to get access token`);
+    if (error && status === 401 || status === 403) {
+        status === 401 && emitToast('error', `Unable to get access token`);
+        status === 403 && emitToast('error', `No access to resource data`);
+        status === 403 && showNoAccessText();
         throw new Error(`no-access: ${error}`);
     }
-    if (error && status === 403) {
-        showNoAccessText();
-        return;
-    }
+    // if (error && status === 403) {
+    //     showNoAccessText();
+    //     return;
+    // }
     if (!token) {
         throw new Error('Unable to get access token');
     }
+
 
     let currentDays = maxDays;
 

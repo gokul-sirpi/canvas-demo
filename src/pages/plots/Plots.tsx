@@ -43,7 +43,7 @@ export default function Plots({
   const [activeChartTab, setActiveChartTab] = useState<string | null>(
     'plotType_1'
   );
-  const [isTabSwitching, setIsTabSwitching] = useState(false);
+  // const [isTabSwitching, setIsTabSwitching] = useState(false);
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -142,13 +142,13 @@ export default function Plots({
 
   // console.log(activeResource);
 
-  useEffect(() => {
-    if (!isTabSwitching && activeResource) {
-      handleOnFilterChange();
-    }
-  }, [filterDates.startDate, filterDates.endDate]);
+  // useEffect(() => {
+  //   if (!isTabSwitching && activeResource) {
+  //     handleOnFilterChange();
+  //   }
+  // }, [filterDates.startDate, filterDates.endDate]);
 
-  async function handleOnFilterChange() {
+  async function handleOnFilterChange(startDate: string, endDate: string) {
     if (activeResource) {
       const ServerRegURL = await getResourceServerRegURL(activeResource);
 
@@ -170,7 +170,7 @@ export default function Plots({
           if (!token) {
             throw new Error('Unable to get access token');
           }
-          let url = `https://${regBaseUrl}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(activeResource.id)}&timerel=during&time=${encodeURIComponent(filterDates.startDate)}&endtime=${encodeURIComponent(filterDates.endDate)}`;
+          let url = `https://${regBaseUrl}/ngsi-ld/v1/temporal/entities?id=${encodeURIComponent(activeResource.id)}&timerel=during&time=${encodeURIComponent(startDate)}&endtime=${encodeURIComponent(endDate)}`;
           const res = await axios.get(url, { headers: { token } });
 
           if (res.status === 200 && res.data.results) {
@@ -206,7 +206,8 @@ export default function Plots({
   }
 
   async function onTabSwitching(resource: plotResource) {
-    setIsTabSwitching(true);
+    // setIsTabSwitching(true);
+
     if (activeResource) {
       SetFilterDates({ startDate, endDate });
       setActiveChartTab(`plotType_1`);
@@ -240,7 +241,7 @@ export default function Plots({
       } catch (error) {
         console.log(error);
       } finally {
-        setIsTabSwitching(false);
+        // setIsTabSwitching(false);
         dispatch(updateLoadingState(false));
       }
     }
@@ -336,8 +337,8 @@ export default function Plots({
                           filterDates={filterDates}
                           SetFilterDates={SetFilterDates}
                           dataforPlot={dataforPlot}
-                          setDataForPlot={setDataForPlot}
                           setFilteredDataForPlot={setFilteredDataForPlot}
+                          onFilterChange={handleOnFilterChange}
                           // allResources={tabs}
                           // activeResource={activeResource}
                         />

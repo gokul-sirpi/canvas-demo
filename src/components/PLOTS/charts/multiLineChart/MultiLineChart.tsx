@@ -2,6 +2,7 @@ import * as echarts from 'echarts';
 import { formatDate } from '../../../../utils/FormatDate';
 import { camelCaseToSpaceSeparated } from '../../../../utils/CamelCaseToSpaceSeparated';
 import { EchatrColors } from '../../../../utils/EchartColors';
+import { useEffect } from 'react';
 
 function getNestedValue(obj: Object, path: string) {
   // @ts-ignore
@@ -11,10 +12,25 @@ function getNestedValue(obj: Object, path: string) {
 function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let chartDom = document.getElementById('line-chart');
   let myChart = echarts.init(chartDom);
+
+  // dispatch(updateLoadingState(true));
+
+  myChart.showLoading('default', {
+    text: '',
+    color: '#05aa99',
+    textColor: '#000',
+    maskColor: 'rgba(255, 255, 255, 0.8)',
+    zlevel: 0,
+    fontSize: 12,
+    showSpinner: true,
+    spinnerRadius: 30,
+    lineWidth: 5,
+  });
+
   let option = {
     color: EchatrColors(),
     animationDuration: 2500,
-    height: '80%',
+    height: '70%',
     title: {
       text: 'MultiLine Plot',
     },
@@ -57,7 +73,15 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     })),
   };
 
-  option && myChart.setOption(option);
+  // option && myChart.setOption(option);
+  // myChart.hideLoading(); // Hide loading after data is ready
+
+  // dispatch(updateLoadingState(false));
+
+  setTimeout(() => {
+    myChart.hideLoading(); // Hide loading after data is ready
+    myChart.setOption(option);
+  }, 1000);
 }
 
 function MultiLineChart({
@@ -69,9 +93,13 @@ function MultiLineChart({
   xAxis: string[];
   yAxis: string[];
 }) {
-  setTimeout(() => {
-    generateGraph(dataforPlot, xAxis, yAxis);
-  }, 1000);
+  useEffect(() => {
+    if (dataforPlot.length > 0) {
+      setTimeout(() => {
+        generateGraph(dataforPlot, xAxis, yAxis);
+      }, 1000);
+    }
+  }, [dataforPlot]);
 
   return (
     <>

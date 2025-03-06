@@ -3,10 +3,24 @@ import * as echarts from 'echarts';
 import { formatDate } from '../../../../utils/FormatDate';
 import { camelCaseToSpaceSeparated } from '../../../../utils/CamelCaseToSpaceSeparated';
 import { EchatrColors } from '../../../../utils/EchartColors';
+import { useEffect } from 'react';
 
 function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
   let chartDom = document.getElementById('area-chart');
   let myChart = echarts.init(chartDom);
+
+  myChart.showLoading('default', {
+    text: '',
+    color: '#05aa99',
+    textColor: '#000',
+    maskColor: 'rgba(255, 255, 255, 0.8)',
+    zlevel: 0,
+    fontSize: 12,
+    showSpinner: true,
+    spinnerRadius: 30,
+    lineWidth: 5,
+  });
+
   let option = {
     animationDuration: 2500,
 
@@ -72,7 +86,11 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     })),
   };
 
-  option && myChart.setOption(option);
+  // option && myChart.setOption(option);
+  setTimeout(() => {
+    myChart.hideLoading(); // Hide loading after data is ready
+    myChart.setOption(option);
+  }, 1000);
 }
 
 function AreaChart({
@@ -85,9 +103,13 @@ function AreaChart({
   xAxis: string[];
   yAxis: string[];
 }) {
-  setTimeout(() => {
-    generateGraph(dataforPlot, xAxis, yAxis);
-  }, 1000);
+  useEffect(() => {
+    if (dataforPlot.length > 0) {
+      setTimeout(() => {
+        generateGraph(dataforPlot, xAxis, yAxis);
+      }, 1000);
+    }
+  }, [dataforPlot]);
   // console.log(dataforPlot, xAxis, yAxis);
 
   return (

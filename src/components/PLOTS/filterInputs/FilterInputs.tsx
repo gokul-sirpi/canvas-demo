@@ -11,6 +11,7 @@ export default function FilterInputs({
   filterDates,
   dataforPlot,
   setFilteredDataForPlot,
+  onFilterChange,
   // allResources,
   // activeResource,
 }: {
@@ -26,8 +27,9 @@ export default function FilterInputs({
     endDate: string;
   };
   dataforPlot: Object[];
-  setDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
+
   setFilteredDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
+  onFilterChange: (startDate: string, endDate: string) => void;
   // allResources: plotResource[];
   // activeResource: plotResource | null;
 }) {
@@ -85,9 +87,9 @@ export default function FilterInputs({
   };
 
   // Handle select change for any dropdown
-  const handleSelectChange = async (key: string, value: string) => {
-    dispatch(updateLoadingState(true));
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  const handleSelectChange = (key: string, value: string) => {
+    // dispatch(updateLoadingState(true));
+    // await new Promise((resolve) => setTimeout(resolve, 500));
 
     const updatedSelectedValues = { ...selectedValues, [key]: value };
     setSelectedValues(updatedSelectedValues);
@@ -98,6 +100,7 @@ export default function FilterInputs({
           selectedValue === '' || item[selectedKey] === selectedValue
       )
     );
+
     console.log(filteredData, 'fildata');
 
     updateFilteredOptions(filteredData as []);
@@ -111,33 +114,41 @@ export default function FilterInputs({
 
   // console.log(filteredOptions);
 
-  // let datarecpKey = dataforPlot.length > 0 && dataforPlot;
-  // const dataDescriptor = activeResource && activeResource.dataDescriptor;
-
-  // console.log(datarecpKey);
-
   return (
     <div className={styles.container}>
-      <div className={styles.date_container}>
-        <div className={styles.input_container}>
-          <label>Start date</label>
-          <input
-            className={styles.dynamic_select}
-            type="date"
-            defaultValue={formatDate(filterDates.startDate)}
-            onChange={handleStartDateChange}
-          />
+      <div className={styles.date_field_container}>
+        <div className={styles.date_container}>
+          <div className={styles.input_container}>
+            <label>Start date</label>
+            <input
+              className={styles.dynamic_select}
+              type="date"
+              defaultValue={formatDate(filterDates.startDate)}
+              onChange={handleStartDateChange}
+              max={formatDate(filterDates.endDate)}
+            />
+          </div>
+          <div className={styles.input_container}>
+            <label>End date</label>
+            <input
+              className={styles.dynamic_select}
+              type="date"
+              defaultValue={formatDate(filterDates.endDate)}
+              onChange={handleEndDateChange}
+              min={formatDate(filterDates.startDate)}
+            />
+          </div>
         </div>
-        <div className={styles.input_container}>
-          <label>End date</label>
-          <input
-            className={styles.dynamic_select}
-            type="date"
-            defaultValue={formatDate(filterDates.endDate)}
-            onChange={handleEndDateChange}
-          />
-        </div>
+        <button
+          onClick={() =>
+            onFilterChange(filterDates.startDate, filterDates.endDate)
+          }
+          className={styles.date_submit_button}
+        >
+          Submit
+        </button>
       </div>
+
       <div className={styles.dynamic_container}>
         {dynamicValues.map((key) => (
           <div key={key} className={styles.input_container}>
@@ -162,7 +173,7 @@ export default function FilterInputs({
           </div>
         ))}
 
-        <div className={styles.reset_button_container}>
+        <div>
           <button
             onClick={() => {
               setFilteredDataForPlot(dataforPlot);

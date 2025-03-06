@@ -50,7 +50,7 @@
 .chart_tab_container {
   display: flex;
   gap: 0.5rem;
-  padding: 0.7rem 0rem;
+  padding: 0.4rem 0rem;
   align-items: center;
   overflow: auto;
 }

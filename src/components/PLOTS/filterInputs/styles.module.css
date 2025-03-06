@@ -1,17 +1,30 @@
 .container {
-  margin-top: 0.7rem;
+  margin-top: 0.2rem;
   display: flex;
   gap: 1rem;
+}
+.date_field_container {
+  background-color: #05aa99;
+  padding: 0.7rem;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: var(--radius-sm);
+  color: white;
 }
 .date_container {
   display: flex;
   gap: 1rem;
-  background-color: #05aa99;
-  padding: 0.7rem;
-  height: fit-content;
   /* flex-wrap: wrap; */
+}
+.date_submit_button {
+  border: 1px solid var(--color-accent);
+  padding: 0.5rem 0.5rem;
   border-radius: var(--radius-sm);
-  color: white;
+  font-size: 1rem;
+  text-align: center;
+  background-color: #fff;
 }
 .dynamic_container {
   display: flex;
@@ -45,6 +58,9 @@
   text-align: center;
   color: white;
   background-color: #002b49;
+  width: fit-content;
+  height: fit-content;
+  margin-top: 12px;
 }
 .reset_button:hover {
   border: 1px solid var(--color-accent);

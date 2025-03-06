@@ -37,6 +37,7 @@ function UgixFeatureTile({
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
+
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const ugixResources: string[] = [];
   const canvasLayers = useSelector((state: RootState) => {
@@ -132,8 +133,9 @@ function UgixFeatureTile({
   }
 
   async function handleResourceDownload() {
+    let serverUrl = await getResourceServerRegURL(resource);
     try {
-      const url = envurls.ugixOgcServer + 'collections/' + resource.id;
+      const url = 'https://' + serverUrl + '/collections/' + resource.id;
       const response = await axios.get(url);
       const assetData = response.data;
 
@@ -147,12 +149,14 @@ function UgixFeatureTile({
         emitToast('error', 'Unable to download data');
       }
     } catch (err) {
-      console.log(err);
+      console.log('download error', err);
       emitToast('error', 'Unable to download data');
     }
   }
   async function downloadResourceData(href: string) {
-    const { error, token } = await getAccessToken(resource);
+    let serverUrl = await getResourceServerRegURL(resource);
+
+    const { error, token } = await getAccessToken(resource, serverUrl);
     if (error) {
       emitToast('error', 'Unable to get Data. Access denied');
     }

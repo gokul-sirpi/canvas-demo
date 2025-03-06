@@ -5,24 +5,31 @@ export async function fetchData(
     url: string,
     token: string,
     dataAccumulator: Object[],
-    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>
+    setIsDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>,
+    isDataFetched?: boolean
 ): Promise<boolean> {
     try {
         const res = await axios.get(url, { headers: { token } });
+
         if (res.status === 200 && res.data.results) {
             dataAccumulator.push(...res.data.results);
-            setIsDialogOpen && setIsDialogOpen(false)
+            setIsDialogOpen && setIsDialogOpen(false);
             return true;
-        } else if (res.status === 204) {
-            setIsDialogOpen && setIsDialogOpen(false)
-            emitToast('info', 'No content available');
+        }
+
+        if (res.status === 204) {
+            setIsDialogOpen && setIsDialogOpen(false);
+            if (!isDataFetched) {
+                console.log("Skipping multiple 'No content available' toasts.");
+            }
             return true;
         }
     } catch (error) {
-
         if (axios.isAxiosError(error)) {
             if (error.response?.status === 413) {
-                emitToast('error', 'Payload is too large.');
+                if (!isDataFetched) {
+                    console.log("Skipping multiple 'Payload too large' toasts.");
+                }
                 return false;
             }
         }
@@ -30,8 +37,6 @@ export async function fetchData(
         console.error(error);
         throw new Error(`fetch-failed: ${error}`);
     }
-
-
     return false;
 }
 

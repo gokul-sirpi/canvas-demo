@@ -60,7 +60,7 @@ function BaseMaps() {
   });
   const openSeriesMap = new TileLayer({
     source: new OSM({
-      url: 'https://geoserver.dx.ugix.org.in/collections/e9120dac-0700-4a41-b07e-277b4f94bad0/map/tiles/WebMercatorQuad/{z}/{x}/{-y}',
+      url: 'https://geoserver.dx.geospatial.org.in/collections/e9120dac-0700-4a41-b07e-277b4f94bad0/map/tiles/WebMercatorQuad/{z}/{x}/{-y}',
       attributions: '',
     }),
   });

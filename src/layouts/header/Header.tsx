@@ -94,7 +94,7 @@ function Header({
         {currentPage === 'canvas' && (
           <div data-intro="header" className={styles.tools_container}>
             <TooltipWrapper
-              content={`  Browse ${keycloakEnv.realm === 'adex' ? 'ADeX' : 'Ugix'} resources`}
+              content={`  Browse ${keycloakEnv.realm === 'adex' ? 'ADeX' : 'Geospatial'} resources`}
             >
               <span data-intro="browse">
                 <BrowseDataDialog resourceList={resourceList} />

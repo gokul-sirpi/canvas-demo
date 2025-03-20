@@ -293,9 +293,21 @@ function UgixFeatureTile({
       </div>
       {/* icon container */}
       <div className={styles.icon_container}>
-        <TooltipWrapper content="Download complete resources">
-          <button onClick={handleResourceDownload}>
-            <div className={styles.icon_wrapper}>
+        <TooltipWrapper
+          content={
+            resource.isDownloadEnabled
+              ? 'Download complete resources'
+              : 'Download not available for this resource'
+          }
+        >
+          <button
+            disabled={!resource.isDownloadEnabled}
+            onClick={handleResourceDownload}
+          >
+            <div
+              className={styles.icon_wrapper}
+              style={!resource.isDownloadEnabled ? { color: 'grey' } : {}}
+            >
               <MdDownloadForOffline />
             </div>
           </button>

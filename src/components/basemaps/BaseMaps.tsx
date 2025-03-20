@@ -13,6 +13,7 @@ import { baseOutlineStyle, basicBaseLayerStyle } from '../../lib/layerStyle';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import VectorLayer from 'ol/layer/Vector';
+import envurls from '../../utils/config';
 
 type baseLayerTypes =
   | 'terrain'
@@ -60,7 +61,7 @@ function BaseMaps() {
   });
   const openSeriesMap = new TileLayer({
     source: new OSM({
-      url: 'https://geoserver.dx.geospatial.org.in/collections/e9120dac-0700-4a41-b07e-277b4f94bad0/map/tiles/WebMercatorQuad/{z}/{x}/{-y}',
+      url: `${envurls.ugixOgcServer}/collections/e9120dac-0700-4a41-b07e-277b4f94bad0/map/tiles/WebMercatorQuad/{z}/{x}/{-y}`,
       attributions: '',
     }),
   });

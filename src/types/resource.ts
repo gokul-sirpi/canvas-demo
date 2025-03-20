@@ -28,6 +28,7 @@ export type Resource = {
   providerName?: string;
   resourceLabel?: string;
   resourceDescription?: string;
+  isDownloadEnabled?: boolean
 };
 
 export type QueryParams = {

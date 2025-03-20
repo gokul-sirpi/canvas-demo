@@ -87,6 +87,10 @@ function Canvas({
           ),
         ];
 
+        const uniqueResourceIds = [
+          ...new Set(resources.map((resource: Resource) => resource.id)),
+        ];
+
         // Fetch provider names
         const providerNames = await Promise.all(
           uniqueProviderIds.map(async (providerId) => {
@@ -135,6 +139,25 @@ function Canvas({
           })
         );
 
+        // check download available
+        const downloadCollections = await Promise.all(
+          uniqueResourceIds.map(async (resourceId) => {
+            try {
+              const downlaodResponse = await axios.get(
+                `${envurls.ugixOgcServer}collections/${resourceId}`
+              );
+              const isDownloadEnabled =
+                downlaodResponse.data.links.some(
+                  (link: { rel: string }) => link.rel === 'enclosure'
+                ) || false;
+              return { resourceId, isDownloadEnabled };
+            } catch (error) {
+              console.error('Failed to get links', error);
+              return { resourceId, isDownloadEnabled: false };
+            }
+          })
+        );
+        console.log(downloadCollections);
         // Map provider names and resource details to dictionaries for quick lookup
         const providerNameMap = providerNames.reduce(
           (acc, { providerId, providerName }) => {
@@ -158,6 +181,14 @@ function Canvas({
           >
         );
 
+        const downloadEnabledMap = downloadCollections.reduce(
+          (acc, { resourceId, isDownloadEnabled }) => {
+            acc[resourceId as string] = isDownloadEnabled;
+            return acc;
+          },
+          {} as Record<string, boolean>
+        );
+
         // Update allResources with providerName, resourceLabel, and resourceDescription
         const updatedResources = resources.map((resource: Resource) => ({
           ...resource,
@@ -168,6 +199,7 @@ function Canvas({
           resourceDescription:
             resourceDetailMap[resource.resourceGroup]?.resourceDescription ||
             'Unknown',
+          isDownloadEnabled: downloadEnabledMap[resource.id] || false,
         }));
 
         setAllResources(updatedResources);

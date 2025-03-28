@@ -2,9 +2,10 @@ import axios from 'axios';
 import envurls from './config';
 import { emitToast } from '../lib/toastEmitter';
 import { Resource } from '../types/resource';
+import { plotResource } from '../types/plotResource';
 
 export default async function getResourceServerRegURL(
-  selectedResource: Resource
+  selectedResource: Resource | plotResource
 ): Promise<string> {
   try {
     const response = await axios.get(

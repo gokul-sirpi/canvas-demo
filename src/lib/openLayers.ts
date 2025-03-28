@@ -73,7 +73,7 @@ const openLayerMap = {
   hoveredTileId: undefined as string | number | undefined,
   canvasLayers: new Map<string, CanvasLayer>(),
   latestLayer: null as UserLayer | UgixLayer | null,
-  indianOutline: null as VectorImageLayer | null,
+  indianOutline: null as VectorImageLayer | VectorTileLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
   popupOverLay: new Overlay({}),
@@ -99,7 +99,7 @@ const openLayerMap = {
   },
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayer: VectorLayer<VectorSource> | TileLayer<OSM> | VectorImageLayer
+    newLayer: VectorLayer<VectorSource> | VectorTileLayer | TileLayer<OSM> | VectorImageLayer
   ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get(BASE_LAYER_KEY)) {
@@ -387,6 +387,54 @@ const openLayerMap = {
     this.addSwipeFuncToLayer(newVectorLayer);
 
     return newLayer;
+  },
+
+  createStateTileBoundariesBaseMap(
+    serverUrl?: string,
+    ugixId?: string,
+    token?: string
+  ) {
+
+
+    const vectorSource = new OGCVectorTile({
+      url: `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      format: new MVT({ idProperty: 'iso_a3' }),
+      mediaType: 'application/vnd.mapbox-vector-tile',
+    });
+    console.log(vectorSource, 'EVFEfeefe');
+
+    //@ts-expect-error tile problem
+    vectorSource.setTileLoadFunction(function (
+      tile: VectorTile<Feature>,
+      url: string
+    ) {
+      tile.setLoader(function (extent, _, projection) {
+        fetch(url, {
+          headers: {
+            Accept: 'application/vnd.mapbox-vector-tile',
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(function (response) {
+          if (!response.ok) {
+            tile.setState(3);
+            return;
+          }
+          response.arrayBuffer().then(function (data) {
+            const format = tile.getFormat();
+            try {
+              const features = format.readFeatures(data, {
+                extent: extent,
+                featureProjection: projection,
+              });
+              tile.setFeatures(features);
+            } catch (err) {
+              console.log(url, err);
+            }
+          });
+        });
+      });
+    });
+    return vectorSource
   },
 
   changeLayerColor(layerId: string, color: string) {
@@ -940,6 +988,9 @@ const openLayerMap = {
     this.map.on('click', (evt) => {
       if (this.drawing) return;
 
+      const featureData = this.getFeatureAtPixel(evt.pixel);
+
+      if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
       const { feature } = this.getFeatureAtPixel(evt.pixel);
 
       if (feature && Object.keys(feature?.getProperties()).length > 1) {
@@ -1087,6 +1138,9 @@ openLayerMap.map.on('pointermove', (event) => {
   if (openLayerMap.drawing) {
     return;
   }
+
+  const featureData = openLayerMap.getFeatureAtPixel(event.pixel);
+  if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
   if (selected) {
     selected.setStyle(prevStyle);
     selected = undefined;

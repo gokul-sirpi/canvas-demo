@@ -1,0 +1,160 @@
+.icon_wrapper {
+  color: var(--color-adex-primary);
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.dialog_overlay {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+}
+
+.dialog_content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 45%;
+  max-width: 90%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dialog_title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.close_btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn_icon_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog_body {
+  margin-top: 15px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.dropdown {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+.query_criteria {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.query_criteria p {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.criteria_btn {
+  padding: 8px 12px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f8f8f8;
+  cursor: pointer;
+}
+
+.criteria_btn:hover {
+  background: #e0e0e0;
+}
+
+.run_query_btn {
+  width: 100%;
+  padding: 10px;
+  background: #05aa99;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.run_query_btn:hover {
+  background: #05aa9ae9;
+}
+
+.date_field_container {
+  /* background-color: lightgray; */
+  padding: 0.7rem;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: var(--radius-sm);
+  color: black;
+  justify-content: center;
+  border: 1px solid lightgray;
+  padding: 1rem;
+  /* flex-wrap: wrap; */
+}
+.date_container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+
+  flex-wrap: wrap;
+}
+.date_submit_button {
+  border: 1px solid var(--color-accent);
+  padding: 0.5rem 4rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  text-align: center;
+  background-color: #fff;
+  width: fit-content;
+}
+.date_submit_button:hover {
+  background-color: var(--color-adex-primary);
+  color: white;
+}
+.dynamic_select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  margin-top: 0.2rem;
+}
+.input_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.Date_submit_container {
+  display: flex;
+  flex-direction: column;
+}
+.date_close_btn {
+  position: absolute;
+  top: 0;
+}

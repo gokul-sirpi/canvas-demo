@@ -13,7 +13,12 @@ import { baseOutlineStyle, basicBaseLayerStyle } from '../../lib/layerStyle';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../context/loading/LoaderSlice';
 import VectorLayer from 'ol/layer/Vector';
-import envurls from '../../utils/config';
+import envurls, { keycloakEnv } from '../../utils/config';
+import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
+import { getAccessToken } from '../../lib/getAllUgixFeatures';
+import { emitToast } from '../../lib/toastEmitter';
+import axios from 'axios';
+import VectorTileLayer from 'ol/layer/VectorTile';
 
 type baseLayerTypes =
   | 'terrain'
@@ -47,8 +52,12 @@ function BaseMaps() {
   const [mapType, setMapType] = useState<baseLayerTypes>('standard');
   const singleRender = useRef(false);
   const dispatch = useDispatch();
-  const ogcLayerLight = useRef<VectorImageLayer | undefined>();
-  const ogcLayerDark = useRef<VectorLayer<VectorSource> | undefined>();
+  const ogcLayerLight = useRef<
+    VectorImageLayer | VectorTileLayer | undefined
+  >();
+  const ogcLayerDark = useRef<
+    VectorLayer<VectorSource> | VectorTileLayer | undefined
+  >();
 
   const standardLayer = new TileLayer({
     source: new OSM({}),
@@ -74,8 +83,14 @@ function BaseMaps() {
   useEffect(() => {
     if (singleRender.current) return;
     singleRender.current = true;
-    getDistrictBoundaries();
+    if (keycloakEnv.realm === 'adex') {
+      getDistrictBoundaries();
+    }
+    if (keycloakEnv.realm === 'ugix') {
+      getStateTileBoundaries();
+    }
   }, []);
+
   function getDistrictBoundaries() {
     dispatch(updateLoadingState(true));
     fetch('https://iudx.s3.ap-south-1.amazonaws.com/state-boundaries.geojson')
@@ -117,6 +132,94 @@ function BaseMaps() {
         toggleBaseMap('standard');
         console.log(error);
       });
+  }
+
+  async function getStateTileBoundaries() {
+    const resource = {
+      id: '39b9d0f5-38be-4603-b2db-7b678d9c3870',
+      ugixGroupId: 'e9120dac-0700-4a41-b07e-277b4f94bad0',
+      geometryType: 'MultiPolygon',
+      layerName: 'State Boundaries',
+      accessPolicy: 'OPEN',
+      resourceServer: '310ec5d1-7291-4346-b8aa-401c471e8be1',
+      label: 'Indian State Boundaries',
+      resourceGroup: '19c6dab5-5ed9-4224-b33f-d56060281587',
+    };
+
+    dispatch(updateLoadingState(true));
+
+    try {
+      // @ts-ignore
+      let serverUrl = await getResourceServerRegURL(resource);
+      // @ts-ignore
+      const { error, token } = await getAccessToken(resource, serverUrl);
+      if (error) {
+        emitToast('error', 'Unable to get access token');
+        dispatch(updateLoadingState(false));
+        return;
+      }
+
+      const response = await axios.get(
+        `https://${serverUrl}/collections/${resource.id}/map/tiles/WorldCRS84Quad`
+      );
+
+      if (response.status === 200 && token) {
+        const vectorSource = openLayerMap.createStateTileBoundariesBaseMap(
+          serverUrl,
+          resource.id,
+          token
+        );
+
+        const ogcOutline = new VectorTileLayer({
+          source: vectorSource,
+          style: baseOutlineStyle('#a480a2'),
+          declutter: true,
+        });
+        ogcOutline.set('name', 'State Boundaries Outline');
+        ogcOutline.set('layer-id', '39b9d0f5-38be-4603-b2db-7b678d9c3870-base');
+
+        const newOgcLayerLight = new VectorTileLayer({
+          source: vectorSource,
+          style: basicBaseLayerStyle('#778899', '#77889922'),
+          declutter: true,
+        });
+        newOgcLayerLight.set('name', 'State Boundaries Outline');
+        newOgcLayerLight.set(
+          'layer-id',
+          '39b9d0f5-38be-4603-b2db-7b678d9c3870-base'
+        );
+
+        const newOgcLayerDark = new VectorTileLayer({
+          source: vectorSource,
+          style: basicBaseLayerStyle('#ffffff', '#333333'),
+          declutter: true,
+        });
+        newOgcLayerDark.set('name', 'State Boundaries Outline');
+        newOgcLayerDark.set(
+          'layer-id',
+          '39b9d0f5-38be-4603-b2db-7b678d9c3870-base'
+        );
+
+        newOgcLayerLight.set('baseLayer', true);
+        newOgcLayerDark.set('baseLayer', true);
+        newOgcLayerLight.set('baseLayer', true);
+
+        openLayerMap.indianOutline = ogcOutline;
+        ogcLayerLight.current = newOgcLayerLight;
+        ogcLayerDark.current = newOgcLayerDark;
+        standardLayer.set('baseLayer', true);
+        openLayerMap.insertBaseMap('standard', standardLayer);
+        setMapType('standard');
+        dispatch(updateLoadingState(false));
+      } else {
+        throw new Error('Failed to load tile layer');
+      }
+    } catch (error) {
+      dispatch(updateLoadingState(false));
+      // emitToast('info', 'Unable to load tiles, fetching state boundaries...');
+      getDistrictBoundaries();
+      console.error(error);
+    }
   }
 
   function toggleBaseMap(baseMapType: baseLayerTypes) {

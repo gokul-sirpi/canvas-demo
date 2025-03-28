@@ -11,6 +11,7 @@ import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
 import { RiInformationFill } from 'react-icons/ri';
 import { useEffect, useState } from 'react';
 import envurls from '../../../utils/config';
+// import DownloadAdexDataDialog from '../downloadAdexDataDialog/DownloadAdexDataDialog';
 
 export default function BrowsePlotsDialog({
   allResources,
@@ -145,13 +146,7 @@ export default function BrowsePlotsDialog({
                     </TooltipWrapper>
                   </div>
                   <div className={styles.icon_container}>
-                    {/* <TooltipWrapper content="Download complete resources">
-                      <button>
-                        <div className={styles.icon_wrapper}>
-                          <MdDownloadForOffline />
-                        </div>
-                      </button>
-                    </TooltipWrapper> */}
+                    {/* <DownloadAdexDataDialog name={item.label} item={item} /> */}
                     <TooltipWrapper content="Resource info">
                       <button onClick={() => getinfoLink(item)}>
                         <div className={styles.icon_wrapper}>

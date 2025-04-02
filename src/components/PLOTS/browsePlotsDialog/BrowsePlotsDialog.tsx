@@ -138,7 +138,7 @@ export default function BrowsePlotsDialog({
                             className={styles.warn_link}
                             onClick={() => getinfoLink(item)}
                           >
-                            ADEX page
+                            ADeX page
                           </button>{' '}
                           to request access
                         </div>
@@ -191,7 +191,7 @@ export default function BrowsePlotsDialog({
                           onClick={() => getinfoLink(item)}
                           className={styles.warn_link}
                         >
-                          GDI page
+                          ADeX page
                         </button>{' '}
                         to request access
                       </div>

@@ -2,7 +2,7 @@ export type plotResource = {
     id: string
     name: string
     description: string
-    accessPolicy: string
+    accessPolicy: 'SECURE' | 'OPEN' | 'PII'
     apdURL: string
     dataDescriptor: dataDescriptor
     plotSchema: plotSchema[]
@@ -10,6 +10,7 @@ export type plotResource = {
     resourceGroup: string
     resourceServer: string
     uniqueResourceId: string
+    resourceType: 'MESSAGESTREAM' | 'DATASET'
 };
 
 export type plotSchema = {

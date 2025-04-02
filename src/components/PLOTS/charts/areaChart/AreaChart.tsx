@@ -75,7 +75,7 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     series: yAxis.map((key) => ({
       name: key,
       type: 'line',
-      stack: 'Total',
+      // stack: 'Total',
       smooth: true,
       areaStyle: {
         color: EchatrColors(),
@@ -86,7 +86,6 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
     })),
   };
 
-  // option && myChart.setOption(option);
   setTimeout(() => {
     myChart.hideLoading(); // Hide loading after data is ready
     myChart.setOption(option);

@@ -86,7 +86,8 @@
 }
 
 .criteria_btn:hover {
-  background: #e0e0e0;
+  background: var(--color-adex-primary);
+  color: #fff;
 }
 
 .run_query_btn {

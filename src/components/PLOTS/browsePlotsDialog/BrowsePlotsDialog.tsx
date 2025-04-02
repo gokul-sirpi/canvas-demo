@@ -7,11 +7,11 @@ import { FaLock, FaSearch, FaUnlock } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
 import { BsArrowRight } from 'react-icons/bs';
 import TooltipWrapper from '../../tooltipWrapper/TooltipWrapper';
-// import { MdDownloadForOffline } from 'react-icons/md';
 import { RiInformationFill } from 'react-icons/ri';
 import { useEffect, useState } from 'react';
 import envurls from '../../../utils/config';
-// import DownloadAdexDataDialog from '../downloadAdexDataDialog/DownloadAdexDataDialog';
+import { MdDownloadForOffline } from 'react-icons/md';
+import DownloadAdexDataDialog from '../downloadAdexDataDialog/DownloadAdexDataDialog';
 
 export default function BrowsePlotsDialog({
   allResources,
@@ -31,6 +31,11 @@ export default function BrowsePlotsDialog({
   const [searchInput, setSearchInput] = useState<string>('');
   const [selectedId, setSelectedId] = useState('');
   const [resourcesList, setResourcesList] = useState<plotResource[]>([]);
+  const [showAccessText, setShowAccessText] = useState({
+    show: false,
+    resourceId: '',
+  });
+
   useEffect(() => {
     setResourcesList(allResources);
   }, [allResources]);
@@ -129,8 +134,13 @@ export default function BrowsePlotsDialog({
                       {noAccess && item.id === selectedId && (
                         <div className={styles.warn_text}>
                           You do not have access to view this data, please visit{' '}
-                          <a onClick={() => getinfoLink(item)}>ADEX page</a> to
-                          request access
+                          <button
+                            className={styles.warn_link}
+                            onClick={() => getinfoLink(item)}
+                          >
+                            ADEX page
+                          </button>{' '}
+                          to request access
                         </div>
                       )}
                     </div>
@@ -146,7 +156,24 @@ export default function BrowsePlotsDialog({
                     </TooltipWrapper>
                   </div>
                   <div className={styles.icon_container}>
-                    {/* <DownloadAdexDataDialog name={item.label} item={item} /> */}
+                    {item.resourceType === 'MESSAGESTREAM' &&
+                    item.accessPolicy !== 'PII' ? (
+                      <DownloadAdexDataDialog
+                        item={item}
+                        setNoAccessText={setShowAccessText}
+                      />
+                    ) : (
+                      <TooltipWrapper content="Download not available for this resource">
+                        <button disabled>
+                          <div
+                            className={styles.icon_wrapper}
+                            style={{ color: 'grey' }}
+                          >
+                            <MdDownloadForOffline />
+                          </div>
+                        </button>
+                      </TooltipWrapper>
+                    )}
                     <TooltipWrapper content="Resource info">
                       <button onClick={() => getinfoLink(item)}>
                         <div className={styles.icon_wrapper}>
@@ -155,6 +182,20 @@ export default function BrowsePlotsDialog({
                       </button>
                     </TooltipWrapper>
                   </div>
+                  {showAccessText.show &&
+                    showAccessText.resourceId === item.id && (
+                      <div className={styles.warn_text}>
+                        You do not have access to view this data, please visit{' '}
+                        <button
+                          // style={{ textDecoration: 'underline', color: 'red' }}
+                          onClick={() => getinfoLink(item)}
+                          className={styles.warn_link}
+                        >
+                          GDI page
+                        </button>{' '}
+                        to request access
+                      </div>
+                    )}
                 </div>
               ))
             ) : (

@@ -61,25 +61,33 @@ function generateGraph(data: object[], xAxis: string[], yAxis: string[]) {
         formatter: (value: string) => formatDate(value),
       },
     },
+    dataZoom: [
+      {
+        type: 'slider',
+        // type: 'inside',
+        zoomOnMouseWheel: false,
+        start: 0,
+        end: 20,
+      },
+      {
+        start: 0,
+        end: 20,
+      },
+    ],
     yAxis: {
       type: 'value',
     },
     series: yAxis.map((key) => ({
       name: key,
       type: 'line',
-      stack: 'Total',
+      // stack: 'Total',
       // data: data.map((item) => item[key]),
       data: data.map((item) => getNestedValue(item, key)),
     })),
   };
 
-  // option && myChart.setOption(option);
-  // myChart.hideLoading(); // Hide loading after data is ready
-
-  // dispatch(updateLoadingState(false));
-
   setTimeout(() => {
-    myChart.hideLoading(); // Hide loading after data is ready
+    myChart.hideLoading();
     myChart.setOption(option);
   }, 1000);
 }
@@ -107,7 +115,7 @@ function MultiLineChart({
         id="line-chart"
         style={{
           width: '95vw',
-          height: '55vh',
+          height: '50vh',
           top: '1.5rem',
         }}
       ></div>

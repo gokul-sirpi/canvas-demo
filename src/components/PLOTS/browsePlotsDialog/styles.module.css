@@ -200,3 +200,8 @@
   justify-content: center;
   min-height: 40vh;
 }
+.warn_link {
+  all: unset;
+  text-decoration: underline;
+  cursor: pointer;
+}

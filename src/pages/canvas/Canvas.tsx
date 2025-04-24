@@ -62,15 +62,7 @@ function Canvas({
       const response = await axios.get(`${envurls.ugixServer}${url}`);
 
       if (response.status === 200 && response.data.results.length > 0) {
-        const featureResources = response.data.results.filter(
-          (resource: Resource) => {
-            if (resource.ogcResourceInfo) {
-              return resource?.ogcResourceInfo?.ogcResourceAPIs?.includes(
-                'FEATURES'
-              );
-            }
-          }
-        );
+        const featureResources = response.data.results;
 
         const resources =
           keycloakEnv.realm === 'adex'

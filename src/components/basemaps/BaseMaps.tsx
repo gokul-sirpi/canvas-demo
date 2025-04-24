@@ -155,6 +155,7 @@ function BaseMaps() {
       const { error, token } = await getAccessToken(resource, serverUrl);
       if (error) {
         emitToast('error', 'Unable to get access token');
+        getDistrictBoundaries();
         dispatch(updateLoadingState(false));
         return;
       }
@@ -216,9 +217,10 @@ function BaseMaps() {
       }
     } catch (error) {
       dispatch(updateLoadingState(false));
+
       // emitToast('info', 'Unable to load tiles, fetching state boundaries...');
       getDistrictBoundaries();
-      console.error(error);
+      console.error(error, 'vfefevefvveeeef');
     }
   }
 

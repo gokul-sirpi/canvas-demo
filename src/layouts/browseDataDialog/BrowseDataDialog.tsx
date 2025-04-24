@@ -8,7 +8,10 @@ import UgixFeatureTile from '../../components/ugixFeatureTile/UgixFeatureTile';
 import { Resource } from '../../types/resource';
 import Loader from '../../components/loader/Loader';
 import { TbWorldSearch } from 'react-icons/tb';
-import { debounce } from 'lodash';
+import { debounce, set } from 'lodash';
+import openLayerMap from '../../lib/openLayers';
+import { useDispatch } from 'react-redux';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 
 function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -23,6 +26,8 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const sortResources = useMemo(() => {
     return [...resourceList].sort((a, b) => a.label.localeCompare(b.label));
   }, [resourceList]);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (isDialogOpen) {
@@ -121,7 +126,13 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   //   });
   //   setResources(filtered);
   // };
-
+  function PlotStac() {
+    let url =
+      'https://s3.us-west-2.amazonaws.com/sentinel-cogs/sentinel-s2-l2a-cogs/10/T/ES/2022/7/S2A_10TES_20220726_0_L2A/S2A_10TES_20220726_0_L2A.json';
+    const stac = openLayerMap.createNewStacLayer(url);
+    dispatch(addCanvasLayer(stac));
+    setIsDialogOpen(false);
+  }
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger asChild>
@@ -163,6 +174,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
           </section>
 
           <div className={styles.feature_tile_container}>
+            <button onClick={PlotStac}>Add Stac</button>
             {loading ? (
               <div className={styles.loading_container}>
                 <Loader />

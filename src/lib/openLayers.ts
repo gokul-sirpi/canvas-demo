@@ -47,6 +47,9 @@ import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 // import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
+import STAC from 'ol-stac';
+import STACLayer from 'ol-stac';
+import datas from "../assets/Tile_response copy.txt"
 
 type baseLayerTypes =
   | 'terrain'
@@ -311,6 +314,7 @@ const openLayerMap = {
       mediaType: 'application/vnd.mapbox-vector-tile',
       // projection: 'EPSG:4326',
     });
+    console.log(vectorSource, "vec src")
 
     this.initialMapFitOnGetResource(serverUrl, layerId, ugixId);
 
@@ -389,19 +393,69 @@ const openLayerMap = {
     return newLayer;
   },
 
+
+  createNewStacLayer(
+    url: string,
+  ) {
+    const layerId = createUniqueId();
+    let StacLayer: STACLayer = new STAC({
+      url: url,
+    })
+    StacLayer.on('sourceready' as unknown as any, () => {
+      const view = this.map.getView();
+      const extent = StacLayer.getExtent();
+      if (extent) {
+        view.fit(extent);
+      }
+    })
+    StacLayer.on('layersready' as unknown as any, () => {
+      if (StacLayer.isEmpty()) {
+        alert('No spatial information available in the data source');
+      }
+    });
+    const layerColor = getRandomColor();
+    this.canvasLayers.set(layerId, {
+      layer: StacLayer,
+      layerId,
+      layerName: 'STAC Layer',
+      layerType: 'StacLayer',
+      style: createFeatureStyle('red'),
+      side: 'middle',
+    })
+    const newLayer = {
+      layerType: 'UgixLayer',
+      sourceType: 'tile',
+      layerName: "STAC",
+      layerId,
+      ugixLayerId: "2e2e22e",
+      ugixGroupId: "432322r3w",
+      selected: true,
+      visible: true,
+      isCompleted: true,
+      layerColor,
+      style: createFeatureStyle(layerColor),
+      featureType: "STAC",
+      fetching: false,
+      editable: true,
+      side: 'middle',
+    }
+    this.addLayer(StacLayer);
+    return newLayer
+  },
+
+
+
   createStateTileBoundariesBaseMap(
     serverUrl?: string,
     ugixId?: string,
     token?: string
   ) {
-
-
     const vectorSource = new OGCVectorTile({
       url: `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
     });
-    console.log(vectorSource, 'EVFEfeefe');
+
 
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
@@ -419,13 +473,17 @@ const openLayerMap = {
             tile.setState(3);
             return;
           }
+          console.log(response, "ferfe")
           response.arrayBuffer().then(function (data) {
+            console.log(data, "data")
             const format = tile.getFormat();
+            console.log(format, "formar")
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
+              console.log(features, "features")
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);

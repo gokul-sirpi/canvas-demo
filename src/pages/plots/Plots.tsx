@@ -57,17 +57,297 @@ export default function Plots({
       const response = await axios.get(
         `${envurls.ugixServer}cat/v1/search?property=[plot]&value=[[true]]`
       );
-      if (response.status === 200 && response.data.results.length > 0) {
-        const filteredData = response.data.results.filter(
-          (item: plotResource) =>
+
+      if (response.status === 200 && response.data.results?.length > 0) {
+        let filteredData = response.data.results.filter(
+          (item: any) =>
             item.resourceServer === '41bb4389-ebaf-4df7-a575-556ec6092a25'
         );
+
+        filteredData = filteredData.map((resource: plotResource) => {
+          let newSchema: any = [];
+          switch (resource.label) {
+            case 'AMC Commodity Price Information in Telangana State':
+              newSchema = [
+                {
+                  plotType_3: 'barChart',
+                  xAxis: ['commodityVarietyName'],
+                  yAxis: ['arrivalQuantity'],
+                  dynamic: ['amcName', 'agencyName'],
+                },
+                {
+                  plotType_4: 'scatterPlot',
+                  xAxis: ['minimumPrice'],
+                  yAxis: ['maximumPrice'],
+                  dynamic: ['commodityVarietyName', 'amcName'],
+                },
+                {
+                  plotType_5: 'scatterPlot',
+                  xAxis: ['arrivalQuantity'],
+                  yAxis: ['modalPrice'],
+                  dynamic: ['commodityVarietyName', 'marketName', 'amcName'],
+                },
+                {
+                  plotType_6: 'stackedBarChart',
+                  xAxis: ['commodityVarietyName'],
+                  yAxis: ['minimumPrice', 'modalPrice', 'maximumPrice'],
+                  aggregation: 'none',
+                  dynamic: ['marketName', 'arrivalQuantity'],
+                },
+              ];
+              break;
+            case 'AMC Commodity Price Information in Khammam District':
+              newSchema = [
+                {
+                  plotType_3: 'pieChart',
+                  xAxis: ['commodityVarietyName'],
+                  yAxis: ['arrivalQuantity'],
+                  aggregation: 'sum',
+                  dynamic: ['amcName', 'agencyName'],
+                },
+                {
+                  plotType_4: 'stackedBarChart',
+                  xAxis: ['commodityVarietyName'],
+                  yAxis: ['minimumPrice', 'modalPrice', 'maximumPrice'],
+                  aggregation: 'none',
+                  dynamic: ['amcName', 'agencyName'],
+                },
+                {
+                  plotType_5: 'barChart',
+                  xAxis: ['commodityVarietyName'],
+                  yAxis: ['modalPrice'],
+                  aggregation: 'none',
+                  dynamic: ['amName', 'agencyName'],
+                },
+              ];
+              break;
+            case 'Reservoir Water Storage Level Details in Telangana':
+              newSchema = [
+                {
+                  plotType_2: 'stackedBarChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['currentCapacity', 'totalCapacity'],
+                  dynamic: ['riverBasin', 'observationDateTime'],
+                },
+
+                {
+                  plotType_3: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['currentCapacity'],
+                  dynamic: ['reservoirName'],
+                },
+
+                {
+                  plotType_4: 'scatterPlot',
+                  xAxis: ['currentCapacity'],
+                  yAxis: ['outflow'],
+                  dynamic: ['reservoirID', 'reservoirName'],
+                },
+
+                {
+                  plotType_5: 'stackedBarChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['inflow', 'outflow'],
+                  dynamic: ['reservoirName'],
+                },
+
+                {
+                  plotType_6: 'radarChart',
+                  xAxis: ['metricType'],
+                  yAxis: ['metricValue'],
+                  dynamic: ['reservoirName'],
+                },
+              ];
+
+              break;
+            case 'Historical Rainfall Information in Khammam District':
+              newSchema = [
+                {
+                  plotType_2: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['precipitation'],
+                  dynamic: ['subdistrictName', 'districtCode'],
+                },
+
+                {
+                  plotType_3: 'barChart',
+                  xAxis: ['subdistrictName'],
+                  yAxis: ['precipitation'],
+                  aggregation: 'none',
+                  dynamic: ['observationDateTime', 'districtCode'],
+                },
+
+                {
+                  plotType_4: 'scatterPlot',
+                  xAxis: 'precipitation',
+                  yAxis: 'airTemperature.maxOverTime',
+                  dynamic: ['subdistrictName', 'observationDateTime'],
+                },
+              ];
+              break;
+            case 'Niruthi Weather Information for Telangana':
+              newSchema = [
+                {
+                  plotType_6: 'stackedBarChart',
+                  xAxis: ['villageName'],
+                  yAxis: [
+                    'windSpeed.avgOverTime',
+                    'windSpeed.maxOverTime',
+                    'precipitation',
+                    'solarRadiation',
+                    'airTemperature.maxOverTime',
+                    'airTemperature.minOverTime',
+                    'relativeHumidity.avgOverTime',
+                  ],
+                  aggregation: 'none',
+                  dynamic: ['subdistrictName', 'observationDateTime'],
+                },
+
+                {
+                  plotType_7: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: [
+                    'airTemperature.maxOverTime',
+                    'airTemperature.minOverTime',
+                    'relativeHumidity.avgOverTime',
+                  ],
+                  dynamic: ['villageName', 'subdistrictName'],
+                },
+                {
+                  plotType_8: 'radarChart',
+                  xAxis: [
+                    'windSpeed.avgOverTime',
+                    'windSpeed.maxOverTime',
+                    'relativeHumidity.avgOverTime',
+                    'relativeHumidity.maxOverTime',
+                    'relativeHumidity.minOverTime',
+                    'solarRadiation',
+                    'dewPoint',
+                    'airTemperature.maxOverTime',
+                    'airTemperature.minOverTime',
+                  ],
+                  yAxis: [],
+                  dynamic: ['villageName', 'observationDateTime'],
+                },
+                {
+                  plotType_9: 'bubblePlot',
+                  xAxis: ['airTemperature.maxOverTime'],
+                  yAxis: ['relativeHumidity.avgOverTime'],
+                  dynamic: ['precipitation', 'villageName'],
+                },
+                {
+                  plotType_10: 'scatterPlot',
+                  xAxis: ['airTemperature.maxOverTime'],
+                  yAxis: ['precipitation'],
+                  dynamic: ['windSpeed.avgOverTime', 'villageName'],
+                },
+              ];
+              break;
+            case 'NPDCL Agriculture Consumption Data in Telangana':
+              newSchema = [
+                {
+                  plotType_2: 'stackedBarChart',
+                  xAxis: ['cityName'],
+                  yAxis: ['powerConsumption', 'totalServiceCount'],
+                  aggregation: 'none',
+                  dynamic: ['category', 'observationDateTime'],
+                },
+                {
+                  plotType_3: 'scatterPlot',
+                  xAxis: ['totalServiceCount'],
+                  yAxis: ['powerConsumption'],
+                  dynamic: ['cityName', 'category'],
+                },
+                {
+                  plotType_4: 'barChart',
+                  xAxis: ['cityName'],
+                  yAxis: ['powerConsumption', 'totalServiceCount'],
+                  aggregation: 'none',
+                  dynamic: ['cityName'],
+                },
+              ];
+
+              break;
+            case 'SPDCL Agriculture Consumption Data in Telangana':
+              newSchema = [
+                {
+                  plotType_2: 'stackedBarChart',
+                  xAxis: ['cityName'],
+                  yAxis: [
+                    'energyConsumption',
+                    'powerConsumption',
+                    'totalServiceCount',
+                  ],
+                  dynamic: ['areaServed'],
+                },
+
+                {
+                  plotType_3: 'scatterPlot',
+                  xAxis: ['energyConsumption'],
+                  yAxis: ['powerConsumption'],
+                  dynamic: ['areaServed'],
+                },
+              ];
+              break;
+            case 'Chilli Sampling for Quality in Telangana State':
+              newSchema = [
+                {
+                  plotType_3: 'stackedBarChart',
+                  xAxis: ['warehouseName'],
+                  yAxis: ['fineProduce', 'brokenProduce', 'foreignMatter'],
+                  aggregation: 'none',
+                  dynamic: ['districtName', 'productGrade'],
+                },
+              ];
+              break;
+            case 'Subdistrict Level Weather Information from Telangana':
+              newSchema = [
+                {
+                  plotType_2: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: [
+                    'airTemperature.maxOverTime',
+                    'airTemperature.minOverTime',
+                  ],
+                  dynamic: ['districtName', 'subdistrictName'],
+                },
+                {
+                  plotType_3: 'barChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['precipitation'],
+                  aggregation: 'none',
+                  dynamic: ['districtName', 'subdistrictName'],
+                },
+                {
+                  plotType_4: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: ['windSpeed.maxOverTime', 'windSpeed.minOverTime'],
+                  dynamic: ['districtName', 'subdistrictName'],
+                },
+
+                {
+                  plotType_5: 'lineChart',
+                  xAxis: ['observationDateTime'],
+                  yAxis: [
+                    'relativeHumidity.maxOverTime',
+                    'relativeHumidity.minOverTime',
+                  ],
+                  dynamic: ['districtName', 'subdistrictName'],
+                },
+              ];
+              break;
+          }
+          return {
+            ...resource,
+            plotSchema: [...(resource.plotSchema || []), ...newSchema],
+          };
+        });
+
         const sortedData = sortResources(filteredData);
         setAllResources(sortedData);
       }
     } catch (error) {
-      console.error('Error fetching resources:', error);
-      emitToast('error', 'Failed to fetch resources');
+      console.error('Error fetching resource data:', error);
     }
   }
 
@@ -288,7 +568,7 @@ export default function Plots({
   // array of displayed resources
   const plotTypes =
     (tabs.length > 0 && tabs.map((reso) => reso).map((item) => item)) || [];
-  // console.log(plotTypes, filterDates.startDate, dataforPlot, 'plot types');
+  console.log(plotTypes, filterDates.startDate, dataforPlot, 'plot types');
 
   return (
     <div className={styles.container}>

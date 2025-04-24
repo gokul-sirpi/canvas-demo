@@ -24,6 +24,7 @@ import axios from 'axios';
 import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
 import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
+import StacItemsPopup from './StackListPopUp';
 
 function UgixFeatureTile({
   resource,
@@ -37,7 +38,8 @@ function UgixFeatureTile({
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
-
+  const [stacItems, setStacItems] = useState([]);
+  const [showStacPopup, setShowStacPopup] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const ugixResources: string[] = [];
   const canvasLayers = useSelector((state: RootState) => {
@@ -48,11 +50,15 @@ function UgixFeatureTile({
       ugixResources.push(layer.layerId);
     }
   });
+
+  console.log('these are static items', stacItems);
+
   function getinfoLink() {
     const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
     return path;
   }
+
   function handleInfoOpen() {
     const path = getinfoLink();
     window.open(path, '_blank');
@@ -71,6 +77,8 @@ function UgixFeatureTile({
     console.log(resource);
     if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('VECTOR_TILES')) {
       plotTiles();
+    } else if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('STAC')) {
+      plotStac();
     } else {
       setAdding(true);
       dispatch(updateLoadingState(true));
@@ -119,6 +127,7 @@ function UgixFeatureTile({
       );
     }
   }
+
   function handleBboxSearch() {
     dialogCloseTrigger(false);
     const newLayer = openLayerMap.createNewUserLayer('', 'Rectangle');
@@ -153,6 +162,7 @@ function UgixFeatureTile({
       emitToast('error', 'Unable to download data');
     }
   }
+
   async function downloadResourceData(href: string) {
     let serverUrl = await getResourceServerRegURL(resource);
 
@@ -176,24 +186,30 @@ function UgixFeatureTile({
       }
     }
   }
+
   function cleanUpSideEffects() {
     setAdding(false);
     dispatch(updateLoadingState(false));
   }
+
   function showNoAccessText() {
     setNoAccess(true);
     setTimeout(() => {
       setNoAccess(false);
     }, 5000);
   }
+
   function toggleExtraButtonDrawer() {
-    setIsExtraBtnVisible(!isExtraBtnVisible);
+    if (resource.ogcResourceInfo.ogcResourceAPIs[0] === 'STAC') {
+      handleUgixLayerAddition();
+    } else {
+      setIsExtraBtnVisible(!isExtraBtnVisible);
+    }
   }
 
   async function plotTiles() {
     console.log('tiles');
     let serverUrl = await getResourceServerRegURL(resource);
-
     try {
       const { error, token } = await getAccessToken(resource, serverUrl);
 
@@ -202,10 +218,6 @@ function UgixFeatureTile({
         return;
       }
 
-      // const response = await axios.get(
-      //   envurls.ugixOgcServer +
-      //     `/collections/${resource.id}/map/tiles/WorldCRS84Quad`
-      // );
       const response = await axios.get(
         `https://${serverUrl}/collections/${resource.id}/map/tiles/WorldCRS84Quad`
       );
@@ -233,6 +245,93 @@ function UgixFeatureTile({
       emitToast('error', 'Unable to plot tiles, please try again later');
     }
   }
+
+  async function plotStac() {
+    setAdding(true);
+    dispatch(updateLoadingState(true));
+
+    let serverUrl = await getResourceServerRegURL(resource);
+    try {
+      const { error, token } = await getAccessToken(resource, serverUrl);
+      if (error) {
+        emitToast('error', 'No access to data');
+        cleanUpSideEffects();
+        return;
+      }
+
+      const res = await axios.get(
+        `https://${serverUrl}/stac/collections/${resource.id}`
+      );
+
+      if (token && res.status === 200) {
+        const items = await axios.get(
+          `https://${serverUrl}/stac/collections/${resource.id}/items?limit=20`
+        );
+
+        console.log(items.data.features, 'STAC items fetched');
+        setStacItems(items.data.features);
+        setShowStacPopup(true); // Show popup when data is fetched
+        cleanUpSideEffects();
+      } else {
+        throw new Error('Failed to fetch STAC collection');
+      }
+    } catch (error) {
+      console.error(error);
+      emitToast('error', 'Failed to fetch STAC items');
+      cleanUpSideEffects();
+    }
+  }
+  async function handleStacDateDateFilterChange(
+    startISO: string,
+    endISO: string
+  ) {
+    setAdding(true);
+    dispatch(updateLoadingState(true));
+
+    try {
+      // 1. Get server URL and token
+      const serverUrl = await getResourceServerRegURL(resource);
+      const { error, token } = await getAccessToken(resource, serverUrl);
+      if (error) throw new Error('No access to data');
+
+      const url = `https://${serverUrl}/stac/collections/${resource.id}/items`;
+      const { data } = await axios.get(url, {
+        params: {
+          datetime: `${startISO}/${endISO}`,
+          limit: 20,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 3. Update list + open popup (if closed)
+      setStacItems(data.features);
+      setShowStacPopup(true);
+    } catch (err: any) {
+      console.error(err);
+      emitToast('error', err.message ?? 'Failed to fetch STAC items');
+    } finally {
+      cleanUpSideEffects();
+    }
+  }
+  function handlePreviewStac(item: any) {
+    // Implementation for preview stac functionality
+    console.log('Preview STAC item:', item);
+    // Add your preview implementation here
+    emitToast('info', `Previewing STAC item: ${item.id}`);
+  }
+
+  function handlePlotStac(item: any) {
+    // Implementation for plot stac functionality
+    console.log('Plot STAC item:', item);
+    // Add your plot implementation here
+    emitToast('info', `Plotting STAC item: ${item.id}`);
+    setShowStacPopup(false); // Close popup after plotting
+  }
+
+  function closeStacPopup() {
+    setShowStacPopup(false);
+  }
+
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>
@@ -263,20 +362,34 @@ function UgixFeatureTile({
             className={styles.extra_button_container}
             data-visible={isExtraBtnVisible}
           >
-            <button
-              className={styles.extra_button}
-              disabled={adding}
-              onClick={() => handleUgixLayerAddition()}
-            >
-              Get all
-            </button>
-            <button
-              disabled={adding}
-              className={styles.extra_button}
-              onClick={handleBboxSearch}
-            >
-              BBOX search
-            </button>
+            {resource.ogcResourceInfo.ogcResourceAPIs[0] !== 'STAC' ? (
+              <>
+                <button
+                  className={styles.extra_button}
+                  disabled={adding}
+                  onClick={() => handleUgixLayerAddition()}
+                >
+                  Get all
+                </button>
+                <button
+                  disabled={adding}
+                  className={styles.extra_button}
+                  onClick={handleBboxSearch}
+                >
+                  BBOX search
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className={styles.extra_button}
+                  disabled={adding}
+                  onClick={() => handleUgixLayerAddition()}
+                >
+                  {adding ? 'Loading...' : 'Get STAC list'}
+                </button>
+              </>
+            )}
           </div>
         </div>
         <TooltipWrapper content="add">
@@ -320,6 +433,7 @@ function UgixFeatureTile({
           </button>
         </TooltipWrapper>
       </div>
+
       {noAccess && (
         <div className={styles.warn_text}>
           You do not have access to view this data, please visit{' '}
@@ -329,6 +443,18 @@ function UgixFeatureTile({
           to request access
         </div>
       )}
+
+      {/* STAC Items Popup */}
+      {showStacPopup && stacItems.length > 0 && (
+        <StacItemsPopup
+          resource={resource}
+          stacItems={stacItems}
+          onClose={closeStacPopup}
+          onPreviewStac={handlePreviewStac}
+          onPlotStac={handlePlotStac}
+          handleStacDateDateFilterChange={handleStacDateDateFilterChange}
+        />
+      )}
     </div>
   );
 }
@@ -337,4 +463,5 @@ const areEqual = (prevProps: any, nextProps: any) => {
   // Only rerender if resources prop has changed
   return prevProps.resources === nextProps.resources;
 };
+
 export default memo(UgixFeatureTile, areEqual);

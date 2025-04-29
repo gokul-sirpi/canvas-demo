@@ -14,21 +14,34 @@ import { useRef } from 'react';
 import { getUgixFeatureById } from '../../lib/getUgixFeatureById';
 import { emitToast } from '../../lib/toastEmitter';
 import { toast } from 'react-toastify';
+import { StacLayer } from '../../types/StacLayer';
 // import {
 //   updateFooterLayerState,
 //   updateFooterShownState,
 // } from '../../context/footerState/footerStateSlice';
 
-function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
+function LayerMorePopover({
+  layer,
+  onDeleteLayer,
+}: {
+  layer: UserLayer | UgixLayer | StacLayer;
+  onDeleteLayer: (layerId: string) => void;
+}) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
+
   function deleteLayer() {
     dispatch(deleteCanvasLayer(layer.layerId));
     if (layer.layerType === 'UgixLayer') {
       removeCookieFromWishList(layer.ugixLayerId);
     }
+    if (layer.layerType === 'StacLayer') {
+      sessionStorage.removeItem(layer.layerId + '-extent');
+    }
+    onDeleteLayer?.(layer.layerId);
     openLayerMap.removeLayer(layer.layerId);
   }
+
   function removeCookieFromWishList(id: string) {
     const cookie = getCookieValue(envurls.catalogueCookie);
     if (cookie) {
@@ -48,28 +61,24 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
     }
   }
   async function handleLayerExport() {
-    let l: UgixLayer = layer as UgixLayer;
+    let l = layer;
 
-    if (l.sourceType === 'tile') {
+    // Handle Ugix
+    if (l.layerType === 'UgixLayer' && l.sourceType === 'tile') {
       try {
         const data = await getUgixFeatureById(l.ugixLayerId);
-        console.log('data', data);
-
         const file = new Blob([JSON.stringify(data)], {
           type: 'application/geo+json;charset=utf-8',
         });
 
-        const tempAnchor = document.createElement('a');
+        const link = document.createElement('a');
         const url = URL.createObjectURL(file);
-        tempAnchor.href = url;
-        tempAnchor.download = `${l.layerName}.geojson`;
-        document.body.appendChild(tempAnchor);
-        tempAnchor.click();
-        document.body.removeChild(tempAnchor);
-
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 100);
+        link.href = url;
+        link.download = `${l.layerName}.geojson`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
       } catch (err) {
         emitToast('error', 'Failed to export data');
         console.log(err);
@@ -78,17 +87,62 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       }
       return;
     }
+    if (l.layerType === 'StacLayer') {
+      try {
+        const stacLayerEntry = openLayerMap.canvasLayers.get(l.layerId);
+        if (!stacLayerEntry || !stacLayerEntry.layer) {
+          throw new Error('Layer not found in map');
+        }
 
+        const stacLayer = stacLayerEntry.layer;
+
+        // ✅ Get the STAC item URL from the custom property
+        const stacItemUrl = stacLayer.get('stac-url');
+        if (!stacItemUrl) {
+          throw new Error('STAC item URL not found on the layer');
+        }
+
+        const response = await fetch(stacItemUrl);
+        const stacJson = await response.json();
+
+        const asset =
+          stacJson.assets?.visual ||
+          stacJson.assets?.overview ||
+          stacJson.assets?.thumbnail ||
+          Object.values(stacJson.assets || {})[0];
+
+        if (!asset?.href) {
+          throw new Error('No downloadable asset found in STAC item');
+        }
+
+        const link = document.createElement('a');
+        link.href = asset.href;
+        link.download = `${l.layerName || 'stac-layer'}.tif`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error(err);
+        emitToast('error', 'Failed to export data');
+      } finally {
+        toast.dismiss('exporting-data');
+      }
+      return;
+    }
+
+    // Default fallback to GeoJSON export for other layer types
     const geojsonData = openLayerMap.createGeojsonFromLayer(layer.layerId);
     const file = new Blob([JSON.stringify(geojsonData)], {
       type: 'text/json;charset=utf-8',
     });
+
     if (anchorRef.current) {
       anchorRef.current.href = URL.createObjectURL(file);
       anchorRef.current.download = `${layer.layerName}.geojson`;
       anchorRef.current.click();
     }
   }
+
   // function handleFooterUpdate() {
   //   dispatch(updateFooterShownState(true));
   //   dispatch(updateFooterLayerState(layer));

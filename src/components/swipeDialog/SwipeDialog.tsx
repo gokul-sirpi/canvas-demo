@@ -34,17 +34,24 @@ export default function SwipeDialog() {
     for (const layer of leftSide) {
       leftMap.set(layer.layerId, layer.layerName);
     }
-    const newLeft = [];
-    const newRight = [];
-    const newMiddle = [];
+    const newLeft: (UserLayer | UgixLayer)[] = [];
+    const newRight: (UserLayer | UgixLayer)[] = [];
+    const newMiddle: (UserLayer | UgixLayer)[] = [];
     for (const layer of canvasLayers) {
-      if (rightMap.get(layer.layerId)) {
-        newRight.push(layer);
-        continue;
-      } else if (leftMap.get(layer.layerId)) {
-        newLeft.push(layer);
-      } else {
-        newMiddle.push(layer);
+      if (
+        'sourceType' in layer &&
+        'ugixLayerId' in layer &&
+        'ugixGroupId' in layer &&
+        'featureType' in layer
+      ) {
+        if (rightMap.get(layer.layerId)) {
+          newRight.push(layer);
+          continue;
+        } else if (leftMap.get(layer.layerId)) {
+          newLeft.push(layer);
+        } else {
+          newMiddle.push(layer);
+        }
       }
     }
     setRightSide(newRight);
@@ -86,7 +93,14 @@ export default function SwipeDialog() {
         const layer = canvasLayers[i];
         if (layer.layerId === layerId) {
           setLeftSide((prev) => {
-            prev.push(layer);
+            if (
+              'sourceType' in layer &&
+              'ugixLayerId' in layer &&
+              'ugixGroupId' in layer &&
+              'featureType' in layer
+            ) {
+              prev.push(layer);
+            }
             return [...prev];
           });
           const newRightSide = rightSide.filter(
@@ -104,7 +118,14 @@ export default function SwipeDialog() {
         const layer = canvasLayers[i];
         if (layer.layerId === layerId) {
           setRightSide((prev) => {
-            prev.push(layer);
+            if (
+              'sourceType' in layer &&
+              'ugixLayerId' in layer &&
+              'ugixGroupId' in layer &&
+              'featureType' in layer
+            ) {
+              prev.push(layer);
+            }
             return [...prev];
           });
           const newLeftSide = leftSide.filter(
@@ -122,7 +143,14 @@ export default function SwipeDialog() {
         const layer = canvasLayers[i];
         if (layer.layerId === layerId) {
           setMiddle((prev) => {
-            prev.push(layer);
+            if (
+              'sourceType' in layer &&
+              'ugixLayerId' in layer &&
+              'ugixGroupId' in layer &&
+              'featureType' in layer
+            ) {
+              prev.push(layer);
+            }
             return [...prev];
           });
           const newLeftSide = leftSide.filter(

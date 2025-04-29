@@ -177,6 +177,7 @@ function BaseMaps() {
         });
         ogcOutline.set('name', 'State Boundaries Outline');
         ogcOutline.set('layer-id', '39b9d0f5-38be-4603-b2db-7b678d9c3870-base');
+        openLayerMap.indianOutline = ogcOutline;
 
         const newOgcLayerLight = new VectorTileLayer({
           source: vectorSource,
@@ -203,6 +204,7 @@ function BaseMaps() {
         newOgcLayerLight.set('baseLayer', true);
         newOgcLayerDark.set('baseLayer', true);
         newOgcLayerLight.set('baseLayer', true);
+        ogcOutline.set('baseLayer', true);
 
         openLayerMap.indianOutline = ogcOutline;
         ogcLayerLight.current = newOgcLayerLight;
@@ -216,6 +218,7 @@ function BaseMaps() {
       }
     } catch (error) {
       dispatch(updateLoadingState(false));
+
       // emitToast('info', 'Unable to load tiles, fetching state boundaries...');
       getDistrictBoundaries();
       console.error(error);

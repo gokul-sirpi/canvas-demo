@@ -9,6 +9,9 @@ import { Resource } from '../../types/resource';
 import Loader from '../../components/loader/Loader';
 import { TbWorldSearch } from 'react-icons/tb';
 import { debounce } from 'lodash';
+import openLayerMap from '../../lib/openLayers';
+import { useDispatch } from 'react-redux';
+import { addCanvasLayer } from '../../context/canvasLayers/canvasLayerSlice';
 
 function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const [searchInput, setSearchInput] = useState<string>('');
@@ -23,6 +26,8 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const sortResources = useMemo(() => {
     return [...resourceList].sort((a, b) => a.label.localeCompare(b.label));
   }, [resourceList]);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (isDialogOpen) {
@@ -82,46 +87,13 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   const loadMore = () => {
     setVisibleResources((prev) => Math.min(prev + 50, resources.length));
   };
-
-  // const handleBboxSelection = () => {
-  //   setIsDialogOpen(false);
-  //   const bboxLayer = openLayerMap.createNewUserLayer(
-  //     'bbox-drawer',
-  //     'Rectangle'
-  //   );
-  //   openLayerMap.addDrawFeature('Rectangle', bboxLayer, (event) => {
-  //     openLayerMap.removeDrawInteraction();
-  //     openLayerMap.removeLayer(bboxLayer.layerId);
-  //     const extent = event.feature.getGeometry()?.getExtent();
-  //     if (extent) {
-  //       getIntersectingResources(extent);
-  //     }
-  //     setIsDialogOpen(true);
-  //   });
-  // };
-
-  // const getIntersectingResources = (extent: Extent) => {
-  //   const filtered = allResources.filter((resource) => {
-  //     const coordinate = resource.location.geometry.coordinates[0];
-  //     const localMin = [...coordinate[0]];
-  //     const localMax = [...coordinate[0]];
-  //     for (let i = 0; i < coordinate.length; i++) {
-  //       const element = coordinate[i];
-  //       if (element[0] < localMin[0]) localMin[0] = element[0];
-  //       if (element[1] < localMin[1]) localMin[1] = element[1];
-  //       if (element[0] > localMax[0]) localMax[0] = element[0];
-  //       if (element[1] > localMax[1]) localMax[1] = element[1];
-  //     }
-  //     return !(
-  //       localMin[0] > extent[2] ||
-  //       localMax[0] < extent[0] ||
-  //       localMin[1] > extent[3] ||
-  //       localMax[1] < extent[1]
-  //     );
-  //   });
-  //   setResources(filtered);
-  // };
-
+  function PlotStac() {
+    let url =
+      'https://s3.us-west-2.amazonaws.com/sentinel-cogs/sentinel-s2-l2a-cogs/10/T/ES/2022/7/S2A_10TES_20220726_0_L2A/S2A_10TES_20220726_0_L2A.json';
+    const stacLayer = openLayerMap.createNewStacLayer(url);
+    dispatch(addCanvasLayer(stacLayer));
+    setIsDialogOpen(false);
+  }
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger asChild>
@@ -163,6 +135,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
           </section>
 
           <div className={styles.feature_tile_container}>
+            <button onClick={PlotStac}>Add Stac</button>
             {loading ? (
               <div className={styles.loading_container}>
                 <Loader />
@@ -199,3 +172,42 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
 }
 
 export default BrowseDataDialog;
+
+// const handleBboxSelection = () => {
+//   setIsDialogOpen(false);
+//   const bboxLayer = openLayerMap.createNewUserLayer(
+//     'bbox-drawer',
+//     'Rectangle'
+//   );
+//   openLayerMap.addDrawFeature('Rectangle', bboxLayer, (event) => {
+//     openLayerMap.removeDrawInteraction();
+//     openLayerMap.removeLayer(bboxLayer.layerId);
+//     const extent = event.feature.getGeometry()?.getExtent();
+//     if (extent) {
+//       getIntersectingResources(extent);
+//     }
+//     setIsDialogOpen(true);
+//   });
+// };
+
+// const getIntersectingResources = (extent: Extent) => {
+//   const filtered = allResources.filter((resource) => {
+//     const coordinate = resource.location.geometry.coordinates[0];
+//     const localMin = [...coordinate[0]];
+//     const localMax = [...coordinate[0]];
+//     for (let i = 0; i < coordinate.length; i++) {
+//       const element = coordinate[i];
+//       if (element[0] < localMin[0]) localMin[0] = element[0];
+//       if (element[1] < localMin[1]) localMin[1] = element[1];
+//       if (element[0] > localMax[0]) localMax[0] = element[0];
+//       if (element[1] > localMax[1]) localMax[1] = element[1];
+//     }
+//     return !(
+//       localMin[0] > extent[2] ||
+//       localMax[0] < extent[0] ||
+//       localMin[1] > extent[3] ||
+//       localMax[1] < extent[1]
+//     );
+//   });
+//   setResources(filtered);
+// };

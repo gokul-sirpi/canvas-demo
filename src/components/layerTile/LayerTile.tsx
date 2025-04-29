@@ -3,7 +3,6 @@ import { RootState } from '../../context/store';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { UserLayer } from '../../types/UserLayer';
-//
 import styles from './styles.module.css';
 import openLayerMap from '../../lib/openLayers';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,7 +11,8 @@ import {
   updateCanvasLayerColor,
   updateCanvasLayer,
 } from '../../context/canvasLayers/canvasLayerSlice';
-import { UgixLayer } from '../../types/UgixLayers';
+import { UgixLayer } from '../../types/UgixLayers'; // Include StacLayer
+import { StacLayer } from '../../types/StacLayer'; // Import StacLayer
 import TooltipWrapper from '../tooltipWrapper/TooltipWrapper';
 import LayerMorePopover from '../layerMorePopover/LayerMorePopover';
 import { GoCircle } from 'react-icons/go';
@@ -27,17 +27,21 @@ function LayerTile({
   index,
   isTile = true,
 }: {
-  layer: UserLayer | UgixLayer;
+  layer: UserLayer | UgixLayer | StacLayer; // Support both UgixLayer and StacLayer
   index: number;
   isTile?: boolean;
 }) {
-  const canvasLayers = useSelector((state: RootState) => {
-    return state.canvasLayer.layers;
-  });
+  const canvasLayers = useSelector(
+    (state: RootState) => state.canvasLayer.layers
+  );
   const ugixResources: string[] = [];
-  canvasLayers.map((layer) => {
+  const stacResources: string[] = [];
+
+  canvasLayers.map((layer: UserLayer | UgixLayer | StacLayer) => {
     if (layer.layerType === 'UgixLayer') {
       ugixResources.push(layer.layerId);
+    } else if (layer.layerType === 'StacLayer') {
+      stacResources.push(layer.layerId); // Collect StacLayer resources
     }
   });
 
@@ -48,42 +52,32 @@ function LayerTile({
   const [selectedColor, setSelectedColor] = useState<string>(layer.layerColor);
   const [useEffIndex, setUseEffIndex] = useState(index);
   const titleRef = useRef<HTMLParagraphElement>(null);
-  const swiperShown = useSelector((state: RootState) => {
-    return state.swipeShown.swipeShown;
-  });
+  const swiperShown = useSelector(
+    (state: RootState) => state.swipeShown.swipeShown
+  );
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (
-      layer.layerType === 'UgixLayer' &&
+      (layer.layerType === 'UgixLayer' || layer.layerType === 'StacLayer') &&
       layer.isCompleted &&
       !layer.fetching &&
-      useEffIndex == index
+      useEffIndex === index
     ) {
       setUseEffIndex(useEffIndex + 1);
-      // openLayerMap.zoomToCombinedExtend(ugixResources);
     }
-  }, [layer, ugixResources]);
+  }, [layer, ugixResources, stacResources, useEffIndex, index]);
 
   function toggleLayerVisibility() {
-    if (visible) {
-      openLayerMap.toggleLayerVisibility(layer.layerId, false);
-      setVisible(false);
-    } else {
-      openLayerMap.toggleLayerVisibility(layer.layerId, true);
-      setVisible(true);
-    }
+    openLayerMap.toggleLayerVisibility(layer.layerId, !visible);
+    setVisible(!visible);
   }
 
   function completeLayerCreation() {
     openLayerMap.removeDrawInteraction();
     dispatch(updateDrawingTool('None'));
-    let layerName = layerNameRef.current?.value;
-    if (!layerName) {
-      layerName = `Layer${index + 1}`;
-    }
-    const modifiedLayer = { ...layer };
-    modifiedLayer.layerName = layerName;
-    modifiedLayer.isCompleted = true;
+    const layerName = layerNameRef.current?.value || `Layer${index + 1}`;
+    const modifiedLayer = { ...layer, layerName, isCompleted: true };
     dispatch(updateCanvasLayer({ index, modifiedLayer }));
     openLayerMap.updateFeatureProperties(
       modifiedLayer.layerId,
@@ -98,29 +92,34 @@ function LayerTile({
     dispatch(updateDrawingTool('None'));
     dispatch(deleteCanvasLayer(layer.layerId));
   }
-
   function handleColorChange(event: ChangeEvent<HTMLInputElement>) {
-    const text = event.target.value;
-    const changedStyle = openLayerMap.changeLayerColor(layer.layerId, text);
+    const newColor = event.target.value;
+    const changedStyle = openLayerMap.changeLayerColor(layer.layerId, newColor);
     dispatch(
       updateCanvasLayerColor({
         layerId: layer.layerId,
-        newColor: text,
+        newColor,
         style: changedStyle,
       })
     );
-    setSelectedColor(text);
+    setSelectedColor(newColor);
+  }
+
+  function handleOpacityChange(value: number) {
+    const newOpacity = value / 100;
+    openLayerMap.setLayerOpacity(layer.layerId, newOpacity);
+
+    const modifiedLayer = { ...layer, opacity: newOpacity };
+    dispatch(updateCanvasLayer({ index, modifiedLayer }));
   }
 
   return (
     <div className={styles.container} data-layer={layer.layerType}>
-      {/* badge */}
       <div
-        className={`${styles.layer_badge} ${layer.layerType === 'UserLayer' ? styles.userTile : null}`}
-      >
-        {/* {layer.layerType == 'UgixLayer' ? 'UGIX' : 'User'} */}
-      </div>
-      {/* name & eye icon */}
+        className={`${styles.layer_badge} ${
+          layer.layerType === 'UserLayer' ? styles.userTile : ''
+        }`}
+      ></div>
       <div className={styles.input_container}>
         {isTile && (
           <button className={styles.eye_btn} onClick={toggleLayerVisibility}>
@@ -146,21 +145,21 @@ function LayerTile({
           />
         )}
       </div>
-      {/* swipe side */}
       {swiperShown && isTile && (
         <div>
           {layer.side === 'left' && 'L'}
           {layer.side === 'right' && 'R'}
         </div>
       )}
-      {/* interactive buttons */}
       <div className={styles.btn_container}>
         {layer.isCompleted ? (
           <div className={styles.layer_controllers}>
-            {layer.layerType === 'UgixLayer' && layer.fetching && <Loader />}
+            {(layer.layerType === 'UgixLayer' ||
+              layer.layerType === 'StacLayer') &&
+              layer.fetching && <Loader />}
             {layer.editable && (
               <>
-                {layer.featureType === 'Point' ? (
+                {'featureType' in layer && layer.featureType === 'Point' ? (
                   <>
                     <div className={styles.empty_box}></div>
                     <MarkerPicker
@@ -169,6 +168,23 @@ function LayerTile({
                       layer={layer}
                     />
                   </>
+                ) : layer.layerType === 'StacLayer' ? (
+                  <div className={styles.opacity_slider_container}>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={((layer as StacLayer).opacity ?? 1) * 100}
+                      onChange={(e) =>
+                        handleOpacityChange(Number(e.target.value))
+                      }
+                      className={styles.opacity_slider}
+                    />
+                    <label className={styles.opacity_label}>
+                      {Math.round(((layer as StacLayer).opacity ?? 1) * 100)}%
+                    </label>
+                  </div>
                 ) : (
                   <div className={styles.color_picker_container}>
                     <input
@@ -190,6 +206,7 @@ function LayerTile({
                 )}
               </>
             )}
+
             {layer.layerType === 'UserLayer' && (
               <>
                 {layer.featureType === 'Circle' && <GoCircle size={13} />}
@@ -203,7 +220,14 @@ function LayerTile({
                 )}
               </>
             )}
-            {isTile && <LayerMorePopover layer={layer} />}
+            {isTile && (
+              <LayerMorePopover
+                layer={layer}
+                onDeleteLayer={(layerId: string) =>
+                  dispatch(deleteCanvasLayer(layerId))
+                }
+              />
+            )}
           </div>
         ) : (
           <>

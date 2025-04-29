@@ -47,6 +47,10 @@ import { Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 // import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
+import STAC from 'ol-stac';
+import STACLayer from 'ol-stac';
+import { FeatureLike } from 'ol/Feature';
+import { StacLayer } from '../types/StacLayer';
 
 type baseLayerTypes =
   | 'terrain'
@@ -72,7 +76,7 @@ const openLayerMap = {
   swipePercentage: 1,
   hoveredTileId: undefined as string | number | undefined,
   canvasLayers: new Map<string, CanvasLayer>(),
-  latestLayer: null as UserLayer | UgixLayer | null,
+  latestLayer: null as UserLayer | UgixLayer | StacLayer | null,
   indianOutline: null as VectorImageLayer | VectorTileLayer | null,
   measureTooltip: null as Overlay | null,
   tooltipElement: null as HTMLDivElement | null,
@@ -99,7 +103,11 @@ const openLayerMap = {
   },
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayer: VectorLayer<VectorSource> | VectorTileLayer | TileLayer<OSM> | VectorImageLayer
+    newLayer:
+      | VectorLayer<VectorSource>
+      | VectorTileLayer
+      | TileLayer<OSM>
+      | VectorImageLayer
   ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get(BASE_LAYER_KEY)) {
@@ -145,7 +153,11 @@ const openLayerMap = {
   },
 
   addLayer(
-    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer
+    layer:
+      | VectorLayer<any, FeatureLike>
+      | VectorTileLayer<any, FeatureLike>
+      | VectorImageLayer<any>
+      | TileLayer
   ) {
     this.map.addLayer(layer);
   },
@@ -218,7 +230,11 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  initialMapFitOnGetResource(serverUrl: string, layerId: string, ugixId: string) {
+  initialMapFitOnGetResource(
+    serverUrl: string,
+    layerId: string,
+    ugixId: string
+  ) {
     let resourceExtent = createEmpty();
     let view = this.map.getView();
 
@@ -303,14 +319,14 @@ const openLayerMap = {
     const layerColor = getRandomColor();
     const layerId = createUniqueId();
     const vectorSource = new OGCVectorTile({
-      url:
-        `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      url: `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       // envurls.ugixOgcServer +
       // `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
       // projection: 'EPSG:4326',
     });
+    console.log(vectorSource, 'vec src');
 
     this.initialMapFitOnGetResource(serverUrl, layerId, ugixId);
 
@@ -389,19 +405,69 @@ const openLayerMap = {
     return newLayer;
   },
 
+  createNewStacLayer(url: string) {
+    const layerId = createUniqueId();
+    const stacLayer: STACLayer = new STAC({ url });
+
+    stacLayer.set('layer-id', layerId);
+    stacLayer.set('stac-url', url);
+
+    stacLayer.on('sourceready' as unknown as any, () => {
+      const extent = stacLayer.getExtent();
+      if (extent) {
+        this.map.getView().fit(extent);
+        sessionStorage.setItem(layerId + '-extent', JSON.stringify(extent));
+      }
+    });
+
+    stacLayer.on('layersready' as unknown as any, () => {
+      if (stacLayer.isEmpty()) {
+        alert('No spatial information available in the data source');
+      }
+    });
+
+    const layerColor = getRandomColor();
+
+    // Store the actual OpenLayers layer
+    this.canvasLayers.set(layerId, {
+      layer: stacLayer,
+      layerId,
+      layerName: 'STAC Layer',
+      layerType: 'StacLayer',
+      style: createFeatureStyle(layerColor),
+      side: 'middle',
+    });
+
+    const newLayer = {
+      layerId,
+      layerType: 'StacLayer',
+      sourceType: 'tile',
+      layerName: 'STAC',
+      selected: true,
+      visible: true,
+      isCompleted: true,
+      editable: true,
+      fetching: false,
+      side: 'middle',
+      style: createFeatureStyle(layerColor),
+      layerColor,
+      featureType: 'STAC',
+    };
+
+    this.addLayer(stacLayer as any);
+    return newLayer;
+  },
+
   createStateTileBoundariesBaseMap(
     serverUrl?: string,
     ugixId?: string,
     token?: string
   ) {
-
-
     const vectorSource = new OGCVectorTile({
       url: `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
     });
-    console.log(vectorSource, 'EVFEfeefe');
 
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
@@ -419,13 +485,17 @@ const openLayerMap = {
             tile.setState(3);
             return;
           }
+          console.log(response, 'ferfe');
           response.arrayBuffer().then(function (data) {
+            console.log(data, 'data');
             const format = tile.getFormat();
+            console.log(format, 'formar');
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
+              console.log(features, 'features');
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);
@@ -434,7 +504,7 @@ const openLayerMap = {
         });
       });
     });
-    return vectorSource
+    return vectorSource;
   },
 
   changeLayerColor(layerId: string, color: string) {
@@ -458,6 +528,14 @@ const openLayerMap = {
     }
     return featureStyle;
   },
+
+  setLayerOpacity(layerId: string, opacity: number) {
+    const layer = this.getLayer(layerId);
+    if (layer && typeof layer.setOpacity === 'function') {
+      layer.setOpacity(opacity);
+    }
+  },
+
   changeMarkerIcon(layerId: string, iconInd: number) {
     const source = this.getLayer(layerId)?.getSource();
     if (!source) return;
@@ -708,8 +786,9 @@ const openLayerMap = {
       layer.setVisible(visible);
     }
   },
-  getLayerVisibility(layerId: string): boolean | undefined {
-    return this.getLayer(layerId)?.isVisible();
+  getLayerVisibility(layerId: string): boolean {
+    const layer = this.getLayer(layerId);
+    return typeof layer?.isVisible === 'function' ? layer.isVisible() : false;
   },
 
   swapLayerPosition(layers: string[]) {
@@ -990,7 +1069,8 @@ const openLayerMap = {
 
       const featureData = this.getFeatureAtPixel(evt.pixel);
 
-      if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
+      if (featureData.layerId === '39b9d0f5-38be-4603-b2db-7b678d9c3870-base')
+        return;
       const { feature } = this.getFeatureAtPixel(evt.pixel);
 
       if (feature && Object.keys(feature?.getProperties()).length > 1) {
@@ -1140,7 +1220,8 @@ openLayerMap.map.on('pointermove', (event) => {
   }
 
   const featureData = openLayerMap.getFeatureAtPixel(event.pixel);
-  if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
+  if (featureData.layerId === '39b9d0f5-38be-4603-b2db-7b678d9c3870-base')
+    return;
   if (selected) {
     selected.setStyle(prevStyle);
     selected = undefined;

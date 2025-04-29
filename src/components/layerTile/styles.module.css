@@ -111,3 +111,17 @@
   border-radius: 10rem;
   cursor: pointer;
 }
+.opacity_slider_container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100px;
+}
+
+.opacity_slider {
+  width: 70px;
+}
+
+.opacity_label {
+  font-size: 12px;
+}

@@ -2,8 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserLayer } from '../../types/UserLayer';
 import { FeatureStyle } from '../../types/FeatureStyle';
 import { UgixLayer } from '../../types/UgixLayers';
+import { StacLayer } from '../../types/StacLayer';
 type CanvasLayerState = {
-  layers: (UserLayer | UgixLayer)[];
+  layers: (UserLayer | UgixLayer | StacLayer)[];
 };
 
 const initialState: CanvasLayerState = {

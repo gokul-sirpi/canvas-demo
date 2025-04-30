@@ -24,14 +24,15 @@ function StacItemsPopup({
   stacItems,
   onClose,
   onPlotStac,
+  setPreviewImageUrl,
 }: {
   resource: Resource;
   stacItems: any[];
   onClose: () => void;
   onPreviewStac: (item: any) => void;
   onPlotStac: (item: any, bbox: any) => void;
+  setPreviewImageUrl: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handlePreviewStac = (item: StacItem) => {
@@ -122,7 +123,7 @@ function StacItemsPopup({
         </div>
 
         {/* ✅ Radix Dialog for Thumbnail Preview */}
-        <Dialog.Root
+        {/* <Dialog.Root
           open={isDialogOpen}
           onOpenChange={() => setPreviewImageUrl(null)}
         >
@@ -145,7 +146,7 @@ function StacItemsPopup({
               </Dialog.Close>
             </Dialog.Content>
           </Dialog.Portal>
-        </Dialog.Root>
+        </Dialog.Root> */}
       </div>
     </div>
   );

@@ -449,19 +449,17 @@ const openLayerMap = {
     bbox: [number, number, number, number],
   ) {
     const layerId = createUniqueId();
-
-    // 1. Create ImageStatic layer
+    console.log(imageUrl)
     const imageSource = new ImageStatic({
       url: imageUrl,
       imageExtent: bbox,
-      projection: 'EPSG:4326',
+      projection: 'EPSG:3857',
     });
 
     const imageLayer = new ImageLayer({
       source: imageSource,
     });
-
-    // 2. Create vector layer for bbox overlay
+    console.log(imageLayer)
     const polygonCoords = [[
       [bbox[0], bbox[1]],
       [bbox[0], bbox[3]],
@@ -476,7 +474,6 @@ const openLayerMap = {
     const vectorSource = new VectorSource({
       features: [bboxFeature],
     });
-
 
     const layerColor = getRandomColor();
     const vectorLayer = new VectorLayer({
@@ -524,8 +521,6 @@ const openLayerMap = {
 
     return newLayer;
   },
-
-
 
   createStateTileBoundariesBaseMap(
     serverUrl?: string,

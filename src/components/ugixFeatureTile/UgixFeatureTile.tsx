@@ -50,6 +50,7 @@ function UgixFeatureTile({
       ugixResources.push(layer.layerId);
     }
   });
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   console.log('these are static items', stacItems);
 
@@ -424,6 +425,7 @@ function UgixFeatureTile({
           onClose={closeStacPopup}
           onPreviewStac={handlePreviewStac}
           onPlotStac={handlePlotStac}
+          setPreviewImageUrl={setPreviewImageUrl}
         />
       )}
     </div>

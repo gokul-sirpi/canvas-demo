@@ -24,7 +24,7 @@ import axios from 'axios';
 import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
 import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
-import StacItemsPopup from './StackListPopUp';
+import StacItemsPopup from './stacListPopup/StackListPopUp';
 
 function UgixFeatureTile({
   resource,
@@ -200,11 +200,7 @@ function UgixFeatureTile({
   }
 
   function toggleExtraButtonDrawer() {
-    if (resource.ogcResourceInfo.ogcResourceAPIs[0] === 'STAC') {
-      handleUgixLayerAddition();
-    } else {
-      setIsExtraBtnVisible(!isExtraBtnVisible);
-    }
+    setIsExtraBtnVisible(!isExtraBtnVisible);
   }
 
   async function plotTiles() {
@@ -247,6 +243,7 @@ function UgixFeatureTile({
   }
 
   async function plotStac() {
+    console.log('Stac');
     setAdding(true);
     dispatch(updateLoadingState(true));
 
@@ -281,38 +278,7 @@ function UgixFeatureTile({
       cleanUpSideEffects();
     }
   }
-  async function handleStacDateDateFilterChange(
-    startISO: string,
-    endISO: string
-  ) {
-    setAdding(true);
-    dispatch(updateLoadingState(true));
 
-    try {
-      // 1. Get server URL and token
-      const serverUrl = await getResourceServerRegURL(resource);
-      const { error, token } = await getAccessToken(resource, serverUrl);
-      if (error) throw new Error('No access to data');
-
-      const url = `https://${serverUrl}/stac/collections/${resource.id}/items`;
-      const { data } = await axios.get(url, {
-        params: {
-          datetime: `${startISO}/${endISO}`,
-          limit: 20,
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // 3. Update list + open popup (if closed)
-      setStacItems(data.features);
-      setShowStacPopup(true);
-    } catch (err: any) {
-      console.error(err);
-      emitToast('error', err.message ?? 'Failed to fetch STAC items');
-    } finally {
-      cleanUpSideEffects();
-    }
-  }
   function handlePreviewStac(item: any) {
     // Implementation for preview stac functionality
     console.log('Preview STAC item:', item);
@@ -320,12 +286,18 @@ function UgixFeatureTile({
     emitToast('info', `Previewing STAC item: ${item.id}`);
   }
 
-  function handlePlotStac(item: any) {
+  function handlePlotStac(
+    imageUrl: string,
+    bbox: [number, number, number, number]
+  ) {
     // Implementation for plot stac functionality
-    console.log('Plot STAC item:', item);
-    // Add your plot implementation here
-    emitToast('info', `Plotting STAC item: ${item.id}`);
+    console.log('Plot STAC item:', imageUrl);
+    const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
+    dispatch(addCanvasLayer(stac));
+
+    emitToast('info', `Plotting STAC imageUrl: ${imageUrl}`);
     setShowStacPopup(false); // Close popup after plotting
+    dialogCloseTrigger(false);
   }
 
   function closeStacPopup() {
@@ -452,7 +424,6 @@ function UgixFeatureTile({
           onClose={closeStacPopup}
           onPreviewStac={handlePreviewStac}
           onPlotStac={handlePlotStac}
-          handleStacDateDateFilterChange={handleStacDateDateFilterChange}
         />
       )}
     </div>

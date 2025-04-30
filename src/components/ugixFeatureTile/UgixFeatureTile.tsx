@@ -52,8 +52,6 @@ function UgixFeatureTile({
   });
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
-  console.log('these are static items', stacItems);
-
   function getinfoLink() {
     const groupId = resource.resourceGroup;
     const path = envurls.ugixCatalogue + 'dataset/' + groupId;
@@ -293,9 +291,12 @@ function UgixFeatureTile({
   ) {
     // Implementation for plot stac functionality
     console.log('Plot STAC item:', imageUrl);
-    const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
-    dispatch(addCanvasLayer(stac));
-
+    // const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
+    // console.log(stac);
+    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox);
+    // dispatch(addCanvasLayer(stac));
+    dispatch(addCanvasLayer(bboxlayer));
+    console.log(bboxlayer, 'jlwefwnjflew');
     emitToast('info', `Plotting STAC imageUrl: ${imageUrl}`);
     setShowStacPopup(false); // Close popup after plotting
     dialogCloseTrigger(false);

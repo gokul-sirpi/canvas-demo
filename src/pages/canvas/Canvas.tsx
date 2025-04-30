@@ -69,133 +69,133 @@ function Canvas({
             ? featureResources
             : response.data.results;
 
-        // Extract unique provider and resourceGroup IDs
-        const uniqueProviderIds = [
-          ...new Set(resources.map((resource: Resource) => resource.provider)),
-        ];
-        const uniqueResourceGroups = [
-          ...new Set(
-            resources.map((resource: Resource) => resource.resourceGroup)
-          ),
-        ];
+        // // Extract unique provider and resourceGroup IDs
+        // const uniqueProviderIds = [
+        //   ...new Set(resources.map((resource: Resource) => resource.provider)),
+        // ];
+        // const uniqueResourceGroups = [
+        //   ...new Set(
+        //     resources.map((resource: Resource) => resource.resourceGroup)
+        //   ),
+        // ];
 
-        const uniqueResourceIds = [
-          ...new Set(resources.map((resource: Resource) => resource.id)),
-        ];
+        // const uniqueResourceIds = [
+        //   ...new Set(resources.map((resource: Resource) => resource.id)),
+        // ];
 
-        // Fetch provider names
-        const providerNames = await Promise.all(
-          uniqueProviderIds.map(async (providerId) => {
-            try {
-              const providerResponse = await axios.get(
-                `${envurls.ugixServer}cat/v1/item?id=${providerId}`
-              );
-              return {
-                providerId,
-                providerName: providerResponse.data.results[0].description,
-              };
-            } catch (error) {
-              console.error(
-                `Error fetching provider name for ID: ${providerId}`,
-                error
-              );
-              return { providerId, providerName: 'Unknown' };
-            }
-          })
-        );
+        // // Fetch provider names
+        // const providerNames = await Promise.all(
+        //   uniqueProviderIds.map(async (providerId) => {
+        //     try {
+        //       const providerResponse = await axios.get(
+        //         `${envurls.ugixServer}cat/v1/item?id=${providerId}`
+        //       );
+        //       return {
+        //         providerId,
+        //         providerName: providerResponse.data.results[0].description,
+        //       };
+        //     } catch (error) {
+        //       console.error(
+        //         `Error fetching provider name for ID: ${providerId}`,
+        //         error
+        //       );
+        //       return { providerId, providerName: 'Unknown' };
+        //     }
+        //   })
+        // );
 
-        // Fetch resource details
-        const resourceDetails = await Promise.all(
-          uniqueResourceGroups.map(async (resourceGroupId) => {
-            try {
-              const resourceResponse = await axios.get(
-                `${envurls.ugixServer}cat/v1/item?id=${resourceGroupId}`
-              );
-              return {
-                resourceGroupId,
-                resourceLabel: resourceResponse.data.results[0].label,
-                resourceDescription:
-                  resourceResponse.data.results[0].description,
-              };
-            } catch (error) {
-              console.error(
-                `Error fetching resource details for ID: ${resourceGroupId}`,
-                error
-              );
-              return {
-                resourceGroupId,
-                resourceLabel: 'Unknown',
-                resourceDescription: 'Unknown',
-              };
-            }
-          })
-        );
+        // // Fetch resource details
+        // const resourceDetails = await Promise.all(
+        //   uniqueResourceGroups.map(async (resourceGroupId) => {
+        //     try {
+        //       const resourceResponse = await axios.get(
+        //         `${envurls.ugixServer}cat/v1/item?id=${resourceGroupId}`
+        //       );
+        //       return {
+        //         resourceGroupId,
+        //         resourceLabel: resourceResponse.data.results[0].label,
+        //         resourceDescription:
+        //           resourceResponse.data.results[0].description,
+        //       };
+        //     } catch (error) {
+        //       console.error(
+        //         `Error fetching resource details for ID: ${resourceGroupId}`,
+        //         error
+        //       );
+        //       return {
+        //         resourceGroupId,
+        //         resourceLabel: 'Unknown',
+        //         resourceDescription: 'Unknown',
+        //       };
+        //     }
+        //   })
+        // );
 
-        // check download available
-        const downloadCollections = await Promise.all(
-          uniqueResourceIds.map(async (resourceId) => {
-            try {
-              const downlaodResponse = await axios.get(
-                `${envurls.ugixOgcServer}collections/${resourceId}`
-              );
-              const isDownloadEnabled =
-                downlaodResponse.data.links.some(
-                  (link: { rel: string }) => link.rel === 'enclosure'
-                ) || false;
-              return { resourceId, isDownloadEnabled };
-            } catch (error) {
-              console.error('Failed to get links', error);
-              return { resourceId, isDownloadEnabled: false };
-            }
-          })
-        );
-        console.log(downloadCollections);
-        // Map provider names and resource details to dictionaries for quick lookup
-        const providerNameMap = providerNames.reduce(
-          (acc, { providerId, providerName }) => {
-            acc[providerId as string] = providerName;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+        // // check download available
+        // const downloadCollections = await Promise.all(
+        //   uniqueResourceIds.map(async (resourceId) => {
+        //     try {
+        //       const downlaodResponse = await axios.get(
+        //         `${envurls.ugixOgcServer}collections/${resourceId}`
+        //       );
+        //       const isDownloadEnabled =
+        //         downlaodResponse.data.links.some(
+        //           (link: { rel: string }) => link.rel === 'enclosure'
+        //         ) || false;
+        //       return { resourceId, isDownloadEnabled };
+        //     } catch (error) {
+        //       console.error('Failed to get links', error);
+        //       return { resourceId, isDownloadEnabled: false };
+        //     }
+        //   })
+        // );
+        // console.log(downloadCollections);
+        // // Map provider names and resource details to dictionaries for quick lookup
+        // const providerNameMap = providerNames.reduce(
+        //   (acc, { providerId, providerName }) => {
+        //     acc[providerId as string] = providerName;
+        //     return acc;
+        //   },
+        //   {} as Record<string, string>
+        // );
 
-        const resourceDetailMap = resourceDetails.reduce(
-          (acc, { resourceGroupId, resourceLabel, resourceDescription }) => {
-            acc[resourceGroupId as string] = {
-              resourceLabel,
-              resourceDescription,
-            };
-            return acc;
-          },
-          {} as Record<
-            string,
-            { resourceLabel: string; resourceDescription: string }
-          >
-        );
+        // const resourceDetailMap = resourceDetails.reduce(
+        //   (acc, { resourceGroupId, resourceLabel, resourceDescription }) => {
+        //     acc[resourceGroupId as string] = {
+        //       resourceLabel,
+        //       resourceDescription,
+        //     };
+        //     return acc;
+        //   },
+        //   {} as Record<
+        //     string,
+        //     { resourceLabel: string; resourceDescription: string }
+        //   >
+        // );
 
-        const downloadEnabledMap = downloadCollections.reduce(
-          (acc, { resourceId, isDownloadEnabled }) => {
-            acc[resourceId as string] = isDownloadEnabled;
-            return acc;
-          },
-          {} as Record<string, boolean>
-        );
+        // const downloadEnabledMap = downloadCollections.reduce(
+        //   (acc, { resourceId, isDownloadEnabled }) => {
+        //     acc[resourceId as string] = isDownloadEnabled;
+        //     return acc;
+        //   },
+        //   {} as Record<string, boolean>
+        // );
 
-        // Update allResources with providerName, resourceLabel, and resourceDescription
-        const updatedResources = resources.map((resource: Resource) => ({
-          ...resource,
-          providerName: providerNameMap[resource.provider] || 'Unknown',
-          resourceLabel:
-            resourceDetailMap[resource.resourceGroup]?.resourceLabel ||
-            'Unknown',
-          resourceDescription:
-            resourceDetailMap[resource.resourceGroup]?.resourceDescription ||
-            'Unknown',
-          isDownloadEnabled: downloadEnabledMap[resource.id] || false,
-        }));
+        // // Update allResources with providerName, resourceLabel, and resourceDescription
+        // const updatedResources = resources.map((resource: Resource) => ({
+        //   ...resource,
+        //   providerName: providerNameMap[resource.provider] || 'Unknown',
+        //   resourceLabel:
+        //     resourceDetailMap[resource.resourceGroup]?.resourceLabel ||
+        //     'Unknown',
+        //   resourceDescription:
+        //     resourceDetailMap[resource.resourceGroup]?.resourceDescription ||
+        //     'Unknown',
+        //   isDownloadEnabled: downloadEnabledMap[resource.id] || false,
+        // }));
 
-        setAllResources(updatedResources);
-        renderWishListItems(updatedResources);
+        setAllResources(resources);
+        renderWishListItems(resources);
       } else {
         console.log('No resources found.');
       }

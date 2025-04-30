@@ -43,7 +43,7 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 // @ts-ignore
 import JSZip from 'jszip';
-import { Stroke, Style } from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 // import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
@@ -51,6 +51,7 @@ import STAC from 'ol-stac';
 import STACLayer from 'ol-stac';
 import datas from "../assets/Tile_response copy.txt"
 import ImageLayer from 'ol/layer/Image';
+import Static from 'ol/source/ImageStatic';
 
 type baseLayerTypes =
   | 'terrain'
@@ -149,7 +150,7 @@ const openLayerMap = {
   },
 
   addLayer(
-    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer
+    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer | ImageLayer<ImageStatic>
   ) {
     this.map.addLayer(layer);
   },
@@ -402,7 +403,6 @@ const openLayerMap = {
     let StacLayer: STACLayer = new STAC({
       url: url,
     })
-
     StacLayer.on('sourceready' as unknown as any, () => {
       const view = this.map.getView();
       const extent = StacLayer.getExtent();
@@ -444,22 +444,111 @@ const openLayerMap = {
     this.addLayer(StacLayer);
     return newLayer
   },
+
   createNewStacImageLayer(
     imageUrl: string,
     bbox: [number, number, number, number],
   ) {
-    const layerId = createUniqueId();
     console.log(imageUrl)
-    const imageSource = new ImageStatic({
-      url: imageUrl,
-      imageExtent: bbox,
-      projection: 'EPSG:3857',
-    });
+    try {
+      const layerId = createUniqueId();
 
-    const imageLayer = new ImageLayer({
-      source: imageSource,
-    });
-    console.log(imageLayer)
+      // 1. Create ImageStatic layer
+      // const imageSource = new ImageStatic({
+      //   url: imageUrl,
+      //   imageExtent: bbox,
+      //   projection: 'EPSG:4326',
+      // });
+      // console.log(imageSource)
+      // const imageLayer = new ImageLayer({
+      //   source: imageSource,
+      // });
+
+      const imageLayer = new ImageLayer({
+        source: new Static({
+          url: imageUrl,
+          projection: 'EPSG:4326',
+          imageExtent: bbox
+        })
+      })
+
+      console.log(imageLayer)
+      // 2. Create vector layer for bbox overlay
+      const polygonCoords = [[
+        [bbox[0], bbox[1]],
+        [bbox[0], bbox[3]],
+        [bbox[2], bbox[3]],
+        [bbox[2], bbox[1]],
+        [bbox[0], bbox[1]],
+      ]];
+      const bboxFeature = new Feature({
+        geometry: new Polygon(polygonCoords),
+      });
+
+      bboxFeature.setStyle(new Style({
+        stroke: new Stroke({
+          color: 'blue',
+          width: 2
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 255, 0.1)'
+        })
+      }));
+
+      console.log(bboxFeature)
+
+
+      const layerColor = getRandomColor();
+
+      const vectorLayer = new VectorLayer({
+        source: new VectorSource({
+          features: [bboxFeature]
+        })
+      });
+
+      const view = this.map.getView();
+      view.fit(bbox, { duration: 1000 });
+
+      this.canvasLayers.set(layerId, {
+        layer: imageLayer,
+        // overlay: vectorLayer,
+        layerId,
+        layerName: 'STAC Image',
+        layerType: 'StacLayer',
+        style: createFeatureStyle("transparent"),
+        side: 'middle',
+      });
+
+
+      // 6. Return config object
+      const newLayer = {
+        layerType: 'StacLayer',
+        sourceType: 'image',
+        layerName: 'STAC Image',
+        layerId,
+        ugixLayerId: 'img-' + layerId,
+        ugixGroupId: 'stac-image-group',
+        selected: true,
+        visible: true,
+        isCompleted: true,
+        layerColor,
+        style: createFeatureStyle(layerColor),
+        featureType: 'STAC_IMAGE',
+        fetching: false,
+        editable: true,
+        side: 'middle',
+      };
+      this.addLayer(imageLayer)
+      this.addLayer(vectorLayer);
+      return newLayer;
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  drawBBoxFromApi(
+    bbox: [number, number, number, number]
+  ) {
+    const layerId = createUniqueId(); // Optional if you want to track it
     const polygonCoords = [[
       [bbox[0], bbox[1]],
       [bbox[0], bbox[3]],
@@ -467,6 +556,7 @@ const openLayerMap = {
       [bbox[2], bbox[1]],
       [bbox[0], bbox[1]],
     ]];
+
     const bboxFeature = new Feature({
       geometry: new Polygon(polygonCoords),
     });
@@ -475,51 +565,36 @@ const openLayerMap = {
       features: [bboxFeature],
     });
 
-    const layerColor = getRandomColor();
     const vectorLayer = new VectorLayer({
       source: vectorSource,
-      style: createFeatureStyle(layerColor),
+      style: new Style({
+        // fill: new Fill({
+        //   color: 'rgba(255, 0, 0, 0.3)', // red fill with some opacity
+        // }),
+        stroke: new Stroke({
+          color: 'blue', // blue outline
+          width: 2,
+        }),
+      }),
     });
-
-    // 3. Fit map view to extent
     const view = this.map.getView();
     view.fit(bbox, { duration: 1000 });
+    this.map.addLayer(vectorLayer);
 
-    // 4. Track in canvasLayers (assuming canvasLayers is a Map)
+    // Optional: track it if you're managing layers
     this.canvasLayers.set(layerId, {
-      layer: imageLayer,
-      overlay: vectorLayer,
+      layer: vectorLayer,
       layerId,
-      layerName: 'STAC Image Layer',
-      layerType: 'StacImageLayer',
-      style: createFeatureStyle(layerColor),
+      layerName: 'BBox Layer',
+      layerType: 'BBox',
+      style: {
+        fill: 'red',
+        stroke: 'blue',
+      },
       side: 'middle',
     });
 
-    // 5. Add both layers to the map
-    this.addLayer(imageLayer);
-    this.addLayer(vectorLayer);
-
-    // 6. Return config object
-    const newLayer = {
-      layerType: 'UgixLayer',
-      sourceType: 'image',
-      layerName: 'STAC Image',
-      layerId,
-      ugixLayerId: 'img-' + layerId,
-      ugixGroupId: 'stac-image-group',
-      selected: true,
-      visible: true,
-      isCompleted: true,
-      layerColor,
-      style: createFeatureStyle(layerColor),
-      featureType: 'STAC_IMAGE',
-      fetching: false,
-      editable: false,
-      side: 'middle',
-    };
-
-    return newLayer;
+    return layerId;
   },
 
   createStateTileBoundariesBaseMap(

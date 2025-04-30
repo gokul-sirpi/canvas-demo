@@ -174,7 +174,7 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
           </section>
 
           <div className={styles.feature_tile_container}>
-            <button onClick={PlotStac}>Add Stac</button>
+            {/* <button onClick={PlotStac}>Add Stac</button> */}
             {loading ? (
               <div className={styles.loading_container}>
                 <Loader />

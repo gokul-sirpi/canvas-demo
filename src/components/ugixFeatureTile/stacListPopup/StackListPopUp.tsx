@@ -105,7 +105,7 @@ function StacItemsPopup({
                       onClick={() => handlePreviewStac(item)}
                       disabled={!hasThumbnailAsset(item.assets)}
                     >
-                      Preview Stac
+                      Preview Stack
                     </button>
                   </td>
                   <td className={styles.stac_table_action}>

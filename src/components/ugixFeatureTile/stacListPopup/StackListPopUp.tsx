@@ -1,7 +1,6 @@
 import styles from './styles.module.css';
 import { Resource } from '../../../types/resource';
 import { useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
 import { StacAsset, StacItem } from '../../../types/UgixLayers';
 
 // ✅ Helper function to check for thumbnail role
@@ -24,6 +23,7 @@ function StacItemsPopup({
   stacItems,
   onClose,
   onPlotStac,
+  onPreviewStac,
   setPreviewImageUrl,
 }: {
   resource: Resource;
@@ -33,19 +33,10 @@ function StacItemsPopup({
   onPlotStac: (item: any, bbox: any) => void;
   setPreviewImageUrl: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const handlePreviewStac = (item: StacItem) => {
-    setIsDialogOpen(true);
-    const thumbnailAsset = Object.values(item.assets || {}).find(
-      (asset: any) =>
-        Array.isArray(asset.roles) && asset.roles.includes('thumbnail')
-    );
-
-    if (thumbnailAsset && thumbnailAsset.href) {
-      setPreviewImageUrl(thumbnailAsset.href);
-    }
+    onPreviewStac(item);
   };
+
   const handlePlotStac = (item: StacItem) => {
     const overviewUrl = getOverviewAssetUrl(
       item.assets as unknown as StacAsset
@@ -105,7 +96,7 @@ function StacItemsPopup({
                       onClick={() => handlePreviewStac(item)}
                       disabled={!hasThumbnailAsset(item.assets)}
                     >
-                      Preview Stack
+                      Preview Stac
                     </button>
                   </td>
                   <td className={styles.stac_table_action}>

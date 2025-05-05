@@ -7,7 +7,7 @@ import {
   defaults as defaultControls,
 } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
-import { OGCVectorTile, OSM } from 'ol/source';
+import { ImageStatic, OGCVectorTile, OSM } from 'ol/source';
 import Draw, {
   DrawEvent,
   SketchCoordType,
@@ -43,13 +43,15 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 // @ts-ignore
 import JSZip from 'jszip';
-import { Style } from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 // import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
 import STAC from 'ol-stac';
 import STACLayer from 'ol-stac';
 import datas from "../assets/Tile_response copy.txt"
+import ImageLayer from 'ol/layer/Image';
+import Static from 'ol/source/ImageStatic';
 
 type baseLayerTypes =
   | 'terrain'
@@ -148,7 +150,7 @@ const openLayerMap = {
   },
 
   addLayer(
-    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer
+    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer | ImageLayer<ImageStatic>
   ) {
     this.map.addLayer(layer);
   },
@@ -443,7 +445,157 @@ const openLayerMap = {
     return newLayer
   },
 
+  createNewStacImageLayer(
+    imageUrl: string,
+    bbox: [number, number, number, number],
+  ) {
+    console.log(imageUrl)
+    try {
+      const layerId = createUniqueId();
 
+      // 1. Create ImageStatic layer
+      // const imageSource = new ImageStatic({
+      //   url: imageUrl,
+      //   imageExtent: bbox,
+      //   projection: 'EPSG:4326',
+      // });
+      // console.log(imageSource)
+      // const imageLayer = new ImageLayer({
+      //   source: imageSource,
+      // });
+
+      const imageLayer = new ImageLayer({
+        source: new Static({
+          url: imageUrl,
+          projection: 'EPSG:4326',
+          imageExtent: bbox
+        })
+      })
+
+      console.log(imageLayer)
+      // 2. Create vector layer for bbox overlay
+      const polygonCoords = [[
+        [bbox[0], bbox[1]],
+        [bbox[0], bbox[3]],
+        [bbox[2], bbox[3]],
+        [bbox[2], bbox[1]],
+        [bbox[0], bbox[1]],
+      ]];
+      const bboxFeature = new Feature({
+        geometry: new Polygon(polygonCoords),
+      });
+
+      bboxFeature.setStyle(new Style({
+        stroke: new Stroke({
+          color: 'blue',
+          width: 2
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 255, 0.1)'
+        })
+      }));
+
+      console.log(bboxFeature)
+
+
+      const layerColor = getRandomColor();
+
+      const vectorLayer = new VectorLayer({
+        source: new VectorSource({
+          features: [bboxFeature]
+        })
+      });
+
+      const view = this.map.getView();
+      view.fit(bbox, { duration: 1000 });
+
+      this.canvasLayers.set(layerId, {
+        layer: imageLayer,
+        // overlay: vectorLayer,
+        layerId,
+        layerName: 'STAC Image',
+        layerType: 'StacLayer',
+        style: createFeatureStyle("transparent"),
+        side: 'middle',
+      });
+
+
+      // 6. Return config object
+      const newLayer = {
+        layerType: 'StacLayer',
+        sourceType: 'image',
+        layerName: 'STAC Image',
+        layerId,
+        ugixLayerId: 'img-' + layerId,
+        ugixGroupId: 'stac-image-group',
+        selected: true,
+        visible: true,
+        isCompleted: true,
+        layerColor,
+        style: createFeatureStyle(layerColor),
+        featureType: 'STAC_IMAGE',
+        fetching: false,
+        editable: true,
+        side: 'middle',
+      };
+      this.addLayer(imageLayer)
+      this.addLayer(vectorLayer);
+      return newLayer;
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  drawBBoxFromApi(
+    bbox: [number, number, number, number]
+  ) {
+    const layerId = createUniqueId(); // Optional if you want to track it
+    const polygonCoords = [[
+      [bbox[0], bbox[1]],
+      [bbox[0], bbox[3]],
+      [bbox[2], bbox[3]],
+      [bbox[2], bbox[1]],
+      [bbox[0], bbox[1]],
+    ]];
+
+    const bboxFeature = new Feature({
+      geometry: new Polygon(polygonCoords),
+    });
+
+    const vectorSource = new VectorSource({
+      features: [bboxFeature],
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: new Style({
+        // fill: new Fill({
+        //   color: 'rgba(255, 0, 0, 0.3)', // red fill with some opacity
+        // }),
+        stroke: new Stroke({
+          color: 'blue', // blue outline
+          width: 2,
+        }),
+      }),
+    });
+    const view = this.map.getView();
+    view.fit(bbox, { duration: 1000 });
+    this.map.addLayer(vectorLayer);
+
+    // Optional: track it if you're managing layers
+    this.canvasLayers.set(layerId, {
+      layer: vectorLayer,
+      layerId,
+      layerName: 'BBox Layer',
+      layerType: 'BBox',
+      style: {
+        fill: 'red',
+        stroke: 'blue',
+      },
+      side: 'middle',
+    });
+
+    return layerId;
+  },
 
   createStateTileBoundariesBaseMap(
     serverUrl?: string,

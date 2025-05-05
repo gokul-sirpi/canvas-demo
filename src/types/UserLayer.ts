@@ -2,6 +2,8 @@ import VectorLayer from 'ol/layer/Vector';
 import { FeatureStyle } from './FeatureStyle';
 import VectorSource from 'ol/source/Vector';
 import VectorTileLayer from 'ol/layer/VectorTile';
+import ImageLayer from 'ol/layer/Image';
+import ImageSource from 'ol/source/Image';
 
 export type DrawType =
   | 'Circle'
@@ -29,8 +31,8 @@ export type UserLayer = {
 export type CanvasLayer = {
   layerId: string;
   layerName: string;
-  layerType: 'UserLayer' | 'UgixLayer';
-  layer: VectorLayer<VectorSource> | VectorTileLayer;
+  layerType: 'UserLayer' | 'UgixLayer' | 'StacLayer';
+  layer: VectorLayer<VectorSource> | VectorTileLayer | ImageLayer<ImageSource>;
   style: FeatureStyle;
   side: 'left' | 'right' | 'middle';
 };

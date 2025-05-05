@@ -24,7 +24,8 @@ import axios from 'axios';
 import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
 import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
-import StacItemsPopup from './StackListPopUp';
+import StacItemsPopup from './stacListPopup/StackListPopUp';
+import * as Dialog from '@radix-ui/react-dialog';
 
 function UgixFeatureTile({
   resource,
@@ -41,6 +42,8 @@ function UgixFeatureTile({
   const [stacItems, setStacItems] = useState([]);
   const [showStacPopup, setShowStacPopup] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const ugixResources: string[] = [];
   const canvasLayers = useSelector((state: RootState) => {
     return state.canvasLayer.layers;
@@ -50,8 +53,6 @@ function UgixFeatureTile({
       ugixResources.push(layer.layerId);
     }
   });
-
-  console.log('these are static items', stacItems);
 
   function getinfoLink() {
     const groupId = resource.resourceGroup;
@@ -200,11 +201,7 @@ function UgixFeatureTile({
   }
 
   function toggleExtraButtonDrawer() {
-    if (resource.ogcResourceInfo.ogcResourceAPIs[0] === 'STAC') {
-      handleUgixLayerAddition();
-    } else {
-      setIsExtraBtnVisible(!isExtraBtnVisible);
-    }
+    setIsExtraBtnVisible(!isExtraBtnVisible);
   }
 
   async function plotTiles() {
@@ -247,6 +244,7 @@ function UgixFeatureTile({
   }
 
   async function plotStac() {
+    console.log('Stac');
     setAdding(true);
     dispatch(updateLoadingState(true));
 
@@ -281,51 +279,38 @@ function UgixFeatureTile({
       cleanUpSideEffects();
     }
   }
-  async function handleStacDateDateFilterChange(
-    startISO: string,
-    endISO: string
-  ) {
-    setAdding(true);
-    dispatch(updateLoadingState(true));
+  function handlePreviewStac(item: any) {
+    const thumbnailAsset = Object.values(item.assets || {}).find(
+      (asset: any) =>
+        Array.isArray(asset.roles) && asset.roles.includes('thumbnail')
+    );
 
-    try {
-      // 1. Get server URL and token
-      const serverUrl = await getResourceServerRegURL(resource);
-      const { error, token } = await getAccessToken(resource, serverUrl);
-      if (error) throw new Error('No access to data');
-
-      const url = `https://${serverUrl}/stac/collections/${resource.id}/items`;
-      const { data } = await axios.get(url, {
-        params: {
-          datetime: `${startISO}/${endISO}`,
-          limit: 20,
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // 3. Update list + open popup (if closed)
-      setStacItems(data.features);
-      setShowStacPopup(true);
-    } catch (err: any) {
-      console.error(err);
-      emitToast('error', err.message ?? 'Failed to fetch STAC items');
-    } finally {
-      cleanUpSideEffects();
+    if (
+      thumbnailAsset &&
+      typeof thumbnailAsset === 'object' &&
+      'href' in thumbnailAsset
+    ) {
+      setPreviewImageUrl(thumbnailAsset.href as string);
+      setIsDialogOpen(true);
+    } else {
+      console.warn('No thumbnail found for STAC item:', item);
     }
   }
-  function handlePreviewStac(item: any) {
-    // Implementation for preview stac functionality
-    console.log('Preview STAC item:', item);
-    // Add your preview implementation here
-    emitToast('info', `Previewing STAC item: ${item.id}`);
-  }
-
-  function handlePlotStac(item: any) {
+  function handlePlotStac(
+    imageUrl: string,
+    bbox: [number, number, number, number]
+  ) {
     // Implementation for plot stac functionality
-    console.log('Plot STAC item:', item);
-    // Add your plot implementation here
-    emitToast('info', `Plotting STAC item: ${item.id}`);
+    console.log('Plot STAC item:', imageUrl);
+    // const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
+    // console.log(stac);
+    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox);
+    // dispatch(addCanvasLayer(stac));
+    dispatch(addCanvasLayer(bboxlayer));
+    console.log(bboxlayer, 'jlwefwnjflew');
+    emitToast('info', `Plotting STAC imageUrl: ${imageUrl}`);
     setShowStacPopup(false); // Close popup after plotting
+    dialogCloseTrigger(false);
   }
 
   function closeStacPopup() {
@@ -452,9 +437,36 @@ function UgixFeatureTile({
           onClose={closeStacPopup}
           onPreviewStac={handlePreviewStac}
           onPlotStac={handlePlotStac}
-          handleStacDateDateFilterChange={handleStacDateDateFilterChange}
+          setPreviewImageUrl={setPreviewImageUrl}
         />
       )}
+      <Dialog.Root
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setPreviewImageUrl(null);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className={styles.dialog_overlay} />
+          <Dialog.Content className={styles.dialogContent}>
+            <Dialog.Title className={styles.dialogTitle}>
+              Preview STAC Image
+            </Dialog.Title>
+            <img
+              src={previewImageUrl || ''}
+              alt="Thumbnail"
+              className={styles.previewImage}
+            />
+            <Dialog.Close
+              onClick={() => setIsDialogOpen(false)}
+              className={styles.dialogClose}
+            >
+              ×
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

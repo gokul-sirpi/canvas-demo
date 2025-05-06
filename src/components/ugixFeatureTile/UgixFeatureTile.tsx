@@ -77,7 +77,7 @@ function UgixFeatureTile({
     if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('VECTOR_TILES')) {
       plotTiles();
     } else if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('STAC')) {
-      plotStac();
+      getStacItems();
     } else {
       setAdding(true);
       dispatch(updateLoadingState(true));
@@ -241,7 +241,7 @@ function UgixFeatureTile({
     }
   }
 
-  async function plotStac() {
+  async function getStacItems() {
     console.log('Stac');
     setAdding(true);
     dispatch(updateLoadingState(true));
@@ -279,26 +279,21 @@ function UgixFeatureTile({
   }
 
   function handlePreviewStac(item: any) {
-    // Implementation for preview stac functionality
     console.log('Preview STAC item:', item);
-    // Add your preview implementation here
-    emitToast('info', `Previewing STAC item: ${item.id}`);
   }
 
   function handlePlotStac(
     imageUrl: string,
     bbox: [number, number, number, number]
   ) {
-    // Implementation for plot stac functionality
     console.log('Plot STAC item:', imageUrl);
     // const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
     // console.log(stac);
-    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox);
+    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox, imageUrl);
     // dispatch(addCanvasLayer(stac));
     dispatch(addCanvasLayer(bboxlayer));
-    console.log(bboxlayer, 'jlwefwnjflew');
-    emitToast('info', `Plotting STAC imageUrl: ${imageUrl}`);
-    setShowStacPopup(false); // Close popup after plotting
+    // console.log(bboxlayer, 'jlwefwnjflew');
+    setShowStacPopup(false);
     dialogCloseTrigger(false);
   }
 

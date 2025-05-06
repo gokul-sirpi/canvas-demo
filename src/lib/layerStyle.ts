@@ -256,3 +256,9 @@ export function markerStyleFunction(iconInd: number) {
     }),
   });
 }
+
+export function BboxStyle(color: string) {
+  return new Style({
+
+  })
+}

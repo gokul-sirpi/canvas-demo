@@ -453,17 +453,6 @@ const openLayerMap = {
     try {
       const layerId = createUniqueId();
 
-      // 1. Create ImageStatic layer
-      // const imageSource = new ImageStatic({
-      //   url: imageUrl,
-      //   imageExtent: bbox,
-      //   projection: 'EPSG:4326',
-      // });
-      // console.log(imageSource)
-      // const imageLayer = new ImageLayer({
-      //   source: imageSource,
-      // });
-
       const imageLayer = new ImageLayer({
         source: new Static({
           url: imageUrl,
@@ -473,38 +462,7 @@ const openLayerMap = {
       })
 
       console.log(imageLayer)
-      // 2. Create vector layer for bbox overlay
-      const polygonCoords = [[
-        [bbox[0], bbox[1]],
-        [bbox[0], bbox[3]],
-        [bbox[2], bbox[3]],
-        [bbox[2], bbox[1]],
-        [bbox[0], bbox[1]],
-      ]];
-      const bboxFeature = new Feature({
-        geometry: new Polygon(polygonCoords),
-      });
 
-      bboxFeature.setStyle(new Style({
-        stroke: new Stroke({
-          color: 'blue',
-          width: 2
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 0, 255, 0.1)'
-        })
-      }));
-
-      console.log(bboxFeature)
-
-
-      const layerColor = getRandomColor();
-
-      const vectorLayer = new VectorLayer({
-        source: new VectorSource({
-          features: [bboxFeature]
-        })
-      });
 
       const view = this.map.getView();
       view.fit(bbox, { duration: 1000 });
@@ -531,24 +489,23 @@ const openLayerMap = {
         selected: true,
         visible: true,
         isCompleted: true,
-        layerColor,
-        style: createFeatureStyle(layerColor),
         featureType: 'STAC_IMAGE',
         fetching: false,
         editable: true,
         side: 'middle',
       };
       this.addLayer(imageLayer)
-      this.addLayer(vectorLayer);
+
       return newLayer;
     } catch (error) {
       console.log(error)
     }
   },
   drawBBoxFromApi(
-    bbox: [number, number, number, number]
+    bbox: [number, number, number, number],
+    imageUrl: string
   ) {
-    const layerId = createUniqueId(); // Optional if you want to track it
+    const layerId = createUniqueId();
     const polygonCoords = [[
       [bbox[0], bbox[1]],
       [bbox[0], bbox[3]],
@@ -564,15 +521,16 @@ const openLayerMap = {
     const vectorSource = new VectorSource({
       features: [bboxFeature],
     });
+    const layerColor = getRandomColor()
 
     const vectorLayer = new VectorLayer({
       source: vectorSource,
       style: new Style({
-        // fill: new Fill({
-        //   color: 'rgba(255, 0, 0, 0.3)', // red fill with some opacity
-        // }),
+        fill: new Fill({
+          color: layerColor,
+        }),
         stroke: new Stroke({
-          color: 'blue', // blue outline
+          color: layerColor,
           width: 2,
         }),
       }),
@@ -581,19 +539,14 @@ const openLayerMap = {
     view.fit(bbox, { duration: 1000 });
     this.map.addLayer(vectorLayer);
 
-    // Optional: track it if you're managing layers
     this.canvasLayers.set(layerId, {
       layer: vectorLayer,
       layerId,
-      layerName: 'BBox Layer',
-      layerType: 'BBox',
-      style: {
-        fill: 'red',
-        stroke: 'blue',
-      },
+      layerName: imageUrl,
+      layerType: 'UserLayer',
+      style: createFeatureStyle(layerColor),
       side: 'middle',
     });
-
     return layerId;
   },
 

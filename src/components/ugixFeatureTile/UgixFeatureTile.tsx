@@ -25,6 +25,7 @@ import { RootState } from '../../context/store';
 import { getProviderIcon } from '../../assets/providerIcons';
 import getResourceServerRegURL from '../../utils/ResourceServerRegURL';
 import StacItemsPopup from './stacListPopup/StackListPopUp';
+import * as Dialog from '@radix-ui/react-dialog';
 
 function UgixFeatureTile({
   resource,
@@ -41,6 +42,8 @@ function UgixFeatureTile({
   const [stacItems, setStacItems] = useState([]);
   const [showStacPopup, setShowStacPopup] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const ugixResources: string[] = [];
   const canvasLayers = useSelector((state: RootState) => {
     return state.canvasLayer.layers;
@@ -50,7 +53,6 @@ function UgixFeatureTile({
       ugixResources.push(layer.layerId);
     }
   });
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   function getinfoLink() {
     const groupId = resource.resourceGroup;
@@ -277,11 +279,23 @@ function UgixFeatureTile({
       cleanUpSideEffects();
     }
   }
-
   function handlePreviewStac(item: any) {
-    console.log('Preview STAC item:', item);
-  }
+    const thumbnailAsset = Object.values(item.assets || {}).find(
+      (asset: any) =>
+        Array.isArray(asset.roles) && asset.roles.includes('thumbnail')
+    );
 
+    if (
+      thumbnailAsset &&
+      typeof thumbnailAsset === 'object' &&
+      'href' in thumbnailAsset
+    ) {
+      setPreviewImageUrl(thumbnailAsset.href as string);
+      setIsDialogOpen(true);
+    } else {
+      console.warn('No thumbnail found for STAC item:', item);
+    }
+  }
   function handlePlotStac(
     imageUrl: string,
     bbox: [number, number, number, number]
@@ -424,6 +438,33 @@ function UgixFeatureTile({
           setPreviewImageUrl={setPreviewImageUrl}
         />
       )}
+      <Dialog.Root
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setPreviewImageUrl(null);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className={styles.dialog_overlay} />
+          <Dialog.Content className={styles.dialogContent}>
+            <Dialog.Title className={styles.dialogTitle}>
+              Preview STAC Image
+            </Dialog.Title>
+            <img
+              src={previewImageUrl || ''}
+              alt="Thumbnail"
+              className={styles.previewImage}
+            />
+            <Dialog.Close
+              onClick={() => setIsDialogOpen(false)}
+              className={styles.dialogClose}
+            >
+              ×
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

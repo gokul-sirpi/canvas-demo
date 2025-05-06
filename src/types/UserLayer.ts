@@ -2,6 +2,10 @@ import VectorLayer from 'ol/layer/Vector';
 import { FeatureStyle } from './FeatureStyle';
 import VectorSource from 'ol/source/Vector';
 import VectorTileLayer from 'ol/layer/VectorTile';
+import ImageLayer from 'ol/layer/Image';
+import ImageSource from 'ol/source/Image';
+import { Feature } from 'ol';
+import { Polygon } from 'ol/geom';
 
 export type DrawType =
   | 'Circle'
@@ -29,8 +33,8 @@ export type UserLayer = {
 export type CanvasLayer = {
   layerId: string;
   layerName: string;
-  layerType: 'UserLayer' | 'UgixLayer';
-  layer: VectorLayer<VectorSource> | VectorTileLayer;
+  layerType: 'UserLayer' | 'UgixLayer' | 'StacLayer';
+  layer: VectorLayer<VectorSource> | VectorTileLayer | ImageLayer<ImageSource> | VectorLayer<VectorSource<Feature<Polygon>>>
   style: FeatureStyle;
   side: 'left' | 'right' | 'middle';
 };

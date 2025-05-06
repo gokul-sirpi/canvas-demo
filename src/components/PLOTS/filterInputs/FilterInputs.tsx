@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
-// import { plotResource } from '../../../types/plotResource';
 import { camelCaseToSpaceSeparated } from '../../../utils/CamelCaseToSpaceSeparated';
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../../context/loading/LoaderSlice';
+import { canDrillDown } from '../../../utils/drill-down-analyzer';
 
 export default function FilterInputs({
   dynamicValues,
@@ -12,8 +12,6 @@ export default function FilterInputs({
   dataforPlot,
   setFilteredDataForPlot,
   onFilterChange,
-  // allResources,
-  // activeResource,
 }: {
   dynamicValues: string[];
   SetFilterDates: React.Dispatch<
@@ -27,20 +25,18 @@ export default function FilterInputs({
     endDate: string;
   };
   dataforPlot: Object[];
-
   setFilteredDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
   onFilterChange: (startDate: string, endDate: string) => void;
-  // allResources: plotResource[];
-  // activeResource: plotResource | null;
 }) {
   const dispatch = useDispatch();
 
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
-    {}
-  );
-  const [filteredOptions, setFilteredOptions] = useState<
-    Record<string, string[]>
-  >({});
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
+  const [filteredOptions, setFilteredOptions] = useState<Record<string, string[]>>({});
+  const [hasShownAlert, setHasShownAlert] = useState<string>('');
+  const [drillDownResult, setDrillDownResult] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedXLevels, setSelectedXLevels] = useState<string[]>([]);
+  const [selectedYMetric, setSelectedYMetric] = useState<string>('');
 
   // Helper function to format date to the desired format
   const formatToCustomISOString = (dateString: string) => {
@@ -48,9 +44,7 @@ export default function FilterInputs({
     return date.toISOString().replace('Z', '+00:00');
   };
 
-  const handleStartDateChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const formattedDate = formatToCustomISOString(event.target.value);
     SetFilterDates((prev) => ({
       ...prev,
@@ -74,7 +68,6 @@ export default function FilterInputs({
   // Function to update options for the dropdown based on current selections
   const updateFilteredOptions = (currentData: Object[]) => {
     dispatch(updateLoadingState(true));
-
     const newOptions: Record<string, string[]> = {};
     dynamicValues.forEach((key) => {
       newOptions[key] = Array.from(
@@ -88,9 +81,6 @@ export default function FilterInputs({
 
   // Handle select change for any dropdown
   const handleSelectChange = (key: string, value: string) => {
-    // dispatch(updateLoadingState(true));
-    // await new Promise((resolve) => setTimeout(resolve, 500));
-
     const updatedSelectedValues = { ...selectedValues, [key]: value };
     setSelectedValues(updatedSelectedValues);
     const filteredData = dataforPlot.filter((item) =>
@@ -100,19 +90,63 @@ export default function FilterInputs({
           selectedValue === '' || item[selectedKey] === selectedValue
       )
     );
-
-    console.log(filteredData, 'fildata');
-
     updateFilteredOptions(filteredData as []);
     setFilteredDataForPlot(filteredData as []);
     dispatch(updateLoadingState(false));
   };
 
+  // Run drill-down analysis when dataforPlot changes
+  useEffect(() => {
+    if (dataforPlot && dataforPlot.length > 0) {
+      const dataKey = JSON.stringify(dataforPlot.slice(0, 1));
+      if (hasShownAlert !== dataKey) {
+        const result = canDrillDown(dataforPlot);
+        setDrillDownResult(result);
+        const message = result.drillDownPossible
+          ? 'Drill-Down Capable: YES ✅'
+          : `Drill-Down Capable: NO ❌ (Reason: ${result.reason})`;
+        alert(message);
+        setHasShownAlert(dataKey);
+      }
+    } else {
+      setDrillDownResult(null);
+    }
+  }, [dataforPlot, hasShownAlert]);
+
   useEffect(() => {
     updateFilteredOptions(dataforPlot);
   }, [dataforPlot]);
 
-  // console.log(filteredOptions);
+  // Handle X-axis level selection
+  const handleXLevelChange = (fieldName: string) => {
+    setSelectedXLevels((prev) =>
+      prev.includes(fieldName)
+        ? prev.filter((f) => f !== fieldName)
+        : [...prev, fieldName]
+    );
+  };
+
+  // Handle Y-axis metric selection
+  const handleYMetricChange = (fieldName: string) => {
+    setSelectedYMetric(fieldName);
+  };
+
+  // Handle dialog confirmation
+  const handleConfirm = () => {
+    // Optionally pass selections to parent component via a new prop if needed
+    console.log('Selected X-Axis Levels:', selectedXLevels);
+    console.log('Selected Y-Axis Metric:', selectedYMetric);
+    setIsDialogOpen(false);
+  };
+
+  // Handle dialog cancellation
+  const handleCancel = () => {
+    setSelectedXLevels([]);
+    setSelectedYMetric('');
+    setIsDialogOpen(false);
+  };
+
+  console.log("drilldownresult variable", drillDownResult)
 
   return (
     <div className={styles.container}>
@@ -140,9 +174,7 @@ export default function FilterInputs({
           </div>
         </div>
         <button
-          onClick={() =>
-            onFilterChange(filterDates.startDate, filterDates.endDate)
-          }
+          onClick={() => onFilterChange(filterDates.startDate, filterDates.endDate)}
           className={styles.date_submit_button}
         >
           Submit
@@ -158,10 +190,7 @@ export default function FilterInputs({
               value={selectedValues[key] || ''}
               onChange={(e) => handleSelectChange(key, e.target.value)}
             >
-              <option
-                value=""
-                onClick={() => updateFilteredOptions(dataforPlot)}
-              >
+              <option value="" onClick={() => updateFilteredOptions(dataforPlot)}>
                 All
               </option>
               {filteredOptions[key]?.map((value) => (
@@ -172,7 +201,6 @@ export default function FilterInputs({
             </select>
           </div>
         ))}
-
         <div>
           <button
             onClick={() => {
@@ -187,7 +215,71 @@ export default function FilterInputs({
         </div>
       </div>
 
-      {/* <button>Info</button> */}
+      {/* Drill-Down Configuration Button */}
+      <div className={styles.drill_down_container}>
+        <button
+          className={styles.drill_down_button}
+          onClick={() => setIsDialogOpen(true)}
+          disabled={!drillDownResult?.drillDownPossible}
+          title={
+            !drillDownResult?.drillDownPossible
+              ? drillDownResult?.reason || 'Drill-down not possible'
+              : 'Configure drill-down settings'
+          }
+        >
+          Configure Drill-Down
+        </button>
+      </div>
+
+      {/* Drill-Down Dialog */}
+      {isDialogOpen && (
+        <div className={styles.dialog_overlay}>
+          <div className={styles.dialog}>
+            <h2>Drill-Down Configuration</h2>
+            <div className={styles.dialog_content}>
+              <h3>X-Axis Drill-Down Levels</h3>
+              <p>Select one or more levels:</p>
+              {drillDownResult?.drillDownLevels?.map((level: any) => (
+                <label key={level.fieldName} className={styles.checkbox_label}>
+                  <input
+                    type="checkbox"
+                    checked={selectedXLevels.includes(level.fieldName)}
+                    onChange={() => handleXLevelChange(level.fieldName)}
+                  />
+                  {level.displayName} ({level.uniqueValues} unique values)
+                </label>
+              ))}
+
+              <h3>Y-Axis Metric</h3>
+              <p>Select one metric:</p>
+              {drillDownResult?.bestMetrics?.map((metric: any) => (
+                <label key={metric.fieldName} className={styles.radio_label}>
+                  <input
+                    type="radio"
+                    name="yMetric"
+                    value={metric.fieldName}
+                    checked={selectedYMetric === metric.fieldName}
+                    onChange={() => handleYMetricChange(metric.fieldName)}
+                  />
+                  {metric.displayName}
+                </label>
+              ))}
+            </div>
+            <div className={styles.dialog_actions}>
+              <button onClick={handleCancel} className={styles.cancel_button}>
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className={styles.confirm_button}
+                disabled={!selectedYMetric}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

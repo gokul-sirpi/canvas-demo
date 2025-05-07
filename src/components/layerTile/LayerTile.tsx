@@ -75,6 +75,7 @@ function LayerTile({
   }
 
   function completeLayerCreation() {
+    console.log(layer, 'Layer');
     openLayerMap.removeDrawInteraction();
     dispatch(updateDrawingTool('None'));
     let layerName = layerNameRef.current?.value;

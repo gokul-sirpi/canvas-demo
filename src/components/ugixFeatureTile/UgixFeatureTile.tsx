@@ -345,7 +345,8 @@ function UgixFeatureTile({
             className={styles.extra_button_container}
             data-visible={isExtraBtnVisible}
           >
-            {resource.ogcResourceInfo.ogcResourceAPIs[0] !== 'STAC' ? (
+            {resource?.ogcResourceInfo?.ogcResourceAPIs &&
+            resource?.ogcResourceInfo?.ogcResourceAPIs[0] !== 'STAC' ? (
               <>
                 <button
                   className={styles.extra_button}

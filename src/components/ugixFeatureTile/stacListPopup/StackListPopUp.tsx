@@ -24,7 +24,6 @@ function StacItemsPopup({
   onClose,
   onPlotStac,
   onPreviewStac,
-  setPreviewImageUrl,
 }: {
   resource: Resource;
   stacItems: any[];

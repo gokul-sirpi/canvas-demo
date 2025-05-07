@@ -25,7 +25,9 @@ export const canvasLayerSlice = createSlice({
       action: PayloadAction<{ index: number; id: number }>
     ) {
       const { index, id } = action.payload;
-      state.layers[index].style['marker-id'] = id;
+      if (state.layers[index] && state.layers[index].style) {
+        state.layers[index].style['marker-id'] = id;
+      }
     },
     deleteCanvasLayer(state, { payload }) {
       state.layers = state.layers.filter((layer) => {

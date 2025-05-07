@@ -44,8 +44,8 @@ function App() {
     setFavicon(faviconUrl);
     if (isRun.current) return;
     isRun.current = true;
-    setLoggedIn(true);
-    // initialiseKeycloak();
+    // setLoggedIn(true);
+    initialiseKeycloak();
   }, []);
 
   function initialiseKeycloak() {

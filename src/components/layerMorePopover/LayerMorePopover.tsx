@@ -22,11 +22,11 @@ import { toast } from 'react-toastify';
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
-  console.log('layer', layer);
-  console.log('typeof layer', typeof layer);
-  console.log('Object.keys(layer)', Object.keys(layer));
+  // console.log('layer', layer);
+  // console.log('typeof layer', typeof layer);
+  // console.log('Object.keys(layer)', Object.keys(layer));
   function deleteLayer() {
-    console.log('delete layer', layer.layerId);
+    // console.log('delete layer', layer.layerId);
 
     dispatch(deleteCanvasLayer(layer.layerId));
     if (layer.layerType === 'UgixLayer') {
@@ -85,6 +85,10 @@ function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
       return;
     }
 
+    if (l.sourceType === 'raster') {
+    }
+
+    // console.log(layer);
     const geojsonData = openLayerMap.createGeojsonFromLayer(layer.layerId);
     const file = new Blob([JSON.stringify(geojsonData)], {
       type: 'text/json;charset=utf-8',

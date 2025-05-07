@@ -14,7 +14,7 @@ export type DrawType =
   | 'Polygon'
   | 'Measure'
   | 'Line'
-  | 'GeometryCollection';
+  | 'GeometryCollection' | 'Static' | 'raster';
 
 export type UserLayer = {
   readonly layerType: 'UserLayer';
@@ -35,10 +35,10 @@ export type CanvasLayer = {
   layerName: string;
   layerType: 'UserLayer' | 'UgixLayer' | 'StacLayer' | 'BBoxLayer';
   layer:
-    | VectorLayer<VectorSource>
-    | VectorTileLayer
-    | ImageLayer<ImageSource>
-    | VectorLayer<VectorSource<Feature<Polygon>>>;
+  | VectorLayer<VectorSource>
+  | VectorTileLayer
+  | ImageLayer<ImageSource>
+  | VectorLayer<VectorSource<Feature<Polygon>>>;
   style: FeatureStyle;
   side: 'left' | 'right' | 'middle';
 };

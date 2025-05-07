@@ -170,7 +170,7 @@ function LayerTile({
                       layer={layer}
                     />
                   </>
-                ) : (
+                ) : layer.featureType === 'Static' ? null : (
                   <div className={styles.color_picker_container}>
                     <input
                       disabled={!isTile}

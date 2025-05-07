@@ -35,7 +35,7 @@ import {
 } from './layerStyle';
 import { UgixLayer } from '../types/UgixLayers';
 import { getArea, getDistance, getLength } from 'ol/sphere.js';
-import { circular } from 'ol/geom/Polygon';
+import { circular, fromExtent } from 'ol/geom/Polygon';
 import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
 import VectorImageLayer from 'ol/layer/VectorImage';
@@ -43,13 +43,9 @@ import { FeatureStyle } from '../types/FeatureStyle';
 import { Type as GeometryType } from 'ol/geom/Geometry';
 // @ts-ignore
 import JSZip from 'jszip';
-import { Fill, Stroke, Style } from 'ol/style';
 import { getRenderPixel } from 'ol/render';
 // import envurls from '../utils/config';
 import { createEmpty } from 'ol/extent';
-import STAC from 'ol-stac';
-import STACLayer from 'ol-stac';
-import datas from '../assets/Tile_response copy.txt';
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
 
@@ -139,12 +135,13 @@ const openLayerMap = {
     if (this.latestLayer) {
       const layerId = this.latestLayer.layerId;
       const source = this.getLayer(layerId)?.getSource();
-      if (source) {
-        const featureLength = source.getFeatures().length;
-        if (featureLength === 0) {
+      if (this.latestLayer?.layerType === 'UserLayer' && source?.getFeatures) {
+        const features = source.getFeatures();
+        if (features.length === 0) {
           this.removeLayer(layerId);
         }
       }
+
     }
   },
 
@@ -457,13 +454,20 @@ const openLayerMap = {
 
   createNewStacImageLayer(
     imageUrl: string,
-    bbox: [number, number, number, number]
+    bbox: [number, number, number, number],
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string,
   ) {
     console.log(imageUrl);
+
     try {
       const layerId = createUniqueId();
       const projection = this.map.getView().getProjection();
-
+      sessionStorage.setItem(
+        layerId + '-extent',
+        JSON.stringify(bbox)
+      );
       const newImageLayer = new ImageLayer({
         source: new Static({
           url: imageUrl,
@@ -479,13 +483,14 @@ const openLayerMap = {
         padding: [100, 100, 100, 100],
         duration: 1000,
       });
+      // @ts-ignore
       const newLayer: UgixLayer = {
         layerType: 'UgixLayer',
         sourceType: 'raster',
-        layerName: 'STAC Image',
+        layerName: layerName,
         layerId,
-        ugixLayerId: 'r34k3mm3kl33',
-        ugixGroupId: 'vfjefnrjv4r3',
+        ugixLayerId: ugixId,
+        ugixGroupId: ugixGroupId,
         selected: true,
         visible: true,
         isCompleted: true,
@@ -498,7 +503,7 @@ const openLayerMap = {
       this.canvasLayers.set(layerId, {
         layer: newImageLayer,
         layerId,
-        layerName: imageUrl + Math.random(),
+        layerName,
         layerType: 'UgixLayer',
         style: createFeatureStyle('transparent'),
         side: 'middle',
@@ -512,146 +517,62 @@ const openLayerMap = {
     }
   },
 
-  drawBBoxFromApi(bbox: [number, number, number, number], imageUrl: string) {
-    console.log(bbox, imageUrl);
+
+  drawBBoxFromApi(
+    bbox: [number, number, number, number],
+    layerName: string,
+    ugixId: string,
+    ugixGroupId: string
+  ) {
+    const layerColor = getRandomColor()
     const layerId = createUniqueId();
-
-    const polygonCoords = [
-      [
-        [bbox[0], bbox[1]],
-        [bbox[0], bbox[3]],
-        [bbox[2], bbox[3]],
-        [bbox[2], bbox[1]],
-        [bbox[0], bbox[1]],
-      ],
-    ];
-
-    const bboxFeature = new Feature({
-      geometry: new Polygon(polygonCoords),
+    const vectorSource = new VectorSource<Feature<Geometry>>({
+      features: [
+        new Feature(
+          fromExtent(bbox)
+        )
+      ]
     });
-
-    const vectorSource = new VectorSource({
-      features: [bboxFeature],
-    });
-
-    const layerColor = getRandomColor();
-    const featureStyleObj = createFeatureStyle(layerColor);
-
-    const vectorLayer = new VectorLayer({
+    const newVectorLayer = new VectorLayer<VectorSource<Feature<Geometry>>>({
       source: vectorSource,
-      style: (feature) => {
-        const type = feature.getGeometry()?.getType();
-        if (!type) return;
-        return featureUniqueStyle(
-          type,
-          featureStyleObj.stroke,
-          featureStyleObj.fill,
-          featureStyleObj['stroke-opacity'],
-          featureStyleObj['stroke-width'],
-          featureStyleObj['fill-opacity'],
-          featureStyleObj['marker-id']
-        );
-      },
+      style: (feature) => styleFunction(feature, layerColor),
     });
+    newVectorLayer.set('layer-id', layerId)
+    let view = this.map.getView();
 
-    vectorLayer.set('layerId', layerId);
-    vectorLayer.set('hover', false);
-
-    const view = this.map.getView();
-    view.fit(bbox, { duration: 1000 });
-    this.map.addLayer(vectorLayer);
-
-    const newLayer = {
+    view.fit(bbox, {
+      padding: [100, 100, 100, 100],
+      duration: 500,
+    });
+    const newLayer: UgixLayer = {
+      layerType: 'UgixLayer',
+      sourceType: 'json',
+      layerName: layerName,
       layerId,
-      layerName: 'bbox layer',
-      layerType: 'BBoxLayer',
-      sourceType: 'bbox-api',
-      visible: true,
+      ugixLayerId: ugixId,
+      ugixGroupId: ugixGroupId,
       selected: true,
+      visible: true,
       isCompleted: true,
       layerColor,
-      editable: true,
+      style: createFeatureStyle(layerColor),
+      featureType: "Polygon",
       fetching: false,
-      featureType: 'Polygon',
+      editable: true,
       side: 'middle',
     };
-
     this.canvasLayers.set(layerId, {
-      layer: vectorLayer,
+      layer: newVectorLayer,
       layerId,
-      layerName: imageUrl,
-      layerType: 'BBoxLayer',
-      style: featureStyleObj,
+      layerName,
+      layerType: 'UgixLayer',
+      style: createFeatureStyle(layerColor),
       side: 'middle',
     });
-
-    // Optionally: store this.latestLayer = newLayer;
+    this.addLayer(newVectorLayer);
     this.latestLayer = newLayer;
-
-    console.log('BBox layer added:', newLayer);
-
     return newLayer;
   },
-
-  // drawBBoxFromApi(bbox: [number, number, number, number], imageUrl: string) {
-  //   console.log(bbox, imageUrl);
-  //   const layerId = createUniqueId();
-  //   const polygonCoords = [
-  //     [
-  //       [bbox[0], bbox[1]],
-  //       [bbox[0], bbox[3]],
-  //       [bbox[2], bbox[3]],
-  //       [bbox[2], bbox[1]],
-  //       [bbox[0], bbox[1]],
-  //     ],
-  //   ];
-
-  //   const bboxFeature = new Feature({
-  //     geometry: new Polygon(polygonCoords),
-  //   });
-
-  //   const vectorSource = new VectorSource({
-  //     features: [bboxFeature],
-  //   });
-
-  //   const layerColor = getRandomColor();
-  //   const featureStyleObj = createFeatureStyle(layerColor);
-
-  //   const vectorLayer = new VectorLayer({
-  //     source: vectorSource,
-  //     style: (feature) => {
-  //       const type = feature.getGeometry()?.getType();
-  //       if (!type) return;
-  //       return featureUniqueStyle(
-  //         type,
-  //         featureStyleObj.stroke,
-  //         featureStyleObj.fill,
-  //         featureStyleObj['stroke-opacity'],
-  //         featureStyleObj['stroke-width'],
-  //         featureStyleObj['fill-opacity'],
-  //         featureStyleObj['marker-id']
-  //       );
-  //     },
-  //   });
-
-  //   vectorLayer.set('hover', false);
-
-  //   const view = this.map.getView();
-  //   view.fit(bbox, { duration: 1000 });
-  //   this.map.addLayer(vectorLayer);
-
-  //   this.canvasLayers.set(layerId, {
-  //     layer: vectorLayer,
-  //     layerId,
-  //     layerName: imageUrl,
-  //     layerType: 'UserLayer',
-  //     style: featureStyleObj,
-  //     side: 'middle',
-  //   });
-
-  //   console.log(layerId, 'layerId');
-  //   return layerId;
-  // },
 
   createStateTileBoundariesBaseMap(
     serverUrl?: string,

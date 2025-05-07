@@ -126,13 +126,13 @@ function BrowseDataDialog({ resourceList }: { resourceList: Resource[] }) {
   //   });
   //   setResources(filtered);
   // };
-  function PlotStac() {
-    let url =
-      'https://s3.us-west-2.amazonaws.com/sentinel-cogs/sentinel-s2-l2a-cogs/10/T/ES/2022/7/S2A_10TES_20220726_0_L2A/S2A_10TES_20220726_0_L2A.json';
-    const stac = openLayerMap.createNewStacLayer(url);
-    dispatch(addCanvasLayer(stac));
-    setIsDialogOpen(false);
-  }
+  // function PlotStac() {
+  //   let url =
+  //     'https://s3.us-west-2.amazonaws.com/sentinel-cogs/sentinel-s2-l2a-cogs/10/T/ES/2022/7/S2A_10TES_20220726_0_L2A/S2A_10TES_20220726_0_L2A.json';
+  //   const stac = openLayerMap.createNewStacLayer(url);
+  //   dispatch(addCanvasLayer(stac));
+  //   setIsDialogOpen(false);
+  // }
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger asChild>

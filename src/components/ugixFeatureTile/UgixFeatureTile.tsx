@@ -268,7 +268,7 @@ function UgixFeatureTile({
 
         console.log(items.data.features, 'STAC items fetched');
         setStacItems(items.data.features);
-        setShowStacPopup(true); // Show popup when data is fetched
+        setShowStacPopup(true);
         cleanUpSideEffects();
       } else {
         throw new Error('Failed to fetch STAC collection');
@@ -301,11 +301,11 @@ function UgixFeatureTile({
     bbox: [number, number, number, number]
   ) {
     console.log('Plot STAC item:', imageUrl);
-    // const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
-    // console.log(stac);
-    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox, imageUrl);
-    // dispatch(addCanvasLayer(stac));
-    dispatch(addCanvasLayer(bboxlayer));
+    const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
+    console.log(stac);
+    // const bboxlayer = openLayerMap.drawBBoxFromApi(bbox, imageUrl);
+    dispatch(addCanvasLayer(stac));
+    // dispatch(addCanvasLayer(bboxlayer));
     // console.log(bboxlayer, 'jlwefwnjflew');
     setShowStacPopup(false);
     dialogCloseTrigger(false);
@@ -345,7 +345,8 @@ function UgixFeatureTile({
             className={styles.extra_button_container}
             data-visible={isExtraBtnVisible}
           >
-            {resource.ogcResourceInfo.ogcResourceAPIs[0] !== 'STAC' ? (
+            {resource?.ogcResourceInfo?.ogcResourceAPIs &&
+            resource?.ogcResourceInfo?.ogcResourceAPIs[0] !== 'STAC' ? (
               <>
                 <button
                   className={styles.extra_button}

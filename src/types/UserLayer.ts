@@ -33,8 +33,12 @@ export type UserLayer = {
 export type CanvasLayer = {
   layerId: string;
   layerName: string;
-  layerType: 'UserLayer' | 'UgixLayer' | 'StacLayer';
-  layer: VectorLayer<VectorSource> | VectorTileLayer | ImageLayer<ImageSource> | VectorLayer<VectorSource<Feature<Polygon>>>
+  layerType: 'UserLayer' | 'UgixLayer' | 'StacLayer' | 'BBoxLayer';
+  layer:
+    | VectorLayer<VectorSource>
+    | VectorTileLayer
+    | ImageLayer<ImageSource>
+    | VectorLayer<VectorSource<Feature<Polygon>>>;
   style: FeatureStyle;
   side: 'left' | 'right' | 'middle';
 };

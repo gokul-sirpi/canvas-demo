@@ -22,13 +22,19 @@ import { toast } from 'react-toastify';
 function LayerMorePopover({ layer }: { layer: UserLayer | UgixLayer }) {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const dispatch = useDispatch();
+  console.log('layer', layer);
+  console.log('typeof layer', typeof layer);
+  console.log('Object.keys(layer)', Object.keys(layer));
   function deleteLayer() {
+    console.log('delete layer', layer.layerId);
+
     dispatch(deleteCanvasLayer(layer.layerId));
     if (layer.layerType === 'UgixLayer') {
       removeCookieFromWishList(layer.ugixLayerId);
     }
     openLayerMap.removeLayer(layer.layerId);
   }
+
   function removeCookieFromWishList(id: string) {
     const cookie = getCookieValue(envurls.catalogueCookie);
     if (cookie) {

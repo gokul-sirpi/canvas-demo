@@ -396,54 +396,54 @@ const openLayerMap = {
   },
 
 
-  createNewStacLayer(
-    url: string,
-  ) {
-    const layerId = createUniqueId();
-    let StacLayer: STACLayer = new STAC({
-      url: url,
-    })
-    StacLayer.on('sourceready' as unknown as any, () => {
-      const view = this.map.getView();
-      const extent = StacLayer.getExtent();
-      if (extent) {
-        view.fit(extent);
-      }
-    })
-    StacLayer.on('layersready' as unknown as any, () => {
-      if (StacLayer.isEmpty()) {
-        alert('No spatial information available in the data source');
-      }
-    });
-    const layerColor = getRandomColor();
-    this.canvasLayers.set(layerId, {
-      layer: StacLayer,
-      layerId,
-      layerName: 'STAC Layer',
-      layerType: 'StacLayer',
-      style: createFeatureStyle('red'),
-      side: 'middle',
-    })
-    const newLayer = {
-      layerType: 'UgixLayer',
-      sourceType: 'tile',
-      layerName: "STAC",
-      layerId,
-      ugixLayerId: "2e2e22e",
-      ugixGroupId: "432322r3w",
-      selected: true,
-      visible: true,
-      isCompleted: true,
-      layerColor,
-      style: createFeatureStyle(layerColor),
-      featureType: "STAC",
-      fetching: false,
-      editable: true,
-      side: 'middle',
-    }
-    this.addLayer(StacLayer);
-    return newLayer
-  },
+  // createNewStacLayer(
+  //   url: string,
+  // ) {
+  //   const layerId = createUniqueId();
+  //   let StacLayer: STACLayer = new STAC({
+  //     url: url,
+  //   })
+  //   StacLayer.on('sourceready' as unknown as any, () => {
+  //     const view = this.map.getView();
+  //     const extent = StacLayer.getExtent();
+  //     if (extent) {
+  //       view.fit(extent);
+  //     }
+  //   })
+  //   StacLayer.on('layersready' as unknown as any, () => {
+  //     if (StacLayer.isEmpty()) {
+  //       alert('No spatial information available in the data source');
+  //     }
+  //   });
+  //   const layerColor = getRandomColor();
+  //   this.canvasLayers.set(layerId, {
+  //     layer: StacLayer,
+  //     layerId,
+  //     layerName: 'STAC Layer',
+  //     layerType: 'StacLayer',
+  //     style: createFeatureStyle('red'),
+  //     side: 'middle',
+  //   })
+  //   const newLayer = {
+  //     layerType: 'UgixLayer',
+  //     sourceType: 'tile',
+  //     layerName: "STAC",
+  //     layerId,
+  //     ugixLayerId: "2e2e22e",
+  //     ugixGroupId: "432322r3w",
+  //     selected: true,
+  //     visible: true,
+  //     isCompleted: true,
+  //     layerColor,
+  //     style: createFeatureStyle(layerColor),
+  //     featureType: "STAC",
+  //     fetching: false,
+  //     editable: true,
+  //     side: 'middle',
+  //   }
+  //   this.addLayer(StacLayer);
+  //   return newLayer
+  // },
 
   createNewStacImageLayer(
     imageUrl: string,
@@ -452,49 +452,49 @@ const openLayerMap = {
     console.log(imageUrl)
     try {
       const layerId = createUniqueId();
+      const projection = this.map.getView().getProjection();
 
-      const imageLayer = new ImageLayer({
+      const newImageLayer = new ImageLayer({
         source: new Static({
           url: imageUrl,
-          projection: 'EPSG:4326',
+          projection: projection,
           imageExtent: bbox
         })
       })
-
-      console.log(imageLayer)
-
-
+      console.log(projection)
+      console.log(newImageLayer)
+      newImageLayer.set('layer-id', layerId)
       const view = this.map.getView();
-      view.fit(bbox, { duration: 1000 });
-
-      this.canvasLayers.set(layerId, {
-        layer: imageLayer,
-        // overlay: vectorLayer,
-        layerId,
-        layerName: 'STAC Image',
-        layerType: 'StacLayer',
-        style: createFeatureStyle("transparent"),
-        side: 'middle',
+      view.fit(bbox, {
+        padding: [100, 100, 100, 100],
+        duration: 1000
       });
-
-
-      // 6. Return config object
-      const newLayer = {
-        layerType: 'StacLayer',
-        sourceType: 'image',
+      const newLayer: UgixLayer = {
+        layerType: 'UgixLayer',
+        sourceType: 'raster',
         layerName: 'STAC Image',
         layerId,
-        ugixLayerId: 'img-' + layerId,
-        ugixGroupId: 'stac-image-group',
+        ugixLayerId: 'r34k3mm3kl33',
+        ugixGroupId: 'vfjefnrjv4r3',
         selected: true,
         visible: true,
         isCompleted: true,
-        featureType: 'STAC_IMAGE',
+        featureType: 'Static',
         fetching: false,
         editable: true,
         side: 'middle',
       };
-      this.addLayer(imageLayer)
+
+      this.canvasLayers.set(layerId, {
+        layer: newImageLayer,
+        layerId,
+        layerName: imageUrl + Math.random(),
+        layerType: 'UgixLayer',
+        style: createFeatureStyle("transparent"),
+        side: 'middle',
+      });
+      this.addLayer(newImageLayer)
+      this.latestLayer = newLayer
 
       return newLayer;
     } catch (error) {
@@ -521,7 +521,7 @@ const openLayerMap = {
     const vectorSource = new VectorSource({
       features: [bboxFeature],
     });
-    const layerColor = getRandomColor()
+    const layerColor = "transparent"
 
     const vectorLayer = new VectorLayer({
       source: vectorSource,
@@ -578,17 +578,17 @@ const openLayerMap = {
             tile.setState(3);
             return;
           }
-          console.log(response, "ferfe")
+          // console.log(response, "ferfe")
           response.arrayBuffer().then(function (data) {
-            console.log(data, "data")
+            // console.log(data, "data")
             const format = tile.getFormat();
-            console.log(format, "formar")
+            // console.log(format, "formar")
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
-              console.log(features, "features")
+              // console.log(features, "features")
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);

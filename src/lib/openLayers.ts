@@ -49,7 +49,7 @@ import { getRenderPixel } from 'ol/render';
 import { createEmpty } from 'ol/extent';
 import STAC from 'ol-stac';
 import STACLayer from 'ol-stac';
-import datas from "../assets/Tile_response copy.txt"
+import datas from '../assets/Tile_response copy.txt';
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
 
@@ -104,7 +104,11 @@ const openLayerMap = {
   },
   replaceBasemap(
     baseMapType: baseLayerTypes,
-    newLayer: VectorLayer<VectorSource> | VectorTileLayer | TileLayer<OSM> | VectorImageLayer
+    newLayer:
+      | VectorLayer<VectorSource>
+      | VectorTileLayer
+      | TileLayer<OSM>
+      | VectorImageLayer
   ) {
     this.map.getAllLayers().forEach((layer) => {
       if (layer.get(BASE_LAYER_KEY)) {
@@ -150,7 +154,11 @@ const openLayerMap = {
   },
 
   addLayer(
-    layer: VectorLayer<VectorSource> | VectorImageLayer | VectorTileLayer | ImageLayer<ImageStatic>
+    layer:
+      | VectorLayer<VectorSource>
+      | VectorImageLayer
+      | VectorTileLayer
+      | ImageLayer<ImageStatic>
   ) {
     this.map.addLayer(layer);
   },
@@ -223,7 +231,11 @@ const openLayerMap = {
     this.latestLayer = newLayer;
     return newLayer;
   },
-  initialMapFitOnGetResource(serverUrl: string, layerId: string, ugixId: string) {
+  initialMapFitOnGetResource(
+    serverUrl: string,
+    layerId: string,
+    ugixId: string
+  ) {
     let resourceExtent = createEmpty();
     let view = this.map.getView();
 
@@ -308,15 +320,14 @@ const openLayerMap = {
     const layerColor = getRandomColor();
     const layerId = createUniqueId();
     const vectorSource = new OGCVectorTile({
-      url:
-        `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
+      url: `https://${serverUrl}/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       // envurls.ugixOgcServer +
       // `/collections/${ugixId}/map/tiles/WorldCRS84Quad`,
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
       // projection: 'EPSG:4326',
     });
-    console.log(vectorSource, "vec src")
+    console.log(vectorSource, 'vec src');
 
     this.initialMapFitOnGetResource(serverUrl, layerId, ugixId);
 
@@ -395,167 +406,125 @@ const openLayerMap = {
     return newLayer;
   },
 
-
-  createNewStacLayer(
-    url: string,
-  ) {
-    const layerId = createUniqueId();
-    let StacLayer: STACLayer = new STAC({
-      url: url,
-    })
-    StacLayer.on('sourceready' as unknown as any, () => {
-      const view = this.map.getView();
-      const extent = StacLayer.getExtent();
-      if (extent) {
-        view.fit(extent);
-      }
-    })
-    StacLayer.on('layersready' as unknown as any, () => {
-      if (StacLayer.isEmpty()) {
-        alert('No spatial information available in the data source');
-      }
-    });
-    const layerColor = getRandomColor();
-    this.canvasLayers.set(layerId, {
-      layer: StacLayer,
-      layerId,
-      layerName: 'STAC Layer',
-      layerType: 'StacLayer',
-      style: createFeatureStyle('red'),
-      side: 'middle',
-    })
-    const newLayer = {
-      layerType: 'UgixLayer',
-      sourceType: 'tile',
-      layerName: "STAC",
-      layerId,
-      ugixLayerId: "2e2e22e",
-      ugixGroupId: "432322r3w",
-      selected: true,
-      visible: true,
-      isCompleted: true,
-      layerColor,
-      style: createFeatureStyle(layerColor),
-      featureType: "STAC",
-      fetching: false,
-      editable: true,
-      side: 'middle',
-    }
-    this.addLayer(StacLayer);
-    return newLayer
-  },
+  // createNewStacLayer(
+  //   url: string,
+  // ) {
+  //   const layerId = createUniqueId();
+  //   let StacLayer: STACLayer = new STAC({
+  //     url: url,
+  //   })
+  //   StacLayer.on('sourceready' as unknown as any, () => {
+  //     const view = this.map.getView();
+  //     const extent = StacLayer.getExtent();
+  //     if (extent) {
+  //       view.fit(extent);
+  //     }
+  //   })
+  //   StacLayer.on('layersready' as unknown as any, () => {
+  //     if (StacLayer.isEmpty()) {
+  //       alert('No spatial information available in the data source');
+  //     }
+  //   });
+  //   const layerColor = getRandomColor();
+  //   this.canvasLayers.set(layerId, {
+  //     layer: StacLayer,
+  //     layerId,
+  //     layerName: 'STAC Layer',
+  //     layerType: 'StacLayer',
+  //     style: createFeatureStyle('red'),
+  //     side: 'middle',
+  //   })
+  //   const newLayer = {
+  //     layerType: 'UgixLayer',
+  //     sourceType: 'tile',
+  //     layerName: "STAC",
+  //     layerId,
+  //     ugixLayerId: "2e2e22e",
+  //     ugixGroupId: "432322r3w",
+  //     selected: true,
+  //     visible: true,
+  //     isCompleted: true,
+  //     layerColor,
+  //     style: createFeatureStyle(layerColor),
+  //     featureType: "STAC",
+  //     fetching: false,
+  //     editable: true,
+  //     side: 'middle',
+  //   }
+  //   this.addLayer(StacLayer);
+  //   return newLayer
+  // },
 
   createNewStacImageLayer(
     imageUrl: string,
-    bbox: [number, number, number, number],
+    bbox: [number, number, number, number]
   ) {
-    console.log(imageUrl)
+    console.log(imageUrl);
     try {
       const layerId = createUniqueId();
+      const projection = this.map.getView().getProjection();
 
-      // 1. Create ImageStatic layer
-      // const imageSource = new ImageStatic({
-      //   url: imageUrl,
-      //   imageExtent: bbox,
-      //   projection: 'EPSG:4326',
-      // });
-      // console.log(imageSource)
-      // const imageLayer = new ImageLayer({
-      //   source: imageSource,
-      // });
-
-      const imageLayer = new ImageLayer({
+      const newImageLayer = new ImageLayer({
         source: new Static({
           url: imageUrl,
-          projection: 'EPSG:4326',
-          imageExtent: bbox
-        })
-      })
+          projection: projection,
+          imageExtent: bbox,
+        }),
+      });
+      console.log(projection);
+      console.log(newImageLayer);
+      newImageLayer.set('layer-id', layerId);
+      const view = this.map.getView();
+      view.fit(bbox, {
+        padding: [100, 100, 100, 100],
+        duration: 1000,
+      });
+      const newLayer: UgixLayer = {
+        layerType: 'UgixLayer',
+        sourceType: 'raster',
+        layerName: 'STAC Image',
+        layerId,
+        ugixLayerId: 'r34k3mm3kl33',
+        ugixGroupId: 'vfjefnrjv4r3',
+        selected: true,
+        visible: true,
+        isCompleted: true,
+        featureType: 'Static',
+        fetching: false,
+        editable: true,
+        side: 'middle',
+      };
 
-      console.log(imageLayer)
-      // 2. Create vector layer for bbox overlay
-      const polygonCoords = [[
+      this.canvasLayers.set(layerId, {
+        layer: newImageLayer,
+        layerId,
+        layerName: imageUrl + Math.random(),
+        layerType: 'UgixLayer',
+        style: createFeatureStyle('transparent'),
+        side: 'middle',
+      });
+      this.addLayer(newImageLayer);
+      this.latestLayer = newLayer;
+
+      return newLayer;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  drawBBoxFromApi(bbox: [number, number, number, number], imageUrl: string) {
+    console.log(bbox, imageUrl);
+    const layerId = createUniqueId();
+
+    const polygonCoords = [
+      [
         [bbox[0], bbox[1]],
         [bbox[0], bbox[3]],
         [bbox[2], bbox[3]],
         [bbox[2], bbox[1]],
         [bbox[0], bbox[1]],
-      ]];
-      const bboxFeature = new Feature({
-        geometry: new Polygon(polygonCoords),
-      });
-
-      bboxFeature.setStyle(new Style({
-        stroke: new Stroke({
-          color: 'blue',
-          width: 2
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 0, 255, 0.1)'
-        })
-      }));
-
-      console.log(bboxFeature)
-
-
-      const layerColor = getRandomColor();
-
-      const vectorLayer = new VectorLayer({
-        source: new VectorSource({
-          features: [bboxFeature]
-        })
-      });
-
-      const view = this.map.getView();
-      view.fit(bbox, { duration: 1000 });
-
-      this.canvasLayers.set(layerId, {
-        layer: imageLayer,
-        // overlay: vectorLayer,
-        layerId,
-        layerName: 'STAC Image',
-        layerType: 'StacLayer',
-        style: createFeatureStyle("transparent"),
-        side: 'middle',
-      });
-
-
-      // 6. Return config object
-      const newLayer = {
-        layerType: 'StacLayer',
-        sourceType: 'image',
-        layerName: 'STAC Image',
-        layerId,
-        ugixLayerId: 'img-' + layerId,
-        ugixGroupId: 'stac-image-group',
-        selected: true,
-        visible: true,
-        isCompleted: true,
-        layerColor,
-        style: createFeatureStyle(layerColor),
-        featureType: 'STAC_IMAGE',
-        fetching: false,
-        editable: true,
-        side: 'middle',
-      };
-      this.addLayer(imageLayer)
-      this.addLayer(vectorLayer);
-      return newLayer;
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  drawBBoxFromApi(
-    bbox: [number, number, number, number]
-  ) {
-    const layerId = createUniqueId(); // Optional if you want to track it
-    const polygonCoords = [[
-      [bbox[0], bbox[1]],
-      [bbox[0], bbox[3]],
-      [bbox[2], bbox[3]],
-      [bbox[2], bbox[1]],
-      [bbox[0], bbox[1]],
-    ]];
+      ],
+    ];
 
     const bboxFeature = new Feature({
       geometry: new Polygon(polygonCoords),
@@ -565,37 +534,124 @@ const openLayerMap = {
       features: [bboxFeature],
     });
 
+    const layerColor = getRandomColor();
+    const featureStyleObj = createFeatureStyle(layerColor);
+
     const vectorLayer = new VectorLayer({
       source: vectorSource,
-      style: new Style({
-        // fill: new Fill({
-        //   color: 'rgba(255, 0, 0, 0.3)', // red fill with some opacity
-        // }),
-        stroke: new Stroke({
-          color: 'blue', // blue outline
-          width: 2,
-        }),
-      }),
+      style: (feature) => {
+        const type = feature.getGeometry()?.getType();
+        if (!type) return;
+        return featureUniqueStyle(
+          type,
+          featureStyleObj.stroke,
+          featureStyleObj.fill,
+          featureStyleObj['stroke-opacity'],
+          featureStyleObj['stroke-width'],
+          featureStyleObj['fill-opacity'],
+          featureStyleObj['marker-id']
+        );
+      },
     });
+
+    vectorLayer.set('layerId', layerId);
+    vectorLayer.set('hover', false);
+
     const view = this.map.getView();
     view.fit(bbox, { duration: 1000 });
     this.map.addLayer(vectorLayer);
 
-    // Optional: track it if you're managing layers
+    const newLayer = {
+      layerId,
+      layerName: 'bbox layer',
+      layerType: 'BBoxLayer',
+      sourceType: 'bbox-api',
+      visible: true,
+      selected: true,
+      isCompleted: true,
+      layerColor,
+      editable: true,
+      fetching: false,
+      featureType: 'Polygon',
+      side: 'middle',
+    };
+
     this.canvasLayers.set(layerId, {
       layer: vectorLayer,
       layerId,
-      layerName: 'BBox Layer',
-      layerType: 'BBox',
-      style: {
-        fill: 'red',
-        stroke: 'blue',
-      },
+      layerName: imageUrl,
+      layerType: 'BBoxLayer',
+      style: featureStyleObj,
       side: 'middle',
     });
 
-    return layerId;
+    // Optionally: store this.latestLayer = newLayer;
+    this.latestLayer = newLayer;
+
+    console.log('BBox layer added:', newLayer);
+
+    return newLayer;
   },
+
+  // drawBBoxFromApi(bbox: [number, number, number, number], imageUrl: string) {
+  //   console.log(bbox, imageUrl);
+  //   const layerId = createUniqueId();
+  //   const polygonCoords = [
+  //     [
+  //       [bbox[0], bbox[1]],
+  //       [bbox[0], bbox[3]],
+  //       [bbox[2], bbox[3]],
+  //       [bbox[2], bbox[1]],
+  //       [bbox[0], bbox[1]],
+  //     ],
+  //   ];
+
+  //   const bboxFeature = new Feature({
+  //     geometry: new Polygon(polygonCoords),
+  //   });
+
+  //   const vectorSource = new VectorSource({
+  //     features: [bboxFeature],
+  //   });
+
+  //   const layerColor = getRandomColor();
+  //   const featureStyleObj = createFeatureStyle(layerColor);
+
+  //   const vectorLayer = new VectorLayer({
+  //     source: vectorSource,
+  //     style: (feature) => {
+  //       const type = feature.getGeometry()?.getType();
+  //       if (!type) return;
+  //       return featureUniqueStyle(
+  //         type,
+  //         featureStyleObj.stroke,
+  //         featureStyleObj.fill,
+  //         featureStyleObj['stroke-opacity'],
+  //         featureStyleObj['stroke-width'],
+  //         featureStyleObj['fill-opacity'],
+  //         featureStyleObj['marker-id']
+  //       );
+  //     },
+  //   });
+
+  //   vectorLayer.set('hover', false);
+
+  //   const view = this.map.getView();
+  //   view.fit(bbox, { duration: 1000 });
+  //   this.map.addLayer(vectorLayer);
+
+  //   this.canvasLayers.set(layerId, {
+  //     layer: vectorLayer,
+  //     layerId,
+  //     layerName: imageUrl,
+  //     layerType: 'UserLayer',
+  //     style: featureStyleObj,
+  //     side: 'middle',
+  //   });
+
+  //   console.log(layerId, 'layerId');
+  //   return layerId;
+  // },
 
   createStateTileBoundariesBaseMap(
     serverUrl?: string,
@@ -607,7 +663,6 @@ const openLayerMap = {
       format: new MVT({ idProperty: 'iso_a3' }),
       mediaType: 'application/vnd.mapbox-vector-tile',
     });
-
 
     //@ts-expect-error tile problem
     vectorSource.setTileLoadFunction(function (
@@ -625,17 +680,17 @@ const openLayerMap = {
             tile.setState(3);
             return;
           }
-          console.log(response, "ferfe")
+          // console.log(response, "ferfe")
           response.arrayBuffer().then(function (data) {
-            console.log(data, "data")
+            // console.log(data, "data")
             const format = tile.getFormat();
-            console.log(format, "formar")
+            // console.log(format, "formar")
             try {
               const features = format.readFeatures(data, {
                 extent: extent,
                 featureProjection: projection,
               });
-              console.log(features, "features")
+              // console.log(features, "features")
               tile.setFeatures(features);
             } catch (err) {
               console.log(url, err);
@@ -644,7 +699,7 @@ const openLayerMap = {
         });
       });
     });
-    return vectorSource
+    return vectorSource;
   },
 
   changeLayerColor(layerId: string, color: string) {
@@ -881,20 +936,29 @@ const openLayerMap = {
     const featureLikes = new GeoJson().readFeatures(geojsonData);
     const features = featureLikes.map((feature) => {
       const properties = feature.getProperties();
-      const newStyle = {
-        fill: properties.fill || style.fill,
-        'fill-opacity': properties['fill-opacity'] || style['fill-opacity'],
-        stroke: properties.stroke || style.stroke,
+      const newStyle: FeatureStyle = {
+        fill: properties.fill || getRandomColor(), // force unique fill
+        'fill-opacity':
+          properties['fill-opacity'] ?? style['fill-opacity'] ?? 0.4,
+        stroke: properties.stroke || getRandomColor(), // force unique stroke
         'stroke-opacity':
-          properties['stroke-opacity'] || style['stroke-opacity'],
-        'stroke-width': properties['stroke-width'] || style['stroke-width'],
-        'marker-id': Number(properties['marker-id']) || style['marker-id'],
+          properties['stroke-opacity'] ?? style['stroke-opacity'] ?? 1,
+        'stroke-width':
+          properties['stroke-width'] ?? style['stroke-width'] ?? 1,
+        'marker-id':
+          properties['marker-id'] !== undefined
+            ? Number(properties['marker-id'])
+            : style['marker-id'],
       };
+
       const featureGeometry = feature.getGeometry() as Geometry;
       const newFeature = new Feature({
         geometry: featureGeometry,
-        ...properties,
         ...newStyle,
+        ...properties,
+      });
+      Object.entries(newStyle).forEach(([key, value]) => {
+        newFeature.set(key, value);
       });
       const type = featureGeometry.getType();
       const newStyleobj = featureUniqueStyle(
@@ -1200,7 +1264,8 @@ const openLayerMap = {
 
       const featureData = this.getFeatureAtPixel(evt.pixel);
 
-      if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
+      if (featureData.layerId === '39b9d0f5-38be-4603-b2db-7b678d9c3870-base')
+        return;
       const { feature } = this.getFeatureAtPixel(evt.pixel);
 
       if (feature && Object.keys(feature?.getProperties()).length > 1) {
@@ -1343,31 +1408,56 @@ const openLayerMap = {
 
 // basic map interactions
 let selected: Feature | undefined;
-let prevStyle: Style | undefined;
+let prevStyleProps: FeatureStyle | undefined;
+
 openLayerMap.map.on('pointermove', (event) => {
-  if (openLayerMap.drawing) {
-    return;
-  }
+  if (openLayerMap.drawing) return;
 
   const featureData = openLayerMap.getFeatureAtPixel(event.pixel);
-  if (featureData.layerId === "39b9d0f5-38be-4603-b2db-7b678d9c3870-base") return
+  if (featureData.layerId === '39b9d0f5-38be-4603-b2db-7b678d9c3870-base')
+    return;
+
+  // Reset previously selected feature's style
   if (selected) {
-    selected.setStyle(prevStyle);
-    selected = undefined;
-  }
-  const { feature, layerId } = openLayerMap.getFeatureAtPixel(event.pixel);
-  if (feature) {
-    if (layerId) {
-      const currlayer = openLayerMap.getLayer(layerId);
-      if (currlayer?.get('tile-layer')) {
-        // console.log(feature.getId(), "id");
-        // openLayerMap.hoveredTileId = feature.getId()
-        return;
-      }
+    const geomType = selected.getGeometry()?.getType();
+    if (prevStyleProps && geomType) {
+      selected.setStyle(
+        featureUniqueStyle(
+          geomType,
+          prevStyleProps.stroke,
+          prevStyleProps.fill,
+          prevStyleProps['stroke-opacity'],
+          prevStyleProps['stroke-width'],
+          prevStyleProps['fill-opacity'],
+          prevStyleProps['marker-id']
+        )
+      );
     }
+    selected = undefined;
+    prevStyleProps = undefined;
+  }
+
+  const { feature, layerId } = openLayerMap.getFeatureAtPixel(event.pixel);
+  if (feature && layerId) {
+    const currLayer = openLayerMap.getLayer(layerId);
+    if (currLayer?.get('tile-layer')) return;
+
+    // ❌ Skip hover for UserLayer (i.e., bounding box layers)
+    const canvasLayer = openLayerMap.canvasLayers?.get(layerId);
+    if (canvasLayer?.layerType === 'UserLayer') return;
+
     const { layer, ...style } = feature.getProperties();
     if (!layer) return;
-    prevStyle = feature.getStyle() as Style;
+
+    prevStyleProps = {
+      stroke: style.stroke,
+      fill: style.fill,
+      'stroke-opacity': style['stroke-opacity'],
+      'stroke-width': style['stroke-width'],
+      'fill-opacity': style['fill-opacity'],
+      'marker-id': style['marker-id'],
+    };
+
     feature.setStyle(hoverStyle(style as FeatureStyle));
     selected = feature;
   }

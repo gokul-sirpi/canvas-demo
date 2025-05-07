@@ -1,6 +1,7 @@
 import { Type } from 'ol/geom/Geometry';
 import { FeatureStyle } from './FeatureStyle';
 
+
 export type UgixLayer = {
   layerType: 'UgixLayer';
   sourceType: 'tile' | 'raster' | 'json';
@@ -13,7 +14,7 @@ export type UgixLayer = {
   isCompleted: boolean;
   layerColor: string;
   style: FeatureStyle;
-  featureType: Type;
+  featureType: Type | "Static";
   fetching: boolean;
   editable: boolean;
   side: 'left' | 'right' | 'middle';

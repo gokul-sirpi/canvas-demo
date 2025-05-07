@@ -79,7 +79,7 @@ function UgixFeatureTile({
     if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('VECTOR_TILES')) {
       plotTiles();
     } else if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('STAC')) {
-      plotStac();
+      getStacItems();
     } else {
       setAdding(true);
       dispatch(updateLoadingState(true));
@@ -243,7 +243,7 @@ function UgixFeatureTile({
     }
   }
 
-  async function plotStac() {
+  async function getStacItems() {
     console.log('Stac');
     setAdding(true);
     dispatch(updateLoadingState(true));
@@ -268,7 +268,7 @@ function UgixFeatureTile({
 
         console.log(items.data.features, 'STAC items fetched');
         setStacItems(items.data.features);
-        setShowStacPopup(true); // Show popup when data is fetched
+        setShowStacPopup(true);
         cleanUpSideEffects();
       } else {
         throw new Error('Failed to fetch STAC collection');
@@ -300,16 +300,14 @@ function UgixFeatureTile({
     imageUrl: string,
     bbox: [number, number, number, number]
   ) {
-    // Implementation for plot stac functionality
     console.log('Plot STAC item:', imageUrl);
-    // const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
-    // console.log(stac);
-    const bboxlayer = openLayerMap.drawBBoxFromApi(bbox);
-    // dispatch(addCanvasLayer(stac));
-    dispatch(addCanvasLayer(bboxlayer));
-    console.log(bboxlayer, 'jlwefwnjflew');
-    emitToast('info', `Plotting STAC imageUrl: ${imageUrl}`);
-    setShowStacPopup(false); // Close popup after plotting
+    const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
+    console.log(stac);
+    // const bboxlayer = openLayerMap.drawBBoxFromApi(bbox, imageUrl);
+    dispatch(addCanvasLayer(stac));
+    // dispatch(addCanvasLayer(bboxlayer));
+    // console.log(bboxlayer, 'jlwefwnjflew');
+    setShowStacPopup(false);
     dialogCloseTrigger(false);
   }
 
@@ -347,7 +345,8 @@ function UgixFeatureTile({
             className={styles.extra_button_container}
             data-visible={isExtraBtnVisible}
           >
-            {resource.ogcResourceInfo.ogcResourceAPIs[0] !== 'STAC' ? (
+            {resource?.ogcResourceInfo?.ogcResourceAPIs &&
+            resource?.ogcResourceInfo?.ogcResourceAPIs[0] !== 'STAC' ? (
               <>
                 <button
                   className={styles.extra_button}

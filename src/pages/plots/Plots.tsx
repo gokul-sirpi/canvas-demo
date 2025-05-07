@@ -158,7 +158,6 @@ export default function Plots({
                   dynamic: ['reservoirName'],
                 },
               ];
-
               break;
             case 'Historical Rainfall Information in Khammam District':
               newSchema = [
@@ -564,6 +563,8 @@ export default function Plots({
     setDataForPlot(data);
     setFilteredDataForPlot(data);
   };
+
+  console.log(dataforPlot, filteredDataForPlot, "values of dataforplot and filtertedataforplot is being observed")
 
   // array of displayed resources
   const plotTypes =

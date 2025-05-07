@@ -61,6 +61,7 @@ export const canvasLayerSlice = createSlice({
     changeCanvasLayer(state, action: PayloadAction<(UserLayer | UgixLayer)[]>) {
       state.layers = action.payload;
     },
+
     updateLayerSides(
       state,
       action: PayloadAction<{

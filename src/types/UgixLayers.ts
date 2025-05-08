@@ -1,7 +1,6 @@
 import { Type } from 'ol/geom/Geometry';
 import { FeatureStyle } from './FeatureStyle';
 
-
 export type UgixLayer = {
   layerType: 'UgixLayer';
   sourceType: 'tile' | 'raster' | 'json';
@@ -14,13 +13,19 @@ export type UgixLayer = {
   isCompleted: boolean;
   layerColor: string;
   style: FeatureStyle;
-  featureType: Type | "Static";
+  featureType: Type | 'Static';
   fetching: boolean;
   editable: boolean;
+  opacity: number;
   side: 'left' | 'right' | 'middle';
 };
 
-export type StacAssetRole = 'thumbnail' | 'overview' | 'data' | 'metadata' | string;
+export type StacAssetRole =
+  | 'thumbnail'
+  | 'overview'
+  | 'data'
+  | 'metadata'
+  | string;
 
 export interface StacAsset {
   href: string;
@@ -31,6 +36,7 @@ export interface StacAsset {
   collection_id?: string;
   'file:size'?: number;
   description?: string;
+  opacity?: number;
 }
 
 export interface StacItem {

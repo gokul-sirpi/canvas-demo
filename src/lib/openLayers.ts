@@ -141,7 +141,6 @@ const openLayerMap = {
           this.removeLayer(layerId);
         }
       }
-
     }
   },
 
@@ -457,17 +456,13 @@ const openLayerMap = {
     bbox: [number, number, number, number],
     layerName: string,
     ugixId: string,
-    ugixGroupId: string,
+    ugixGroupId: string
   ) {
     console.log(imageUrl);
-
     try {
       const layerId = createUniqueId();
       const projection = this.map.getView().getProjection();
-      sessionStorage.setItem(
-        layerId + '-extent',
-        JSON.stringify(bbox)
-      );
+      sessionStorage.setItem(layerId + '-extent', JSON.stringify(bbox));
       const newImageLayer = new ImageLayer({
         source: new Static({
           url: imageUrl,
@@ -478,6 +473,7 @@ const openLayerMap = {
       console.log(projection);
       console.log(newImageLayer);
       newImageLayer.set('layer-id', layerId);
+      newImageLayer.setOpacity(1);
       const view = this.map.getView();
       view.fit(bbox, {
         padding: [100, 100, 100, 100],
@@ -517,27 +513,22 @@ const openLayerMap = {
     }
   },
 
-
   drawBBoxFromApi(
     bbox: [number, number, number, number],
     layerName: string,
     ugixId: string,
     ugixGroupId: string
   ) {
-    const layerColor = getRandomColor()
+    const layerColor = getRandomColor();
     const layerId = createUniqueId();
     const vectorSource = new VectorSource<Feature<Geometry>>({
-      features: [
-        new Feature(
-          fromExtent(bbox)
-        )
-      ]
+      features: [new Feature(fromExtent(bbox))],
     });
     const newVectorLayer = new VectorLayer<VectorSource<Feature<Geometry>>>({
       source: vectorSource,
       style: (feature) => styleFunction(feature, layerColor),
     });
-    newVectorLayer.set('layer-id', layerId)
+    newVectorLayer.set('layer-id', layerId);
     let view = this.map.getView();
 
     view.fit(bbox, {
@@ -556,7 +547,7 @@ const openLayerMap = {
       isCompleted: true,
       layerColor,
       style: createFeatureStyle(layerColor),
-      featureType: "Polygon",
+      featureType: 'Polygon',
       fetching: false,
       editable: true,
       side: 'middle',
@@ -621,6 +612,14 @@ const openLayerMap = {
       });
     });
     return vectorSource;
+  },
+  setLayerOpacity(layerId: string, opacity: number) {
+    console.log(layerId);
+
+    const layer = this.getLayer(layerId);
+    if (layer && typeof layer.setOpacity === 'function') {
+      layer.setOpacity(opacity);
+    }
   },
 
   changeLayerColor(layerId: string, color: string) {

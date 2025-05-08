@@ -112,6 +112,14 @@ function LayerTile({
     );
     setSelectedColor(text);
   }
+  function handleOpacityChange(value: number) {
+    const newOpacity = value / 100;
+    console.log('Setting opacity:', newOpacity);
+    openLayerMap.setLayerOpacity(layer.layerId, newOpacity);
+
+    const modifiedLayer = { ...layer, opacity: newOpacity };
+    dispatch(updateCanvasLayer({ index, modifiedLayer }));
+  }
 
   return (
     <div className={styles.container} data-layer={layer.layerType}>
@@ -170,7 +178,24 @@ function LayerTile({
                       layer={layer}
                     />
                   </>
-                ) : layer.featureType === 'Static' ? null : (
+                ) : layer.featureType === 'Static' ? (
+                  <div className={styles.opacity_slider_container}>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={((layer as UgixLayer).opacity ?? 1) * 100}
+                      onChange={(e) =>
+                        handleOpacityChange(Number(e.target.value))
+                      }
+                      className={styles.opacity_slider}
+                    />
+                    <label className={styles.opacity_label}>
+                      {Math.round(((layer as UgixLayer).opacity ?? 1) * 100)}%
+                    </label>
+                  </div>
+                ) : (
                   <div className={styles.color_picker_container}>
                     <input
                       disabled={!isTile}

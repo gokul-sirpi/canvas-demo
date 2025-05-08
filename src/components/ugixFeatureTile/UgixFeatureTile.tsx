@@ -301,22 +301,22 @@ function UgixFeatureTile({
     bbox: [number, number, number, number]
   ) {
     console.log('Plot STAC item:', imageUrl);
-    // const stac = openLayerMap.createNewStacImageLayer(
-    //   imageUrl,
-    //   bbox,
-    //   resource.label,
-    //   resource.id,
-    //   resource.resourceGroup
-    // );
-    // console.log(stac);
-    const bboxlayer = openLayerMap.drawBBoxFromApi(
+    const stac = openLayerMap.createNewStacImageLayer(
+      imageUrl,
       bbox,
       resource.label,
       resource.id,
       resource.resourceGroup
     );
-    // dispatch(addCanvasLayer(stac));
-    dispatch(addCanvasLayer(bboxlayer));
+    console.log(stac);
+    // const bboxlayer = openLayerMap.drawBBoxFromApi(
+    //   bbox,
+    //   resource.label,
+    //   resource.id,
+    //   resource.resourceGroup
+    // );
+    dispatch(addCanvasLayer(stac));
+    // dispatch(addCanvasLayer(bboxlayer));
     // console.log(bboxlayer, 'jlwefwnjflew');
     setShowStacPopup(false);
     dialogCloseTrigger(false);

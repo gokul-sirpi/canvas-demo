@@ -330,7 +330,8 @@
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-sm, 4px);
-  overflow: hidden;
+  overflow: scroll;
+  height: 30rem;
 }
 
 .stac_table thead {
@@ -416,6 +417,14 @@
   position: sticky;
   top: 0;
 }
+
+
+.body_table_data{
+  overflow: scroll;
+  height: 50vh;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .stac_table {

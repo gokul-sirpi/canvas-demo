@@ -7,6 +7,7 @@ import ScatterPlot from '../../components/PLOTS/chart/scatterPlot/ScatterPlot';
 import PieChart from '../../components/PLOTS/chart/pieChart/PieChart';
 import StackedBarChart from '../../components/PLOTS/chart/stackedBarChart/StackedBarChart';
 import LargeScaleBarChart from '../../components/PLOTS/chart/largeScalwBarChart/LargeScaleBarChart';
+import DrillDownChart from '../../components/PLOTS/chart/drillDownBarChart/DrillDownBarChart';
 
 interface ChartRendererProps {
   plotType: string;
@@ -14,6 +15,7 @@ interface ChartRendererProps {
   xAxis: string[];
   yAxis: string[];
   zAxis?: string[];
+  initialOptionId?: string;
 }
 
 const ChartRenderer: React.FC<ChartRendererProps> = ({
@@ -21,6 +23,7 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
   data,
   xAxis,
   yAxis,
+  initialOptionId,
 }) => {
   if (plotType === 'multiLinePlot') {
     return <MultiLineChart dataforPlot={data} xAxis={xAxis} yAxis={yAxis} />;
@@ -44,6 +47,15 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
   } else if (plotType === 'largeScaleBarChart') {
     return (
       <LargeScaleBarChart dataforPlot={data} xAxis={xAxis} yAxis={yAxis} />
+    );
+  } else if (plotType === 'drillDownChart') {
+    return (
+      <DrillDownChart
+        dataset={data}
+        xLevels={xAxis}
+        yMetric={yAxis[0]}
+        initialOptionId={initialOptionId || 'default'}
+      />
     );
   }
 

@@ -76,12 +76,15 @@
 
 /* New styles for drill-down dialog */
 .drill_down_container {
-  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin-top: 1rem; */
 }
 
 .drill_down_button {
   padding: 0.5rem 1rem;
-  background-color: #007bff;
+  background-color: #05aa99;
   color: white;
   border: none;
   border-radius: 4px;

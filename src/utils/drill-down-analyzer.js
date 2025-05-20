@@ -18,14 +18,25 @@ function canDrillDown(dataset) {
 
     // Step 1: Identify potential hierarchy fields
     const fields = extractFields(dataset[0]);
+    const dateTimeFields = [
+        'year', 'quarter', 'month', 'week', 'date', 'day', 'time', 'period',
+        'observationDateTime', 'createdAt', 'updatedAt', 'timestamp', 'dateCreated'
+    ];
     const potentialHierarchyFields = [];
     
-    // Step 2: For each field, check if it forms a hierarchy
+    // Step 2: For each field, check if it forms a hierarchy, exclude date/time and numeric strings
     for (const field of fields) {
-        // Count unique values for this field
+        // Skip date/time fields
+        if (dateTimeFields.some(keyword => field.toLowerCase().includes(keyword.toLowerCase()))) {
+            console.log(`Excluding date/time field: ${field}`);
+            continue;
+        }
+        // Skip fields with numeric string values
+        if (isNumericStringField(dataset, field)) {
+            console.log(`Excluding numeric string field: ${field}`);
+            continue;
+        }
         const uniqueValues = countUniqueValues(dataset, field);
-        
-        // If number of unique values is between 2 and significantly less than dataset size
         if (uniqueValues >= 2 && uniqueValues < dataset.length * 0.5) {
             potentialHierarchyFields.push({
                 field: field,
@@ -33,8 +44,9 @@ function canDrillDown(dataset) {
             });
         }
     }
+    console.log('Potential hierarchy fields:', potentialHierarchyFields);
     
-    // Step 3: Sort fields by uniqueness (fewer unique values suggest higher levels in hierarchy)
+    // Step 3: Sort fields by uniqueness (fewer unique values suggest higher levels)
     potentialHierarchyFields.sort((a, b) => a.uniqueCount - b.uniqueCount);
     
     // Step 4: Check for at least two hierarchy levels
@@ -51,7 +63,6 @@ function canDrillDown(dataset) {
     for (let i = 0; i < potentialHierarchyFields.length - 1; i++) {
         const parentField = potentialHierarchyFields[i].field;
         const childField = potentialHierarchyFields[i + 1].field;
-        
         if (verifyParentChildRelationship(dataset, parentField, childField)) {
             hierarchyLevels.push({
                 parent: parentField,
@@ -99,6 +110,24 @@ function canDrillDown(dataset) {
 }
 
 /**
+ * Check if a field contains numeric string values
+ */
+function isNumericStringField(dataset, field) {
+    const sampleSize = Math.min(100, dataset.length);
+    let numericStringCount = 0;
+    
+    for (let i = 0; i < sampleSize; i++) {
+        const value = dataset[i][field];
+        if (typeof value === 'string' && !isNaN(parseFloat(value)) && isFinite(parseFloat(value))) {
+            numericStringCount++;
+        }
+    }
+    
+    // If >80% of sampled values are numeric strings, consider it a numeric string field
+    return numericStringCount / sampleSize > 0.8;
+}
+
+/**
  * Identify up to 3 levels for drill-down visualization
  */
 function identifyDrillDownLevels(dataset, hierarchyLevels, potentialHierarchyFields) {
@@ -106,19 +135,14 @@ function identifyDrillDownLevels(dataset, hierarchyLevels, potentialHierarchyFie
     
     // Define categories of fields that typically form hierarchies
     const knownFieldCategories = {
-        // Geographic fields
         geo: ['country', 'state', 'district', 'districtName', 'subdistrictName', 'subdistrict', 'tehsil', 
               'block', 'village', 'villageName', 'locality', 'city', 'town', 'region', 'zone'],
-        // Time fields
         time: ['year', 'quarter', 'month', 'week', 'date', 'day', 'time', 'period', 'observationDateTime'],
-        // Organization fields
         org: ['department', 'division', 'unit', 'team', 'organization', 'sector', 'industry', 'category'],
-        // Water/Reservoir fields
         reservoir: ['riverBasin', 'river', 'reservoir', 'reservoirName', 'dam', 'waterBody', 'lake', 'pond', 
                    'fullReservoirLevel', 'minimumDrawDownLevel', 'currentLevel'],
-        // Agricultural fields
         agriculture: ['crop', 'produce', 'variety', 'grade', 'productGrade', 'field', 'farm', 'plantation',
-                     'warehouseName', 'warehouse', 'storage', 'silo']
+                     'warehouseName', 'warehouse', 'storage', 'silo', 'commodityVarietyName', 'agencyName']
     };
     
     // Identify available categories in the dataset
@@ -131,77 +155,69 @@ function identifyDrillDownLevels(dataset, hierarchyLevels, potentialHierarchyFie
         );
     }
     
-    // Select field hierarchy based on domain knowledge
+    // Select field hierarchy based on domain knowledge, sorted by unique values
     let levelFields = [];
     
-    // Try to choose the best hierarchy based on domain
-    if (availableCategories.geo.length >= 3) {
-        // Geographic hierarchy (country > state > district > subdistrict > village)
-        const geoHierarchy = [
-            'country', 'state', 'district', 'districtName', 'subdistrictName', 'subdistrict', 
-            'tehsil', 'block', 'village', 'villageName', 'locality'
-        ];
-        
-        // Sort fields by their position in the geoHierarchy array
-        const sortedGeoFields = availableCategories.geo.sort((a, b) => {
-            const aIndex = geoHierarchy.findIndex(term => a.toLowerCase().includes(term.toLowerCase()));
-            const bIndex = geoHierarchy.findIndex(term => b.toLowerCase().includes(term.toLowerCase()));
-            return aIndex - bIndex;
+    // Helper function to sort fields by unique values
+    const sortByUniqueValues = (fields) => {
+        return fields.sort((a, b) => {
+            const aUnique = potentialHierarchyFields.find(f => f.field === a)?.uniqueCount || Infinity;
+            const bUnique = potentialHierarchyFields.find(f => f.field === b)?.uniqueCount || Infinity;
+            return aUnique - bUnique;
         });
-        
-        levelFields = sortedGeoFields.slice(0, 3);
+    };
+    
+    // Try to choose the best hierarchy based on domain, excluding time and numeric strings
+    if (availableCategories.geo.length >= 2) {
+        const validGeoFields = availableCategories.geo
+            .filter(field => !isNumericStringField(dataset, field));
+        levelFields = sortByUniqueValues(validGeoFields).slice(0, 3);
     } 
-    else if (availableCategories.reservoir.length >= 3) {
-        // Reservoir hierarchy
-        const reservoirHierarchy = [
-            'riverBasin', 'river', 'reservoir', 'reservoirName', 'dam', 'waterBody'
-        ];
-        
-        const sortedReservoirFields = availableCategories.reservoir.sort((a, b) => {
-            const aIndex = reservoirHierarchy.findIndex(term => a.toLowerCase().includes(term.toLowerCase()));
-            const bIndex = reservoirHierarchy.findIndex(term => b.toLowerCase().includes(term.toLowerCase()));
-            return aIndex - bIndex;
-        });
-        
-        levelFields = sortedReservoirFields.slice(0, 3);
+    else if (availableCategories.reservoir.length >= 2) {
+        const validReservoirFields = availableCategories.reservoir
+            .filter(field => !isNumericStringField(dataset, field));
+        levelFields = sortByUniqueValues(validReservoirFields).slice(0, 3);
     }
-    else if (availableCategories.agriculture.length >= 3) {
-        // Agricultural hierarchy
-        const agriHierarchy = [
-            'warehouseName', 'warehouse', 'storage', 'productGrade', 'grade'
-        ];
-        
-        const sortedAgriFields = availableCategories.agriculture.sort((a, b) => {
-            const aIndex = agriHierarchy.findIndex(term => a.toLowerCase().includes(term.toLowerCase()));
-            const bIndex = agriHierarchy.findIndex(term => b.toLowerCase().includes(term.toLowerCase()));
-            return aIndex - bIndex;
-        });
-        
-        levelFields = sortedAgriFields.slice(0, 3);
+    else if (availableCategories.agriculture.length >= 2) {
+        const validAgriFields = availableCategories.agriculture
+            .filter(field => !isNumericStringField(dataset, field));
+        levelFields = sortByUniqueValues(validAgriFields).slice(0, 3);
     }
-    // Otherwise use detected hierarchy levels
+    // Otherwise use detected hierarchy levels, excluding time and numeric strings
     else {
-        // Extract unique fields from hierarchyLevels
         const uniqueFields = new Set();
-        
         for (const level of hierarchyLevels) {
-            uniqueFields.add(level.parent);
-            uniqueFields.add(level.child);
-            if (uniqueFields.size >= 3) break;
+            if (!knownFieldCategories.time.some(keyword => 
+                level.parent.toLowerCase().includes(keyword.toLowerCase()) ||
+                level.child.toLowerCase().includes(keyword.toLowerCase())
+            ) && !isNumericStringField(dataset, level.parent) && !isNumericStringField(dataset, level.child)) {
+                uniqueFields.add(level.parent);
+                uniqueFields.add(level.child);
+                if (uniqueFields.size >= 3) break;
+            }
         }
-        
-        levelFields = Array.from(uniqueFields).slice(0, 3);
+        levelFields = sortByUniqueValues(Array.from(uniqueFields)).slice(0, 3);
     }
     
     // If we still don't have enough levels, add more from potential hierarchy fields
     if (levelFields.length < 3) {
         for (const field of potentialHierarchyFields.map(f => f.field)) {
-            if (!levelFields.includes(field)) {
+            if (!levelFields.includes(field) && 
+                !knownFieldCategories.time.some(keyword => field.toLowerCase().includes(keyword.toLowerCase())) &&
+                !isNumericStringField(dataset, field)) {
                 levelFields.push(field);
             }
             if (levelFields.length >= 3) break;
         }
+        // Re-sort to ensure ascending unique values
+        levelFields = sortByUniqueValues(levelFields).slice(0, 3);
     }
+    
+    // Log selected levels with unique counts for debugging
+    console.log('Selected drill-down levels:', levelFields.map(field => ({
+        field,
+        uniqueCount: countUniqueValues(dataset, field)
+    })));
     
     // Format the levels for display
     return levelFields.slice(0, 3).map((field, index) => {
@@ -224,26 +240,23 @@ function selectSingleBestMetric(dataset, aggregatableFields) {
     
     // Define priority metrics for different domains
     const metricPriorities = {
-        // Agricultural metrics
-        agriculture: ['fineProduce', 'productGrade', 'grade', 'quality', 'yield', 'moistureLevel', 'foreignMatter'],
-        // Water/reservoir metrics
+        agriculture: ['fineProduce', 'productGrade', 'grade', 'quality', 'yield', 'moistureLevel', 'foreignMatter', 
+                     'modalPrice', 'minimumPrice', 'maximumPrice', 'arrivalQuantity'],
         reservoir: ['currentLevel', 'capacity', 'totalCapacity', 'storage', 'waterLevel', 'percentageFilled'],
-        // Weather metrics
-        weather: ['temperature', 'rainfall', 'precipitation', 'humidity'],
-        // Financial metrics
+        weather: ['temperature', 'rainfall', 'precipitation', 'humidity', 'airTemperature.maxOverTime', 
+                 'airTemperature.minOverTime', 'relativeHumidity.maxOverTime', 'relativeHumidity.minOverTime'],
         financial: ['revenue', 'profit', 'sales', 'income']
     };
     
-    // Check if we have quality-related fields for agriculture
-    const agriQualityFields = aggregatableFields.filter(field => 
-        field.toLowerCase().includes('quality') ||
-        field.toLowerCase().includes('grade') ||
-        field.toLowerCase().includes('fine') ||
-        field.toLowerCase().includes('produce')
+    // Check if we have weather-related fields
+    const weatherFields = aggregatableFields.filter(field => 
+        field.toLowerCase().includes('temperature') ||
+        field.toLowerCase().includes('precipitation') ||
+        field.toLowerCase().includes('humidity')
     );
     
-    if (agriQualityFields.length > 0) {
-        const bestField = agriQualityFields[0];
+    if (weatherFields.length > 0) {
+        const bestField = weatherFields[0];
         return { 
             fieldName: bestField, 
             displayName: formatFieldName(bestField)
@@ -253,7 +266,6 @@ function selectSingleBestMetric(dataset, aggregatableFields) {
     // Try to find a metric according to domain priorities
     for (const domain in metricPriorities) {
         for (const metric of metricPriorities[domain]) {
-            // Look for exact match first
             const exactMatch = aggregatableFields.find(field => field === metric);
             if (exactMatch) {
                 return { 
@@ -261,8 +273,6 @@ function selectSingleBestMetric(dataset, aggregatableFields) {
                     displayName: formatFieldName(exactMatch)
                 };
             }
-            
-            // Then try to find fields containing the metric name
             const partialMatch = aggregatableFields.find(field => 
                 field.toLowerCase().includes(metric.toLowerCase())
             );
@@ -275,7 +285,7 @@ function selectSingleBestMetric(dataset, aggregatableFields) {
         }
     }
     
-    // If no specific metric found, return the first available numeric field
+    // Default to first numerical field
     const defaultMetric = aggregatableFields[0];
     return { 
         fieldName: defaultMetric, 
@@ -291,13 +301,11 @@ function identifyBestMetrics(dataset, aggregatableFields) {
         return [{ fieldName: "count", displayName: "Count" }];
     }
     
-    // Fields to exclude from metrics
     const excludeMetricFields = [
         'id', 'code', 'uuid', 'guid', 'objectid', 'key', 'observationDateTime',
         'createdAt', 'updatedAt', 'timestamp', 'dateCreated'
     ];
     
-    // Filter out technical fields from metrics
     const filteredMetrics = aggregatableFields.filter(field => 
         !excludeMetricFields.some(exclude => 
             field.toLowerCase().includes(exclude.toLowerCase()) ||
@@ -305,41 +313,33 @@ function identifyBestMetrics(dataset, aggregatableFields) {
         )
     );
     
-    // Define priority metrics for different domains
     const metricPriorities = {
-        // Agricultural metrics
-        agriculture: ['fineProduce', 'productGrade', 'grade', 'quality', 'yield', 'moistureLevel', 'foreignMatter'],
-        // Water/reservoir metrics
+        agriculture: ['fineProduce', 'productGrade', 'grade', 'quality', 'yield', 'moistureLevel', 'foreignMatter', 
+                     'modalPrice', 'minimumPrice', 'maximumPrice', 'arrivalQuantity'],
         reservoir: ['currentLevel', 'capacity', 'totalCapacity', 'storage', 'waterLevel', 'percentageFilled'],
-        // Weather metrics
-        weather: ['temperature', 'rainfall', 'precipitation', 'humidity'],
-        // Financial metrics
+        weather: ['temperature', 'rainfall', 'precipitation', 'humidity', 'airTemperature.maxOverTime', 
+                 'airTemperature.minOverTime', 'relativeHumidity.maxOverTime', 'relativeHumidity.minOverTime'],
         financial: ['revenue', 'profit', 'sales', 'income']
     };
     
-    // Top candidates to return
     let metrics = [];
     
-    // Check if we have quality-related fields for agriculture
-    const agriQualityFields = filteredMetrics.filter(field => 
-        field.toLowerCase().includes('quality') ||
-        field.toLowerCase().includes('grade') ||
-        field.toLowerCase().includes('fine') ||
-        field.toLowerCase().includes('produce')
+    const weatherFields = filteredMetrics.filter(field => 
+        field.toLowerCase().includes('temperature') ||
+        field.toLowerCase().includes('precipitation') ||
+        field.toLowerCase().includes('humidity')
     );
     
-    if (agriQualityFields.length > 0) {
+    if (weatherFields.length > 0) {
         metrics.push({
-            fieldName: agriQualityFields[0],
-            displayName: formatFieldName(agriQualityFields[0]),
+            fieldName: weatherFields[0],
+            displayName: formatFieldName(weatherFields[0]),
             priority: 'high'
         });
     }
     
-    // Try to find a metric according to domain priorities
     for (const domain in metricPriorities) {
         for (const metric of metricPriorities[domain]) {
-            // Look for exact match first
             const exactMatch = filteredMetrics.find(field => field === metric);
             if (exactMatch && !metrics.some(m => m.fieldName === exactMatch)) {
                 metrics.push({ 
@@ -348,8 +348,6 @@ function identifyBestMetrics(dataset, aggregatableFields) {
                     priority: 'high'
                 });
             }
-            
-            // Then try to find fields containing the metric name
             const partialMatch = filteredMetrics.find(field => 
                 field.toLowerCase().includes(metric.toLowerCase())
             );
@@ -363,7 +361,6 @@ function identifyBestMetrics(dataset, aggregatableFields) {
         }
     }
     
-    // Add remaining aggregatable fields with lower priority
     for (const field of filteredMetrics) {
         if (!metrics.some(m => m.fieldName === field)) {
             metrics.push({
@@ -374,7 +371,6 @@ function identifyBestMetrics(dataset, aggregatableFields) {
         }
     }
     
-    // Return all metrics, with the highest priority ones first
     return metrics.sort((a, b) => {
         const priorityOrder = { 'high': 0, 'medium': 1, 'low': 2 };
         return priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -386,17 +382,14 @@ function identifyBestMetrics(dataset, aggregatableFields) {
  */
 function formatFieldName(field) {
     return field
-        // Split by camelCase
         .replace(/([A-Z])/g, ' $1')
-        // Split by snake_case
         .replace(/_/g, ' ')
-        // Capitalize first letter of each word
         .replace(/\b\w/g, l => l.toUpperCase())
         .trim();
 }
 
 /**
- * Count unique values for a specific field in the dataset
+ * Count unique values for a specific field
  */
 function countUniqueValues(dataset, field) {
     const uniqueValues = new Set();
@@ -412,7 +405,6 @@ function countUniqueValues(dataset, field) {
  * Verify if two fields form a parent-child relationship
  */
 function verifyParentChildRelationship(dataset, parentField, childField) {
-    // Group by parent value
     const parentGroups = {};
     for (const item of dataset) {
         const parentValue = JSON.stringify(item[parentField]);
@@ -422,7 +414,6 @@ function verifyParentChildRelationship(dataset, parentField, childField) {
         parentGroups[parentValue].add(JSON.stringify(item[childField]));
     }
     
-    // Check if child values are reasonably distributed among parent values
     const totalUniqueChildren = countUniqueValues(dataset, childField);
     let validParents = 0;
     
@@ -433,7 +424,6 @@ function verifyParentChildRelationship(dataset, parentField, childField) {
         }
     }
     
-    // Return true if we found reasonable parent-child relationships
     return validParents >= 2;
 }
 
@@ -441,7 +431,6 @@ function verifyParentChildRelationship(dataset, parentField, childField) {
  * Check if a field contains numerical values
  */
 function isNumerical(dataset, field) {
-    // Check a sample of values to determine if the field is numerical
     const sampleSize = Math.min(100, dataset.length);
     let numericalCount = 0;
     
@@ -452,7 +441,6 @@ function isNumerical(dataset, field) {
         }
     }
     
-    // If >80% of sampled values are numerical, consider it a numerical field
     return numericalCount / sampleSize > 0.8;
 }
 

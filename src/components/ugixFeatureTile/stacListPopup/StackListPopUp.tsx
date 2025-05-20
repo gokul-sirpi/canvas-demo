@@ -1,15 +1,14 @@
 import styles from './styles.module.css';
 import { Resource } from '../../../types/resource';
-import { useState } from 'react';
 import { StacAsset, StacItem } from '../../../types/UgixLayers';
 
-// ✅ Helper function to check for thumbnail role
 const hasThumbnailAsset = (assets: any): boolean => {
   return Object.values(assets || {}).some(
     (asset: any) =>
       Array.isArray(asset.roles) && asset.roles.includes('thumbnail')
   );
 };
+
 const getOverviewAssetUrl = (assets: StacAsset): string | null => {
   const overviewAsset = Object.values(assets || {}).find(
     (asset: any) =>
@@ -25,6 +24,11 @@ function StacItemsPopup({
   onPlotStac,
   onPreviewStac,
   setPreviewImageUrl,
+  fetchNextPage,
+  fetchPreviousPage,
+  hasMoreStacItems,
+  isFirstPage,
+  paginationHistory,
 }: {
   resource: Resource;
   stacItems: any[];
@@ -32,6 +36,11 @@ function StacItemsPopup({
   onPreviewStac: (item: any) => void;
   onPlotStac: (item: any, bbox: any) => void;
   setPreviewImageUrl: React.Dispatch<React.SetStateAction<string | null>>;
+  fetchNextPage: () => void;
+  fetchPreviousPage: () => void;
+  hasMoreStacItems: boolean;
+  isFirstPage: boolean;
+  paginationHistory: string[];
 }) {
   const handlePreviewStac = (item: StacItem) => {
     onPreviewStac(item);
@@ -41,7 +50,6 @@ function StacItemsPopup({
     const overviewUrl = getOverviewAssetUrl(
       item.assets as unknown as StacAsset
     );
-
     console.log(overviewUrl);
     if (overviewUrl) {
       onPlotStac(overviewUrl, item.bbox);
@@ -50,11 +58,14 @@ function StacItemsPopup({
     }
   };
 
+  // Calculate current page number (1-based for display)
+  const currentPage = paginationHistory.length;
+
   return (
     <div className={styles.popup_overlay}>
       <div className={styles.popup_container}>
         <div className={styles.popup_header}>
-          <h3>{resource.label} </h3>
+          <h3>{resource.label}</h3>
           <button className={styles.popup_close_btn} onClick={onClose}>
             ×
           </button>
@@ -70,6 +81,9 @@ function StacItemsPopup({
         </div>
 
         <div className={styles.popup_content}>
+          {/* <div className={styles.page_info}>
+            Page {currentPage} (Showing {stacItems.length} items)
+          </div> */}
           <table className={styles.stac_table}>
             <thead>
               <tr>
@@ -79,9 +93,9 @@ function StacItemsPopup({
                 <th>Plot</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className={styles.body_table_data} >
               {stacItems.map((item: any, index: number) => (
-                <tr key={index} className={styles.stac_table_row}>
+                <tr key={`${item.id}-${index}`} className={styles.stac_table_row}>
                   <td className={styles.stac_table_date}>
                     {item?.properties?.datetime}
                   </td>
@@ -111,33 +125,23 @@ function StacItemsPopup({
               ))}
             </tbody>
           </table>
+          <div className={styles.pagination_container}>
+            <button
+              className={styles.extra_button}
+              onClick={fetchPreviousPage}
+              disabled={isFirstPage}
+            >
+              Previous
+            </button>
+            <button
+              className={styles.extra_button}
+              onClick={fetchNextPage}
+              disabled={!hasMoreStacItems}
+            >
+              Next
+            </button>
+          </div>
         </div>
-
-        {/* ✅ Radix Dialog for Thumbnail Preview */}
-        {/* <Dialog.Root
-          open={isDialogOpen}
-          onOpenChange={() => setPreviewImageUrl(null)}
-        >
-          <Dialog.Portal>
-            <Dialog.Overlay className={styles.dialog_overlay} />
-            <Dialog.Content className={styles.dialog_content}>
-              <Dialog.Title className={styles.dialog_title}>
-                Thumbnail Preview
-              </Dialog.Title>
-              <img
-                src={previewImageUrl || ''}
-                alt="Thumbnail"
-                className={styles.dialog_image}
-              />
-              <Dialog.Close
-                onClick={() => setIsDialogOpen(false)}
-                className={styles.dialog_close_btn}
-              >
-                Close
-              </Dialog.Close>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root> */}
       </div>
     </div>
   );

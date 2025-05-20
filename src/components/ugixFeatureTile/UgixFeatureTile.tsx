@@ -34,12 +34,16 @@ function UgixFeatureTile({
   resource: Resource;
   dialogCloseTrigger: React.Dispatch<SetStateAction<boolean>>;
 }) {
-  // const limit = 5;
   const dispatch = useDispatch();
   const [noAccess, setNoAccess] = useState(false);
   const [adding, setAdding] = useState(false);
   const [isExtraBtnVisible, setIsExtraBtnVisible] = useState(false);
-  const [stacItems, setStacItems] = useState([]);
+  const [stacItems, setStacItems] = useState<any[]>([]);
+  const [secondPageItems, setSecondPageItems] = useState<any[]>([]);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [paginationHistory, setPaginationHistory] = useState<string[]>([]);
+  const [limit] = useState(12); // Set to 12 per cURL
+  const [hasMoreStacItems, setHasMoreStacItems] = useState(true);
   const [showStacPopup, setShowStacPopup] = useState(false);
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -67,10 +71,8 @@ function UgixFeatureTile({
 
   async function handleUgixLayerAddition(bbox?: Extent) {
     let serverUrl = await getResourceServerRegURL(resource);
-
     console.log(serverUrl);
 
-    // store the resource data in session storage
     sessionStorage.setItem(
       `${resource.id}-ugix-resource`,
       JSON.stringify(resource)
@@ -79,7 +81,7 @@ function UgixFeatureTile({
     if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('VECTOR_TILES')) {
       plotTiles();
     } else if (resource?.ogcResourceInfo?.ogcResourceAPIs?.includes('STAC')) {
-      getStacItems();
+      getStacItems(null); // Initial call with no URL
     } else {
       setAdding(true);
       dispatch(updateLoadingState(true));
@@ -99,7 +101,6 @@ function UgixFeatureTile({
         resource,
         newLayer,
         queryParams,
-
         () => {
           dispatch(addCanvasLayer(newLayer));
           ugixResources.push(newLayer.layerId);
@@ -109,7 +110,6 @@ function UgixFeatureTile({
             openLayerMap.zoomToFit(newLayer.layerId, bbox);
           }
         },
-
         (type, message) => {
           if (type === 'no-access') {
             showNoAccessText();
@@ -211,7 +211,7 @@ function UgixFeatureTile({
       const { error, token } = await getAccessToken(resource, serverUrl);
 
       if (error) {
-        emitToast('error', 'No acces to data');
+        emitToast('error', 'No access to data');
         return;
       }
 
@@ -221,7 +221,6 @@ function UgixFeatureTile({
       console.log(response);
 
       if (token && response.status === 200) {
-        // get server url
         const newLayer = openLayerMap.createNewUgixTileLayer(
           serverUrl,
           resource.label,
@@ -243,8 +242,8 @@ function UgixFeatureTile({
     }
   }
 
-  async function getStacItems() {
-    console.log('Stac');
+  async function getStacItems(url: string | null) {
+    console.log('Fetching STAC items with URL:', url || 'Initial call');
     setAdding(true);
     dispatch(updateLoadingState(true));
 
@@ -257,28 +256,98 @@ function UgixFeatureTile({
         return;
       }
 
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      // Verify collection exists
       const res = await axios.get(
-        `https://${serverUrl}/stac/collections/${resource.id}`
+        `https://${serverUrl}/stac/collections/${resource.id}`,
+        { headers }
       );
 
       if (token && res.status === 200) {
-        const items = await axios.get(
-          `https://${serverUrl}/stac/collections/${resource.id}/items?limit=20`
-        );
+        // Use provided URL or construct initial URL
+        const fetchUrl = url || `https://${serverUrl}/stac/collections/${resource.id}/items?limit=${limit}`;
+        const items = await axios.get(fetchUrl, { headers });
 
-        console.log(items.data.features, 'STAC items fetched');
-        setStacItems(items.data.features);
+        console.log('Full API Response:', JSON.stringify(items.data, null, 2));
+        console.log('Fetched items:', items.data.features.length, 'URL:', fetchUrl);
+        console.log('Current stacItems length:', items.data.features.length);
+
+        const newItems = items.data.features;
+        const nextLink = items.data.links?.find((link: any) => link.rel === 'next')?.href;
+
+        // If no items and no next link, revert to second page items without updating history
+        if (newItems.length === 0 && !nextLink) {
+          emitToast('info', 'No data found');
+          // Use secondPageItems if available, otherwise current stacItems (for single-page case)
+          setStacItems(secondPageItems.length > 0 ? secondPageItems : stacItems);
+          setNextUrl(null);
+          setHasMoreStacItems(false);
+          setAdding(false);
+          dispatch(updateLoadingState(false));
+          console.log('Reverted stacItems:', secondPageItems.length > 0 ? secondPageItems.length : stacItems.length);
+          return;
+        }
+
+        // Update pagination history for valid responses
+        setPaginationHistory((prev) => {
+          if (prev[prev.length - 1] !== fetchUrl) {
+            return [...prev, fetchUrl];
+          }
+          return prev;
+        });
+
+        // Update secondPageItems when on page 2
+        if (paginationHistory.length === 1 && newItems.length > 0) {
+          // This will be page 2 after adding fetchUrl
+          setSecondPageItems(newItems);
+        }
+
+        setStacItems(newItems);
+        setNextUrl(nextLink || null);
+        setHasMoreStacItems(!!nextLink);
+
         setShowStacPopup(true);
         cleanUpSideEffects();
       } else {
         throw new Error('Failed to fetch STAC collection');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching STAC items:', error);
       emitToast('error', 'Failed to fetch STAC items');
       cleanUpSideEffects();
     }
   }
+
+  function fetchNextPage() {
+    console.log('fetchNextPage called, nextUrl:', nextUrl, 'hasMoreStacItems:', hasMoreStacItems);
+    if (nextUrl) {
+      getStacItems(nextUrl);
+    } else {
+      emitToast('info', 'No data found');
+      setStacItems(secondPageItems.length > 0 ? secondPageItems : stacItems);
+      console.log('Reverted stacItems in fetchNextPage:', secondPageItems.length > 0 ? secondPageItems.length : stacItems.length);
+    }
+  }
+
+  function fetchPreviousPage() {
+    console.log('fetchPreviousPage called, paginationHistory length:', paginationHistory.length);
+    if (paginationHistory.length > 1) {
+      // Pop the current page and get the previous one
+      const newHistory = [...paginationHistory];
+      newHistory.pop(); // Remove current page
+      const previousUrl = newHistory[newHistory.length - 1];
+
+      // Fetch previous page
+      getStacItems(previousUrl);
+
+      // Update history (remove the popped entry)
+      setPaginationHistory(newHistory);
+    }
+  }
+
   function handlePreviewStac(item: any) {
     const thumbnailAsset = Object.values(item.assets || {}).find(
       (asset: any) =>
@@ -296,6 +365,7 @@ function UgixFeatureTile({
       console.warn('No thumbnail found for STAC item:', item);
     }
   }
+
   function handlePlotStac(
     imageUrl: string,
     bbox: [number, number, number, number]
@@ -303,22 +373,24 @@ function UgixFeatureTile({
     console.log('Plot STAC item:', imageUrl);
     const stac = openLayerMap.createNewStacImageLayer(imageUrl, bbox);
     console.log(stac);
-    // const bboxlayer = openLayerMap.drawBBoxFromApi(bbox, imageUrl);
     dispatch(addCanvasLayer(stac));
-    // dispatch(addCanvasLayer(bboxlayer));
-    // console.log(bboxlayer, 'jlwefwnjflew');
     setShowStacPopup(false);
     dialogCloseTrigger(false);
   }
 
   function closeStacPopup() {
+    console.log('closeStacPopup called');
     setShowStacPopup(false);
+    setStacItems([]);
+    setSecondPageItems([]);
+    setNextUrl(null);
+    setPaginationHistory([]);
+    setHasMoreStacItems(true);
   }
 
   return (
     <div className={styles.tile_container}>
       <a style={{ display: 'none' }} ref={anchorRef}></a>
-      {/* content */}
       <div className={styles.tile_content}>
         <div className={styles.tile_description}>
           <TooltipWrapper content={resource.label}>
@@ -368,7 +440,7 @@ function UgixFeatureTile({
                 <button
                   className={styles.extra_button}
                   disabled={adding}
-                  onClick={() => handleUgixLayerAddition()}
+                  onClick={() => getStacItems(null)}
                 >
                   {adding ? 'Loading...' : 'Get STAC list'}
                 </button>
@@ -383,12 +455,11 @@ function UgixFeatureTile({
             onClick={toggleExtraButtonDrawer}
           >
             <div className={styles.add_icon}>
-              {isExtraBtnVisible ? <FaMinus size={23} /> : <FaPlus size={23} />}
+              {isExtraBtnVisible ? <FaMinus size="23" /> : <FaPlus size="23" />}
             </div>
           </button>
         </TooltipWrapper>
       </div>
-      {/* icon container */}
       <div className={styles.icon_container}>
         <TooltipWrapper
           content={
@@ -428,8 +499,8 @@ function UgixFeatureTile({
         </div>
       )}
 
-      {/* STAC Items Popup */}
-      {showStacPopup && stacItems.length > 0 && (
+        {showStacPopup && (
+        
         <StacItemsPopup
           resource={resource}
           stacItems={stacItems}
@@ -437,8 +508,15 @@ function UgixFeatureTile({
           onPreviewStac={handlePreviewStac}
           onPlotStac={handlePlotStac}
           setPreviewImageUrl={setPreviewImageUrl}
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          hasMoreStacItems={hasMoreStacItems}
+          isFirstPage={paginationHistory.length <= 1}
+          paginationHistory={paginationHistory}
         />
+  
       )}
+
       <Dialog.Root
         open={isDialogOpen}
         onOpenChange={(open) => {
@@ -471,7 +549,6 @@ function UgixFeatureTile({
 }
 
 const areEqual = (prevProps: any, nextProps: any) => {
-  // Only rerender if resources prop has changed
   return prevProps.resources === nextProps.resources;
 };
 

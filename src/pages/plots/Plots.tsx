@@ -36,14 +36,9 @@ export default function Plots({
   });
   const [allResources, setAllResources] = useState<plotResource[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [activeResource, setActiveResource] = useState<plotResource | null>(
-    null
-  );
+  const [activeResource, setActiveResource] = useState<plotResource | null>(null);
   const [noAccess, setNoAccess] = useState(false);
-  const [activeChartTab, setActiveChartTab] = useState<string | null>(
-    'plotType_1'
-  );
-  // const [isTabSwitching, setIsTabSwitching] = useState(false);
+  const [activeChartTab, setActiveChartTab] = useState<string | null>('plotType_1');
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -51,7 +46,47 @@ export default function Plots({
     getAllResourceData();
   }, []);
 
-  // gets all the resource data
+  const plotTypes = (tabs.length > 0 && tabs.map((reso) => reso).map((item) => item)) || [];
+
+  const handleDrillDownConfirm = (xLevels: string[], yMetric: string) => {
+    if (!activeResource) return;
+
+    
+
+    // Generate a unique for the new drill-down
+    const activeTabData = tabs.find((tab) => tab.uniqueResourceId === activeTab);
+    const drillDownCount = activeTabData?.plotSchema.filter((schema: any) => schema.plotType_drill).length || 0;
+    const newDrillDownCounter = plotTypes[0].plotSchema.length
+    const drillDownKey = `plotType_drill_${newDrillDownCounter + 1}`;
+
+    console.log("this data", plotTypes[0].plotSchema.length)
+
+
+
+    const newPlotSchema = {
+      plotType_drill: 'drillDownChart',
+      xAxis: xLevels,
+      yAxis: [yMetric],
+      dynamic: activeResource.plotSchema[0].dynamic || [],
+    };
+
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
+        tab.uniqueResourceId === activeTab
+          ? {
+              ...tab,
+              plotSchema: [...tab.plotSchema, newPlotSchema],
+            }
+          : tab
+      )
+    );
+
+    // Immediately set activeChartTab to the new to display the drill-down
+    setActiveChartTab(drillDownKey);
+
+    emitToast('info', `Drill-down chart ${drillDownCount + 1} created and selected!`);
+  };
+
   async function getAllResourceData() {
     try {
       const response = await axios.get(
@@ -129,28 +164,24 @@ export default function Plots({
                   yAxis: ['currentCapacity', 'totalCapacity'],
                   dynamic: ['riverBasin', 'observationDateTime'],
                 },
-
                 {
                   plotType_3: 'lineChart',
                   xAxis: ['observationDateTime'],
                   yAxis: ['currentCapacity'],
                   dynamic: ['reservoirName'],
                 },
-
                 {
                   plotType_4: 'scatterPlot',
                   xAxis: ['currentCapacity'],
                   yAxis: ['outflow'],
                   dynamic: ['reservoirID', 'reservoirName'],
                 },
-
                 {
                   plotType_5: 'stackedBarChart',
                   xAxis: ['observationDateTime'],
                   yAxis: ['inflow', 'outflow'],
                   dynamic: ['reservoirName'],
                 },
-
                 {
                   plotType_6: 'radarChart',
                   xAxis: ['metricType'],
@@ -167,7 +198,6 @@ export default function Plots({
                   yAxis: ['precipitation'],
                   dynamic: ['subdistrictName', 'districtCode'],
                 },
-
                 {
                   plotType_3: 'barChart',
                   xAxis: ['subdistrictName'],
@@ -175,7 +205,6 @@ export default function Plots({
                   aggregation: 'none',
                   dynamic: ['observationDateTime', 'districtCode'],
                 },
-
                 {
                   plotType_4: 'scatterPlot',
                   xAxis: 'precipitation',
@@ -201,7 +230,6 @@ export default function Plots({
                   aggregation: 'none',
                   dynamic: ['subdistrictName', 'observationDateTime'],
                 },
-
                 {
                   plotType_7: 'lineChart',
                   xAxis: ['observationDateTime'],
@@ -265,7 +293,6 @@ export default function Plots({
                   dynamic: ['cityName'],
                 },
               ];
-
               break;
             case 'SPDCL Agriculture Consumption Data in Telangana':
               newSchema = [
@@ -279,7 +306,6 @@ export default function Plots({
                   ],
                   dynamic: ['areaServed'],
                 },
-
                 {
                   plotType_3: 'scatterPlot',
                   xAxis: ['energyConsumption'],
@@ -295,7 +321,7 @@ export default function Plots({
                   xAxis: ['warehouseName'],
                   yAxis: ['fineProduce', 'brokenProduce', 'foreignMatter'],
                   aggregation: 'none',
-                  dynamic: ['districtName', 'productGrade'],
+                  dynamic: ['districtName', 'subdistrictName', 'villageName', 'productGrade'],
                 },
               ];
               break;
@@ -323,7 +349,6 @@ export default function Plots({
                   yAxis: ['windSpeed.maxOverTime', 'windSpeed.minOverTime'],
                   dynamic: ['districtName', 'subdistrictName'],
                 },
-
                 {
                   plotType_5: 'lineChart',
                   xAxis: ['observationDateTime'],
@@ -373,7 +398,6 @@ export default function Plots({
       const regURL = await axios.get(
         `${envurls.ugixServer}cat/v1/item?id=${resource.resourceServer}`
       );
-      // console.log(regURL);
       return regURL;
     } catch (error) {
       emitToast('error', 'Failed to get server ID');
@@ -411,21 +435,12 @@ export default function Plots({
         plotData(dataAccumulator);
         addTab(resource);
       }
-      // setIsDialogOpen(false);
     } catch (error) {
       console.log(error);
     } finally {
       dispatch(updateLoadingState(false));
     }
   }
-
-  // console.log(activeResource);
-
-  // useEffect(() => {
-  //   if (!isTabSwitching && activeResource) {
-  //     handleOnFilterChange();
-  //   }
-  // }, [filterDates.startDate, filterDates.endDate]);
 
   async function handleOnFilterChange(startDate: string, endDate: string) {
     if (activeResource) {
@@ -454,6 +469,7 @@ export default function Plots({
 
           if (res.status === 200 && res.data.results) {
             plotData(res.data.results);
+            emitToast('info', 'Date range applied successfully!');
           } else if (res.status === 204) {
             plotData([]);
             emitToast('info', 'No content available');
@@ -485,8 +501,6 @@ export default function Plots({
   }
 
   async function onTabSwitching(resource: plotResource) {
-    // setIsTabSwitching(true);
-
     if (activeResource) {
       SetFilterDates({ startDate, endDate });
       setActiveChartTab(`plotType_1`);
@@ -520,7 +534,6 @@ export default function Plots({
       } catch (error) {
         console.log(error);
       } finally {
-        // setIsTabSwitching(false);
         dispatch(updateLoadingState(false));
       }
     }
@@ -558,18 +571,12 @@ export default function Plots({
     dispatch(updateLoadingState(false));
   };
 
-  // get data returned for the selected resource which is array of initial data
   const plotData = (data: Object[]) => {
     setDataForPlot(data);
     setFilteredDataForPlot(data);
   };
 
-  console.log(dataforPlot, filteredDataForPlot, "values of dataforplot and filtertedataforplot is being observed")
 
-  // array of displayed resources
-  const plotTypes =
-    (tabs.length > 0 && tabs.map((reso) => reso).map((item) => item)) || [];
-  console.log(plotTypes, filterDates.startDate, dataforPlot, 'plot types');
 
   return (
     <div className={styles.container}>
@@ -620,8 +627,7 @@ export default function Plots({
                           dataforPlot={dataforPlot}
                           setFilteredDataForPlot={setFilteredDataForPlot}
                           onFilterChange={handleOnFilterChange}
-                          // allResources={tabs}
-                          // activeResource={activeResource}
+                          onDrillDownConfirm={handleDrillDownConfirm}
                         />
                       </Fragment>
                     );
@@ -636,7 +642,9 @@ export default function Plots({
                           className={styles.chart_tab_container}
                         >
                           {item.plotSchema.map((_, index) => {
-                            const plotKey = `plotType_${index + 1}`;
+                            const plotKey = _.plotType_drill
+                              ? `plotType_drill_${index + 1}`
+                              : `plotType_${index + 1}`;
                             return (
                               <button
                                 key={plotKey}
@@ -647,7 +655,9 @@ export default function Plots({
                                 }`}
                                 onClick={() => switchChartTab(plotKey)}
                               >
-                                Plot {index + 1}
+                                {plotKey.startsWith('plotType_drill')
+                                  ? `Drill-Down ${plotKey.split('_')[2]}`
+                                  : `Plot ${index + 1}`}
                               </button>
                             );
                           })}
@@ -657,12 +667,13 @@ export default function Plots({
                     return null;
                   })}
                 </div>
-                {/* charts */}
                 {plotTypes.map((item) =>
                   item.uniqueResourceId === activeTab &&
                   item.plotSchema.length > 0
                     ? item.plotSchema.map((plotItem, plotIndex) => {
-                        const plotKey = `plotType_${plotIndex + 1}`;
+                        const plotKey = plotItem.plotType_drill
+                          ? `plotType_drill_${plotIndex + 1}`
+                          : `plotType_${plotIndex + 1}`;
                         if (activeChartTab === plotKey) {
                           const xAxis = plotItem.xAxis;
                           const yAxis = plotItem.yAxis;
@@ -683,10 +694,18 @@ export default function Plots({
                                     range above.
                                   </span>
                                 </div>
+                              ) : plotKey.startsWith('plotType_drill') ? (
+                                <ChartRenderer
+                                  key={plotIndex}
+                                  plotType="drillDownChart"
+                                  data={filteredDataForPlot}
+                                  xAxis={xAxis}
+                                  yAxis={yAxis}
+                                  initialOptionId={xAxis[0] + 's'}
+                                />
                               ) : (
                                 <ChartRenderer
                                   key={plotIndex}
-                                  // @ts-ignore
                                   plotType={plotItem[plotKey]}
                                   data={filteredDataForPlot}
                                   xAxis={xAxis}

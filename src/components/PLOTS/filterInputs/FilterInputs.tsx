@@ -4,6 +4,7 @@ import { camelCaseToSpaceSeparated } from '../../../utils/CamelCaseToSpaceSepara
 import { useDispatch } from 'react-redux';
 import { updateLoadingState } from '../../../context/loading/LoaderSlice';
 import { canDrillDown } from '../../../utils/drill-down-analyzer';
+import { emitToast } from '../../../lib/toastEmitter';
 
 export default function FilterInputs({
   dynamicValues,
@@ -12,6 +13,7 @@ export default function FilterInputs({
   dataforPlot,
   setFilteredDataForPlot,
   onFilterChange,
+  onDrillDownConfirm,
 }: {
   dynamicValues: string[];
   SetFilterDates: React.Dispatch<
@@ -27,6 +29,7 @@ export default function FilterInputs({
   dataforPlot: Object[];
   setFilteredDataForPlot: React.Dispatch<React.SetStateAction<Object[]>>;
   onFilterChange: (startDate: string, endDate: string) => void;
+  onDrillDownConfirm: (xLevels: string[], yMetric: string) => void;
 }) {
   const dispatch = useDispatch();
 
@@ -65,7 +68,6 @@ export default function FilterInputs({
     return date.toISOString().split('T')[0];
   };
 
-  // Function to update options for the dropdown based on current selections
   const updateFilteredOptions = (currentData: Object[]) => {
     dispatch(updateLoadingState(true));
     const newOptions: Record<string, string[]> = {};
@@ -79,7 +81,6 @@ export default function FilterInputs({
     dispatch(updateLoadingState(false));
   };
 
-  // Handle select change for any dropdown
   const handleSelectChange = (key: string, value: string) => {
     const updatedSelectedValues = { ...selectedValues, [key]: value };
     setSelectedValues(updatedSelectedValues);
@@ -95,7 +96,6 @@ export default function FilterInputs({
     dispatch(updateLoadingState(false));
   };
 
-  // Run drill-down analysis when dataforPlot changes
   useEffect(() => {
     if (dataforPlot && dataforPlot.length > 0) {
       const dataKey = JSON.stringify(dataforPlot.slice(0, 1));
@@ -103,21 +103,20 @@ export default function FilterInputs({
         const result = canDrillDown(dataforPlot);
         setDrillDownResult(result);
         const message = result.drillDownPossible
-          ? 'Drill-Down Capable: YES ✅'
+          ? 'YES ✅ This data is drill down capable, you can configure this plot using Configure Drill-Down Button Above'
           : `Drill-Down Capable: NO ❌ (Reason: ${result.reason})`;
-        alert(message);
-        setHasShownAlert(dataKey);
+        emitToast(result.drillDownPossible ? 'info' : 'error', message);
+        // setHasShownAlert(dataKey);
       }
     } else {
-      setDrillDownResult(null);
+      // setDrillDownResult(null);
     }
-  }, [dataforPlot, hasShownAlert]);
+  }, [dataforPlot]);
 
   useEffect(() => {
     updateFilteredOptions(dataforPlot);
   }, [dataforPlot]);
 
-  // Handle X-axis level selection
   const handleXLevelChange = (fieldName: string) => {
     setSelectedXLevels((prev) =>
       prev.includes(fieldName)
@@ -126,27 +125,26 @@ export default function FilterInputs({
     );
   };
 
-  // Handle Y-axis metric selection
   const handleYMetricChange = (fieldName: string) => {
     setSelectedYMetric(fieldName);
   };
 
-  // Handle dialog confirmation
   const handleConfirm = () => {
-    // Optionally pass selections to parent component via a new prop if needed
-    console.log('Selected X-Axis Levels:', selectedXLevels);
-    console.log('Selected Y-Axis Metric:', selectedYMetric);
+    if (selectedXLevels.length > 0 && selectedYMetric) {
+      onDrillDownConfirm(selectedXLevels, selectedYMetric);
+      console.log('Selected X-Axis Levels:', selectedXLevels);
+      console.log('Selected Y-Axis Metric:', selectedYMetric);
+    }
     setIsDialogOpen(false);
   };
 
-  // Handle dialog cancellation
   const handleCancel = () => {
     setSelectedXLevels([]);
     setSelectedYMetric('');
     setIsDialogOpen(false);
   };
 
-  console.log("drilldownresult variable", drillDownResult)
+  console.log("drilldownresult variable", drillDownResult);
 
   return (
     <div className={styles.container}>
@@ -210,12 +208,11 @@ export default function FilterInputs({
             }}
             className={styles.reset_button}
           >
-            Reset
+            Reset now
           </button>
         </div>
       </div>
 
-      {/* Drill-Down Configuration Button */}
       <div className={styles.drill_down_container}>
         <button
           className={styles.drill_down_button}
@@ -231,7 +228,6 @@ export default function FilterInputs({
         </button>
       </div>
 
-      {/* Drill-Down Dialog */}
       {isDialogOpen && (
         <div className={styles.dialog_overlay}>
           <div className={styles.dialog}>
